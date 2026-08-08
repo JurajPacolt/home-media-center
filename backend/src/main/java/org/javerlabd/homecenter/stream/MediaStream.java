@@ -5,8 +5,8 @@ import java.io.Closeable;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Pripravená odpoveď na stream požiadavku. Controller z nej už len poskladá hlavičky —
- * rozhodnutie o rozsahu padlo tu, v service vrstve.
+ * Prepared response to a streaming request. The controller only assembles headers from it;
+ * the range decision was made here in the service layer.
  */
 public record MediaStream(
         KnownLengthResource resource,
@@ -16,7 +16,7 @@ public record MediaStream(
         @Nullable String contentRange,
         String fileName) implements Closeable {
 
-    /** true, ak sa posiela iba časť súboru (odpoveď 206). */
+    /** True when only part of the file is sent (a 206 response). */
     public boolean partial() {
         return contentRange != null;
     }

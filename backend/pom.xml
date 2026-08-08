@@ -22,7 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <!-- verzie, ktoré Spring Boot BOM nespravuje -->
+        <!-- Versions not managed by the Spring Boot BOM -->
         <smbj.version>0.14.0</smbj.version>
         <springdoc.version>3.1.0</springdoc.version>
         <webjars-bootstrap.version>5.3.8</webjars-bootstrap.version>
@@ -38,7 +38,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- management UI (server-side rendering) -->
+        <!-- Management UI (server-side rendering) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -54,25 +54,25 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- prihlasovanie do management UI aj do REST API -->
+        <!-- Authentication for both the management UI and REST API -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <!-- Thymeleaf dialekt pre sec:authorize a sec:authentication v šablónach -->
+        <!-- Thymeleaf dialect for sec:authorize and sec:authentication in templates -->
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
-        <!-- Argon2PasswordEncoder zo Spring Security stojí na BouncyCastle (Argon2BytesGenerator).
-             Boot BOM bcprov nespravuje, verziu preto držíme tu. -->
+        <!-- Spring Security's Argon2PasswordEncoder relies on BouncyCastle (Argon2BytesGenerator).
+             The Boot BOM does not manage bcprov, so its version is maintained here. -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
             <version>${bouncycastle.version}</version>
         </dependency>
 
-        <!-- index médií: H2 cez JdbcClient, schéma cez Flyway -->
+        <!-- Media index: H2 through JdbcClient, schema managed by Flyway -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
@@ -82,28 +82,28 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- V Boot 4 je auto-konfigurácia Flyway vo vlastnom module, nestačí flyway-core.
-             Podporu H2 má flyway-core v sebe, samostatný modul netreba. -->
+        <!-- In Boot 4, Flyway auto-configuration is in its own module; flyway-core is insufficient.
+             flyway-core includes H2 support, so no separate database module is needed. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-flyway</artifactId>
         </dependency>
 
-        <!-- prístup na Sambu -->
+        <!-- Samba access -->
         <dependency>
             <groupId>com.hierynomus</groupId>
             <artifactId>smbj</artifactId>
             <version>${smbj.version}</version>
         </dependency>
 
-        <!-- kontrakt pre Android TV klienta -->
+        <!-- Contract for the Android TV client -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
 
-        <!-- frontend knižnice management UI: lokálne, nie z CDN -->
+        <!-- Management UI frontend libraries: local, not from a CDN -->
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>webjars-locator-lite</artifactId>
@@ -130,7 +130,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Obsahuje spring-boot-starter-test; Boot 4 presunul @WebMvcTest do vlastného modulu. -->
+        <!-- Includes spring-boot-starter-test; Boot 4 moved @WebMvcTest to a separate module. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
@@ -150,8 +150,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <!-- Od JDK 23 sa anotačné procesory nehľadajú na classpath automaticky,
-                         Lombok treba vymenovať explicitne. -->
+                    <!-- Since JDK 23, annotation processors are not discovered on the classpath
+                         automatically, so Lombok must be listed explicitly. -->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

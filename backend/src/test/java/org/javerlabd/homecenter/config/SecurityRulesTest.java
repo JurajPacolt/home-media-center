@@ -23,8 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Kto sa kam dostane. Rozdelenie na dva reťazce (bezstavové API vs. session UI) je
- * presne to miesto, kde sa chyba prejaví až v prevádzke.
+ * Verifies who can access which area. The two-chain separation (stateless API versus
+ * session UI) is precisely where an error may appear only in production.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -82,8 +82,9 @@ class SecurityRulesTest {
     }
 
     /**
-     * Zlyhaný CSRF token je tiež {@code AccessDeniedException}. Nesmie skončiť tichým
-     * odhlásením a hláškou o tom, že účet patrí televízoru — správca by nechápal, čo sa deje.
+     * A failed CSRF token also produces {@code AccessDeniedException}. It must not cause a
+     * silent logout and a message that the account belongs to the TV; an administrator
+     * would not understand what happened.
      */
     @Test
     void chybajuciCsrfTokenJe403NieOdhlasenie() throws Exception {

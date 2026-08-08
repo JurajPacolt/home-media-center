@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/** Prehľad knižnice — na TV sú z neho tri dlaždice, v management UI úvodná stránka. */
+/** Library overview used for three TV tiles and the management UI dashboard. */
 public record LibrarySummary(Map<MediaCategory, Long> countsByCategory, long totalItems, long totalSizeBytes) {
 
     public List<Tile> tiles() {

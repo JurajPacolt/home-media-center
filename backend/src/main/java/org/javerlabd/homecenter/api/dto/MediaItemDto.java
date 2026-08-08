@@ -6,10 +6,10 @@ import org.javerlabd.homecenter.media.MediaCategory;
 import org.javerlabd.homecenter.media.MediaItem;
 import org.jspecify.annotations.Nullable;
 
-/** Položka knižnice tak, ako ju vidí Android TV klient. */
+/** A library item as seen by the Android TV client. */
 public record MediaItemDto(
         long id,
-        /** Z ktorého Samba zdroja položka pochádza; zdrojov môže byť nastavených viac. */
+        /** The Samba source this item comes from; multiple sources may be configured. */
         long sourceId,
         MediaCategory category,
         String title,
@@ -20,7 +20,7 @@ public record MediaItemDto(
         @Nullable Instant modifiedAt,
         String contentType,
         @Nullable MediaMetadataDto metadata,
-        /** Adresa na prehrávanie; podporuje Range requesty. */
+        /** Playback address with Range request support. */
         String streamUrl) {
 
     public static MediaItemDto from(MediaItem item) {

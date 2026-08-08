@@ -2,7 +2,7 @@ package org.javerlabd.homecenter.media;
 
 import org.jspecify.annotations.Nullable;
 
-/** Poradie a lokálne zoskupenie rozpoznateľné už zo súborového názvu. */
+/** Ordering and local grouping that can be derived from the filename alone. */
 public record MediaStructure(
         VideoKind kind,
         @Nullable String groupKey,

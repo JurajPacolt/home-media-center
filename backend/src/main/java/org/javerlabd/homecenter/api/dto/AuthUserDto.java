@@ -3,7 +3,7 @@ package org.javerlabd.homecenter.api.dto;
 import org.javerlabd.homecenter.user.AppUser;
 import org.javerlabd.homecenter.user.Role;
 
-/** Prihlásený používateľ. Hash hesla ani PINu sa sem zámerne nedostane. */
+/** Authenticated user. Password and PIN hashes are intentionally excluded. */
 public record AuthUserDto(
         long id,
         String username,

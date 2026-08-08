@@ -9,7 +9,7 @@ import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
-/** Formátovanie pre šablóny — volá sa z Thymeleafu ako {@code ${@humanFormat.size(...)}}. */
+/** Formatting helpers for templates, called from Thymeleaf as {@code ${@humanFormat.size(...)}}. */
 @Component("humanFormat")
 public class HumanFormat {
 

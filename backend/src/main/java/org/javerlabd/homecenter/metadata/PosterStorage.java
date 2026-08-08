@@ -12,7 +12,7 @@ import org.javerlabd.homecenter.media.MediaItem;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
-/** Lokálna cache plagátov; prehliadač ani TV ich neťahajú priamo z internetu. */
+/** Local poster cache; neither the browser nor TV retrieves posters directly from the internet. */
 @Service
 public class PosterStorage {
 
@@ -55,7 +55,7 @@ public class PosterStorage {
         }
     }
 
-    /** Odstráni súbory, ktoré po skončení skenu už nemajú položku v indexe. */
+    /** Removes files no longer referenced by an index item after a scan finishes. */
     public int deleteUnreferenced(Set<String> referencedFiles) {
         int deleted = 0;
         try (var files = Files.list(directory)) {

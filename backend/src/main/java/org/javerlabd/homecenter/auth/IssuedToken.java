@@ -3,8 +3,8 @@ package org.javerlabd.homecenter.auth;
 import java.time.Instant;
 
 /**
- * Čerstvo vydaný token aj s otvorenou hodnotou. Toto je jediný okamih, keď server
- * token pozná — do databázy ide už len jeho hash, takže sa nedá znovu zobraziť.
+ * A newly issued token including its plaintext value. This is the only time the server
+ * knows the token; only its hash is stored in the database, so it cannot be shown again.
  */
 public record IssuedToken(String token, Instant expiresAt) {
 }

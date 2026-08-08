@@ -9,8 +9,8 @@ import org.javerlabd.homecenter.source.SmbSource;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Formulár nastavenia Samba zdroja. Nie je to record — {@code th:field} potrebuje settery.
- * Heslo sa do formulára nikdy nepredvypĺňa; prázdne pole znamená „nechať pôvodné“.
+ * Samba source configuration form. It is not a record because {@code th:field} needs setters.
+ * The password is never prefilled; an empty field means "keep the existing value."
  */
 @Getter
 @Setter
@@ -60,7 +60,7 @@ public class SmbSourceForm {
                 password, enabled, null, null);
     }
 
-    /** Pri uloženom zdroji ostáva heslo v databáze, ak sa vo formulári nezmenilo. */
+    /** For a stored source, the database password remains unchanged unless the form changes it. */
     public boolean hasStoredPassword() {
         return id != null;
     }

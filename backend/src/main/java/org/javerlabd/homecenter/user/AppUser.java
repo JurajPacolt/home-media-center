@@ -5,8 +5,8 @@ import java.time.Instant;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Používateľ mediacentra. Heslo ani PIN sa nikdy nedržia v otvorenom tvare — v poliach
- * sú Argon2 hashe a {@link #toString()} ich zámerne nevypisuje, aby neskončili v logu.
+ * Media center user. Passwords and PINs are never stored in plaintext; the fields contain
+ * Argon2 hashes, and {@link #toString()} intentionally omits them to keep them out of logs.
  */
 public record AppUser(
         @Nullable Long id,
@@ -27,7 +27,7 @@ public record AppUser(
         return id;
     }
 
-    /** Bez PINu sa dá prihlásiť len heslom — teda nie z televízora bez klávesnice. */
+    /** Without a PIN, login requires a password and therefore a TV keyboard. */
     public boolean hasPin() {
         return pinHash != null && !pinHash.isBlank();
     }

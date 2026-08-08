@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.scan;
 
-/** Čo sken vyvolalo. */
+/** What triggered the scan. */
 public enum ScanTrigger {
 
     MANUAL("Ručne"),

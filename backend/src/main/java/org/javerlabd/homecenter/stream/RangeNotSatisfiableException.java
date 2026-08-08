@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.stream;
 
-/** Klient si vypýtal rozsah mimo súboru — odpovedá sa 416 aj s dĺžkou súboru. */
+/** The client requested a range outside the file; respond with 416 and the file length. */
 public class RangeNotSatisfiableException extends RuntimeException {
 
     private final long totalLength;

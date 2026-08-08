@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.javerlabd.homecenter.scan.ScanStart;
 
 /**
- * Potvrdenie, že sken sa postavil do radu. Riadky v histórii vznikajú až vtedy, keď na
- * zdroj príde rad — priebeh sa preto ťahá z {@code GET /api/v1/scan/latest}.
+ * Confirms that a scan was queued. History rows are created only when a source's turn
+ * begins, so progress is retrieved from {@code GET /api/v1/scan/latest}.
  */
 public record ScanStartedDto(
 

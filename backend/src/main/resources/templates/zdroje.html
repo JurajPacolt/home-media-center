@@ -73,8 +73,8 @@
                                 th:disabled="${scanRunning}">Skenovať</button>
                     </form>
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{|/admin/zdroje/${id}|}">Upraviť</a>
-                    <!-- Text potvrdenia ide cez data-*; Thymeleaf 3.1 do on* atribútov
-                         premenné zámerne nepúšťa. Naviaže ho homecenter.js. -->
+                    <!-- Confirmation text uses data-*; Thymeleaf 3.1 intentionally disallows
+                         variables in on* attributes. homecenter.js binds it. -->
                     <form class="d-inline m-0" method="post" th:action="@{|/admin/zdroje/${id}/zmazat|}"
                           th:data-hc-confirm="|Zmazať zdroj ${source.name()} aj s jeho položkami v indexe?|">
                         <button class="btn btn-sm btn-outline-danger" type="submit">Zmazať</button>

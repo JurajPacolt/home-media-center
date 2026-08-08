@@ -56,7 +56,7 @@ public class MediaRepository {
         Map<String, Object> params = new HashMap<>(filter.params());
         params.put("limit", query.limit());
         params.put("offset", query.offset());
-        // Radí sa bez ohľadu na veľkosť písmen; H2 nepodporuje COLLATE v ORDER BY.
+        // Sort case-insensitively; H2 does not support COLLATE in ORDER BY.
         List<MediaItem> items = jdbc.sql("SELECT " + COLUMNS + " FROM media_item" + filter.where()
                         + " ORDER BY LOWER(COALESCE(group_title, title)),"
                         + " COALESCE(season_number, 0), COALESCE(episode_number, 0),"
@@ -68,7 +68,7 @@ public class MediaRepository {
         return attachGenres(items);
     }
 
-    /** Žánre, ktoré má aspoň jedna aktuálna položka knižnice. */
+    /** Genres used by at least one current library item. */
     public List<MediaGenre> findGenres() {
         return jdbc.sql("""
                 SELECT DISTINCT genre.id, genre.name
@@ -80,7 +80,7 @@ public class MediaRepository {
                 .list();
     }
 
-    /** Názvy plagátov, na ktoré ešte odkazuje aktuálny index. */
+    /** Poster names still referenced by the current index. */
     public Set<String> findPosterFiles() {
         return Set.copyOf(jdbc.sql("""
                 SELECT DISTINCT poster_file FROM media_item
@@ -119,7 +119,7 @@ public class MediaRepository {
         return total == null ? 0L : total;
     }
 
-    /** Koľko položiek a koľko bajtov drží každý zdroj — riadky prehľadu zdrojov. */
+    /** Item and byte counts for each source, used by the source overview rows. */
     public Map<Long, SourceUsage> usageBySource() {
         return jdbc.sql("""
                 SELECT source_id, COUNT(*) AS items, COALESCE(SUM(size_bytes), 0) AS bytes
@@ -134,9 +134,9 @@ public class MediaRepository {
     }
 
     /**
-     * Zapíše položku a označí ju aktuálnym skenom.
+     * Writes an item and marks it with the current scan.
      *
-     * @return true, ak v indexe ešte nebola
+     * @return true if it was not already in the index
      */
     public boolean upsert(MediaItem item, long scanId) {
         Instant now = Instant.now();
@@ -168,7 +168,7 @@ public class MediaRepository {
         return true;
     }
 
-    /** Uloží rozpoznané údaje a nahradí väzby na žánre v jednej transakcii. */
+    /** Stores identified data and replaces genre associations in one transaction. */
     @org.springframework.transaction.annotation.Transactional
     public void saveMetadata(long mediaId, MediaMetadataUpdate metadata) {
         Instant now = Instant.now();
@@ -244,7 +244,7 @@ public class MediaRepository {
                 .update();
     }
 
-    /** Uloží zoskupenie z názvu aj vtedy, keď TMDb nie je nakonfigurované. */
+    /** Stores grouping derived from the name even when TMDb is not configured. */
     public void saveStructure(long mediaId, MediaStructure structure) {
         jdbc.sql("""
                 UPDATE media_item
@@ -263,7 +263,7 @@ public class MediaRepository {
                 .update();
     }
 
-    /** Zmaže položky, ktoré posledný sken na Sambe už nenašiel. */
+    /** Deletes items no longer found on Samba by the latest scan. */
     public int deleteMissedBy(long sourceId, long scanId) {
         return jdbc.sql("""
                 DELETE FROM media_item
@@ -387,7 +387,7 @@ public class MediaRepository {
     private record CategoryCount(String category, long total) {
     }
 
-    /** Podmienka a jej parametre pre výpis aj pre počítanie — obe musia filtrovať rovnako. */
+    /** Condition and parameters shared by listing and counting so both apply identical filters. */
     private record Filter(String where, Map<String, Object> params) {
 
         static Filter from(MediaQuery query) {

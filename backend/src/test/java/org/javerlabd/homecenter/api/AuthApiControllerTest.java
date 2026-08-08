@@ -23,8 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Prihlásenie cez celý reťazec Spring Security — nie cez izolovaný controller.
- * Práve poskladanie reťazcov je to, čo sa dá ľahko pokaziť.
+ * Login through the complete Spring Security chain, not an isolated controller.
+ * Chain composition is precisely the part that is easy to break.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -103,9 +103,9 @@ class AuthApiControllerTest {
     }
 
     /**
-     * 403 musí prísť bez hlavičky {@code Location}. Keby ho reťazec poslal cez
-     * {@code sendError}, spustil by ERROR dispatch na {@code /error} mimo {@code /api/v1/**}
-     * a klient by dostal presmerovanie na prihlasovaciu stránku.
+     * A 403 response must have no {@code Location} header. If the chain sent it through
+     * {@code sendError}, it would trigger an ERROR dispatch to {@code /error} outside
+     * {@code /api/v1/**}, and the client would be redirected to the login page.
      */
     @Test
     void skenSmieSpustitLenSpravca() throws Exception {

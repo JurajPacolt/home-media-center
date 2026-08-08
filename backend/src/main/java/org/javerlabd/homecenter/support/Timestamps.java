@@ -9,16 +9,16 @@ import java.time.ZoneOffset;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Prevod medzi {@link Instant} v doméne a stĺpcami {@code TIMESTAMP WITH TIME ZONE}.
- * Ide sa cez {@link OffsetDateTime}, lebo to je typ, ktorý pre tento stĺpec predpisuje
- * JDBC 4.2 — {@code Instant} ovládače mapovať nemusia.
+ * Converts between domain {@link Instant} values and {@code TIMESTAMP WITH TIME ZONE}
+ * columns. It uses {@link OffsetDateTime}, the type prescribed by JDBC 4.2 for this
+ * column; drivers are not required to map {@code Instant}.
  */
 public final class Timestamps {
 
     private Timestamps() {
     }
 
-    /** Hodnota pre parameter dotazu; v databáze sú všetky časy v UTC. */
+    /** Query parameter value; all database timestamps are in UTC. */
     public static @Nullable OffsetDateTime toDatabase(@Nullable Instant instant) {
         return instant == null ? null : instant.atOffset(ZoneOffset.UTC);
     }

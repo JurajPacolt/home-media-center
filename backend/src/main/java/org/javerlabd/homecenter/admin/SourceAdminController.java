@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Nastavenie Samba zdrojov. Sem patrí konfigurácia siete aj prihlasovacích údajov —
- * na diaľkovom ovládači sa to nastavovať nedá a ani nemá.
+ * Samba source configuration. Network settings and credentials belong here; they
+ * cannot and should not be configured with a remote control.
  *
- * <p>Zdrojov môže byť viac; každý sa dá samostatne vypnúť, preskenovať aj zmazať.
+ * <p>Multiple sources are supported; each can be disabled, scanned, or deleted separately.
  */
 @Controller
 @RequestMapping("/admin/zdroje")
@@ -97,7 +97,7 @@ public class SourceAdminController {
         return prepare(model, FORM_VIEW);
     }
 
-    /** Sken jedného zdroja — vypnutý sa takto dá preskenovať zámerne. */
+    /** Scans one source; a disabled source can intentionally be scanned this way. */
     @PostMapping("/{id}/sken")
     public String scan(@PathVariable long id, RedirectAttributes redirect) {
         try {

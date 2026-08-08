@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import org.jspecify.annotations.Nullable;
 
-/** Jedna položka, ktorú vrátil výpis adresára na Sambe. */
+/** One entry returned by a Samba directory listing. */
 public record SmbEntry(
         String path,
         String name,

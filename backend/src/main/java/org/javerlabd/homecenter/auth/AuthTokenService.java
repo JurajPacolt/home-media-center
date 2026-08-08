@@ -22,12 +22,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * Vydávanie a overovanie prihlasovacích tokenov pre Android TV klienta.
+ * Issues and verifies authentication tokens for the Android TV client.
  *
- * <p>Token je 256 bitov z {@link SecureRandom}. V databáze je len jeho SHA-256 —
- * kto sa dostane k súboru s indexom, nedostane sa tým do mediacentra. Argon2 sa sem
- * zámerne nepoužíva: overuje sa pri každom requeste vrátane streamovania a proti
- * hádaniu 256-bitového náhodného čísla pomalý hash aj tak nič nerieši.
+ * <p>The token consists of 256 bits from {@link SecureRandom}. Only its SHA-256 hash is
+ * stored in the database, so access to the index file does not grant access to the media
+ * center. Argon2 is intentionally not used here: the token is verified on every request,
+ * including streaming, and a slow hash adds no protection against guessing a random
+ * 256-bit value.
  */
 @Service
 @Slf4j
@@ -36,8 +37,8 @@ public class AuthTokenService {
     private static final int TOKEN_BYTES = 32;
 
     /**
-     * Ako často sa naozaj zapíše {@code last_used_at}. Bez tejto brzdy by každý blok
-     * streamovaného videa znamenal UPDATE do databázy.
+     * How often {@code last_used_at} is actually written. Without this throttle, every
+     * streamed video block would cause a database UPDATE.
      */
     private static final Duration TOUCH_INTERVAL = Duration.ofMinutes(5);
 
@@ -69,8 +70,8 @@ public class AuthTokenService {
     }
 
     /**
-     * Preloží token na používateľa. Vracia prázdno pri neznámom, expirovanom aj pri
-     * tokene účtu, ktorý medzitým niekto vypol.
+     * Resolves a token to a user. Returns empty for an unknown or expired token and for
+     * a token belonging to an account that has since been disabled.
      */
     public Optional<AppUser> resolve(String rawToken) {
         Optional<AuthToken> found = repository.findByHash(hash(rawToken));
@@ -97,14 +98,15 @@ public class AuthTokenService {
         return repository.findByUser(userId);
     }
 
-    /** Odhlásenie jedného zariadenia. */
+    /** Logs out one device. */
     public void revoke(String rawToken) {
         repository.deleteByHash(hash(rawToken));
     }
 
     /**
-     * Odhlási všetky zariadenia používateľa. Volá sa pri zmene hesla, vypnutí účtu
-     * aj zmazaní — inak by starý token prežil zmenu, ktorá ho mala zneplatniť.
+     * Logs out all of a user's devices. Called when the password changes or the account
+     * is disabled or deleted; otherwise, an old token would survive the change intended
+     * to invalidate it.
      */
     public int revokeAllFor(long userId) {
         int revoked = repository.deleteByUser(userId);
@@ -115,8 +117,9 @@ public class AuthTokenService {
     }
 
     /**
-     * Zmena hesla, PINu alebo vypnutie účtu odhlási všetky televízory daného používateľa.
-     * Zmazanie účtu tu nie je — tokeny zmetie {@code ON DELETE CASCADE} v schéme.
+     * A password or PIN change, or disabling the account, logs out all of the user's TVs.
+     * Account deletion is not handled here because {@code ON DELETE CASCADE} removes the
+     * tokens at the schema level.
      */
     @EventListener
     public void onCredentialsChanged(UserCredentialsChangedEvent event) {
@@ -126,7 +129,7 @@ public class AuthTokenService {
         }
     }
 
-    /** Expirované tokeny sa upratujú v noci, tesne pred naplánovaným skenom. */
+    /** Expired tokens are removed at night, shortly before the scheduled scan. */
     @Scheduled(cron = "0 0 3 * * *")
     public void purgeExpired() {
         int purged = repository.deleteExpired(Instant.now());

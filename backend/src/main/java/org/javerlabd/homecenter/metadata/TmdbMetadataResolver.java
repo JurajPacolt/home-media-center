@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.javerlabd.homecenter.media.VideoKind;
 import org.springframework.stereotype.Component;
 
-/** Skladá vyhľadanie titulu, detail seriálu/filmu a konkrétnu epizódu. */
+/** Combines title search, series/movie details, and a specific episode. */
 @Component
 public class TmdbMetadataResolver {
 
@@ -36,8 +36,8 @@ public class TmdbMetadataResolver {
             String groupKey = null;
             String groupTitle = null;
             String title = movie.title();
-            // Kolekcia je presnejšia než názov súboru: spojí napr. pokračovania,
-            // ktoré majú každé vlastné filmové id, no patria do jednej série.
+            // A collection is more precise than a filename: for example, it links sequels
+            // that each have their own movie ID but belong to one series.
             if (movie.collection() != null) {
                 groupKey = "tmdb:collection:" + movie.collection().id();
                 groupTitle = movie.collection().name();
@@ -89,7 +89,7 @@ public class TmdbMetadataResolver {
                 season, episodeNumber, parsed.partNumber(), series.genres()));
     }
 
-    /** Cache platný len počas jedného skenu; rovnaký seriál sa nehľadá pri každej epizóde. */
+    /** Cache valid only for one scan, avoiding a repeated series search for every episode. */
     public static final class Session {
         private final Map<SearchKey, Optional<TmdbTitle>> movies = new HashMap<>();
         private final Map<SearchKey, Optional<TmdbTitle>> series = new HashMap<>();

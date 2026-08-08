@@ -5,8 +5,8 @@ import java.time.Instant;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Prihlásené zariadenie. V databáze je len SHA-256 tokenu — samotný token vidí server
- * jediný raz, keď ho vydáva, a potom už len klient.
+ * Authenticated device. Only the token's SHA-256 hash is stored in the database; the
+ * server sees the token itself once when issuing it, after which only the client has it.
  */
 public record AuthToken(
         @Nullable Long id,

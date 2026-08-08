@@ -26,8 +26,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Overuje Range logiku, nie prihlasovanie — {@code @WithMockUser} preto len splní
- * podmienku, že stream je od zavedenia účtov prístupný iba prihlásenému klientovi.
+ * Verifies Range logic, not authentication. {@code @WithMockUser} only satisfies the
+ * requirement that streams are accessible solely to authenticated clients.
  */
 @WebMvcTest(StreamApiController.class)
 @ActiveProfiles("test")
@@ -42,7 +42,7 @@ class StreamApiControllerTest {
     @MockitoBean
     private MediaStreamService streamService;
 
-    /** Web vrstva ju ťahá cez {@code PasswordChangeInterceptor}; tento test ju nepoužíva. */
+    /** The web layer loads it through {@code PasswordChangeInterceptor}; this test does not use it. */
     @MockitoBean
     private UserService userService;
 

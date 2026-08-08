@@ -7,8 +7,8 @@ import java.nio.file.Path;
 import org.springframework.core.env.Environment;
 
 /**
- * SQLite vytvorí súbor databázy, ale nie priečinok nad ním. Tento krok musí prebehnúť
- * skôr, než Spring postaví datasource, preto sa volá z listenera nad prostredím.
+ * H2 creates the database file but not its parent directory. This step must run before
+ * Spring builds the data source, so it is called from an environment listener.
  */
 public final class DataDirectory {
 

@@ -17,8 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
     private final PasswordChangeInterceptor passwordChangeInterceptor;
 
     /**
-     * Platí len na management UI. REST API pre TV klienta sa vynúteným prihlásením
-     * nezaoberá — televízor sa prihlasuje tokenom a heslo nemení.
+     * Applies only to the management UI. The TV client's REST API does not enforce a
+     * password change because the TV authenticates with a token and does not change passwords.
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -28,8 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Aby v URL fungovalo {@code ?category=video} rovnako ako {@code ?category=VIDEO} —
-     * klient nemá riešiť veľkosť písmen.
+     * Makes {@code ?category=video} work like {@code ?category=VIDEO} in URLs so the client
+     * does not need to handle letter case.
      */
     @Override
     public void addFormatters(FormatterRegistry registry) {

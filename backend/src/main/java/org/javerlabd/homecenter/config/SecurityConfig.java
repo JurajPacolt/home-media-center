@@ -33,39 +33,39 @@ import org.springframework.security.web.header.writers.DelegatingRequestMatcherH
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
 /**
- * Dva oddelené svety s vlastnými pravidlami:
+ * Two separate environments with their own rules:
  *
  * <ul>
- *   <li><b>{@code /api/v1/**}</b> — Android TV klient. Bezstavové, výhradne
- *       {@code Authorization: Bearer}, žiadna session ani CSRF.</li>
- *   <li><b>všetko ostatné</b> — management UI v prehliadači. Prihlasovací formulár,
- *       session, CSRF a prístup len pre {@code ADMIN}.</li>
+ *   <li><b>{@code /api/v1/**}</b>—Android TV client. Stateless, exclusively
+ *       {@code Authorization: Bearer}, with no session or CSRF.</li>
+ *   <li><b>everything else</b>—browser-based management UI. Login form, session,
+ *       CSRF, and access restricted to {@code ADMIN}.</li>
  * </ul>
  *
- * <p>Rozdelenie nie je kozmetické: keby session platila aj na {@code /api/v1/**},
- * kde je CSRF vypnuté, cudzia stránka by vedela prehliadaču prihláseného správcu
- * podstrčiť POST na server.
+ * <p>The separation is not cosmetic: if sessions also applied to {@code /api/v1/**},
+ * where CSRF is disabled, a malicious site could make a logged-in administrator's
+ * browser submit a POST request to the server.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 public class SecurityConfig {
 
     /**
-     * Adresy, na ktorých tečú samotné súbory médií.
+     * Addresses that serve the media files themselves.
      *
-     * <p>Spring Security dáva do každej odpovede {@code Cache-Control: no-store}. Pre
-     * administračné stránky je to správne, pre médiá nie: Chrome stavia prehrávanie na
-     * multibufferi nad HTTP cache, takže s {@code no-store} nedostane ani prvý blok —
-     * element skončí na udalosti {@code stalled} s prázdnym bufferom a bez chyby.
-     * Vlastnú hlavičku si tieto odpovede nastavujú v {@code MediaStreamResponse}.
+     * <p>Spring Security adds {@code Cache-Control: no-store} to every response. This is
+     * correct for administration pages but not for media: Chrome builds playback on
+     * multiple buffers over the HTTP cache, so with {@code no-store} it does not receive
+     * even the first block. The element ends with a {@code stalled} event, an empty buffer,
+     * and no error. These responses set their own header in {@code MediaStreamResponse}.
      */
     private static final Pattern MEDIA_PATHS = Pattern.compile(
             ".*/(api/v1/media/\\d+/(stream|poster)|admin/kniznica/\\d+/(stream|stiahnut|poster))");
 
     /**
-     * Argon2id s predvolenými parametrami Spring Security (16 MiB, 2 iterácie).
-     * Hashujú sa ním heslá aj PINy — PIN je krátky, takže na pomalom hashi záleží
-     * o to viac.
+     * Argon2id with the default Spring Security parameters (16 MiB, two iterations).
+     * It hashes both passwords and PINs. A PIN is short, making a slow hash even more
+     * important.
      */
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -81,22 +81,22 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
-                        // Prihlásenie menom + heslom alebo menom + PINom.
+                        // Login with username + password or username + PIN.
                         .requestMatchers("/api/v1/auth/login").permitAll()
-                        // Sken je správcovská akcia aj cez API.
+                        // Scanning is an administrator action through the API as well.
                         .requestMatchers(HttpMethod.POST, "/api/v1/scan").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .headers(headersAllowingMediaCache())
                 .addFilterBefore(new BearerTokenAuthenticationFilter(tokenService),
                         UsernamePasswordAuthenticationFilter.class)
-                // Bez presmerovania na prihlasovaciu stránku — klient chce 401, nie HTML.
+                // Do not redirect to the login page; the client expects 401, not HTML.
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                        // Status sa nastavuje priamo, nie cez sendError. sendError totiž spustí
-                        // ERROR dispatch na /error, ktorý už nespadá pod /api/v1/** — chytil by
-                        // ho UI reťazec a klient by namiesto 403 dostal presmerovanie na
-                        // prihlasovaciu stránku. MockMvc ERROR dispatch nerobí, takže sa to
-                        // prejaví až na skutočnom serveri.
+                        // Set the status directly instead of using sendError. sendError triggers
+                        // an ERROR dispatch to /error, which is outside /api/v1/** and would be
+                        // caught by the UI chain. The client would then receive a redirect to the
+                        // login page instead of 403. MockMvc does not perform ERROR dispatches, so
+                        // this appears only on a real server.
                         .accessDeniedHandler((request, response, exception) ->
                                 response.setStatus(HttpStatus.FORBIDDEN.value())))
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -109,16 +109,16 @@ public class SecurityConfig {
     SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(requests -> requests
-                        // Statické súbory musia ísť aj neprihlásenému, inak je prihlasovacia
-                        // stránka bez Bootstrapu.
+                        // Static files must be available without authentication, or the login
+                        // page will have no Bootstrap styling.
                         .requestMatchers("/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
                         .requestMatchers("/prihlasenie").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        // Chybová stránka musí byť priechodná, inak sa každé sendError()
-                        // z ktoréhokoľvek reťazca zmení na presmerovanie na prihlásenie.
+                        // The error page must be accessible, or every sendError() from any chain
+                        // will turn into a redirect to the login page.
                         .requestMatchers("/error").permitAll()
-                        // Vrátane /api/openapi a /api/swagger-ui.html — kontrakt pre klienta
-                        // nemá visieť v sieti verejne.
+                        // Includes /api/openapi and /api/swagger-ui.html; the client contract
+                        // must not be publicly exposed on the network.
                         .anyRequest().hasRole("ADMIN"))
                 .headers(headersAllowingMediaCache())
                 .formLogin(form -> form
@@ -135,14 +135,14 @@ public class SecurityConfig {
     }
 
     /**
-     * Používateľ s rolou {@code USER} zadal správne heslo, ale do management UI nepatrí.
-     * Nechať ho na 403 by bolo mätúce — radšej ho odhlásime a povieme mu to na
-     * prihlasovacej stránke.
+     * A user with the {@code USER} role entered the correct password but is not allowed in
+     * the management UI. Leaving them on a 403 page would be confusing, so log them out and
+     * explain the restriction on the login page.
      *
-     * <p>Podmienka na rolu tu musí byť: {@code AccessDeniedException} nesie aj zlyhanie
-     * CSRF tokenu. Bez nej by sa prihlásený správca po vypršanej stránke potichu odhlásil
-     * a dostal hlášku o tom, že jeho účet patrí televízoru — čo nie je ani pravda, ani
-     * nápomocné. Všetko ostatné preto ide štandardnou cestou na 403.
+     * <p>The role condition is required because {@code AccessDeniedException} also represents
+     * a failed CSRF token. Without it, a logged-in administrator using an expired page would
+     * be silently logged out and told that the account belongs to the TV, which is neither
+     * true nor helpful. All other cases therefore follow the standard path to 403.
      */
     private static AccessDeniedHandler userRoleAccessDenied() {
         AccessDeniedHandlerImpl fallback = new AccessDeniedHandlerImpl();
@@ -158,8 +158,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Ponechá bezpečnostné hlavičky, ale {@code Cache-Control: no-store} nepridá tam,
-     * kde tečie samotný súbor — pozri {@link #MEDIA_PATHS}.
+     * Retains security headers but does not add {@code Cache-Control: no-store} where the
+     * file itself is served; see {@link #MEDIA_PATHS}.
      */
     private static Customizer<HeadersConfigurer<HttpSecurity>> headersAllowingMediaCache() {
         return headers -> headers

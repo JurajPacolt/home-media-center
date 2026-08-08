@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Preposielanie súboru zo Samby. Range requesty sú povinné — bez nich nefunguje
- * pretáčanie vo videu.
+ * Proxies a file from Samba. Range request support is mandatory because video seeking
+ * does not work without it.
  */
 @RestController
 @RequestMapping("/api/v1")

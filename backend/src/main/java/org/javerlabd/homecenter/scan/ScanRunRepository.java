@@ -85,8 +85,8 @@ public class ScanRunRepository {
     }
 
     /**
-     * Ak server spadol počas skenu, ostal by riadok navždy v stave RUNNING. Pri štarte
-     * sa takéto behy uzavrú.
+     * If the server failed during a scan, its row would remain RUNNING forever. Such
+     * runs are closed at startup.
      */
     public int markInterrupted() {
         return jdbc.sql("""
@@ -122,8 +122,8 @@ public class ScanRunRepository {
     }
 
     /**
-     * Posledný beh každého zdroja. Berie sa najvyššie {@code id} v rámci zdroja — behy
-     * vznikajú postupne, takže je to zároveň ten časovo posledný.
+     * Latest run for each source. The highest {@code id} within a source is used; runs
+     * are created sequentially, so this is also the latest chronologically.
      */
     public Map<Long, ScanRun> findLatestBySource() {
         return jdbc.sql("""
@@ -139,7 +139,7 @@ public class ScanRunRepository {
 
     private static ScanRun map(ResultSet rs, int rowNum) throws SQLException {
         long sourceId = rs.getLong("source_id");
-        // wasNull() platí vždy len pre posledné čítanie, preto sa vyhodnocuje hneď.
+        // wasNull() always applies only to the latest read, so evaluate it immediately.
         Long sourceIdOrNull = rs.wasNull() ? null : sourceId;
         return new ScanRun(
                 rs.getLong("id"),

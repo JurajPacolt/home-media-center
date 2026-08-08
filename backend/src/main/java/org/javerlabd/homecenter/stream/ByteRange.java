@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Rozsah z hlavičky {@code Range}. Podporuje sa jeden rozsah — to je presne to, čo
- * posielajú prehrávače pri pretáčaní. Požiadavku o viac rozsahov naraz server podľa
- * RFC 9110 § 14.2 ignoruje a pošle celý súbor.
+ * Range from the {@code Range} header. One range is supported, which is what players
+ * send when seeking. Under RFC 9110 section 14.2, the server ignores a request for
+ * multiple ranges and sends the entire file.
  */
 public record ByteRange(long start, long endInclusive) {
 
@@ -21,14 +21,14 @@ public record ByteRange(long start, long endInclusive) {
         return endInclusive - start + 1;
     }
 
-    /** Hodnota hlavičky {@code Content-Range} pre odpoveď 206. */
+    /** {@code Content-Range} header value for a 206 response. */
     public String contentRange(long totalLength) {
         return "bytes " + start + "-" + endInclusive + "/" + totalLength;
     }
 
     /**
-     * @return prázdny výsledok, ak sa má hlavička ignorovať a poslať celý súbor
-     * @throws RangeNotSatisfiableException ak je rozsah zrozumiteľný, ale mimo súboru
+     * @return empty if the header should be ignored and the entire file sent
+     * @throws RangeNotSatisfiableException if the range is valid but outside the file
      */
     public static Optional<ByteRange> parse(@Nullable String header, long totalLength) {
         if (header == null || header.isBlank()) {
@@ -53,7 +53,7 @@ public record ByteRange(long start, long endInclusive) {
         long end;
         try {
             if (startText.isEmpty()) {
-                // tvar "-N": posledných N bajtov
+                // "-N" form: the last N bytes
                 if (endText.isEmpty()) {
                     return Optional.empty();
                 }

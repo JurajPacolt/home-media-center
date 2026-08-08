@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Správa používateľov. Tenká vrstva nad {@code UserService} — hashovanie, validácia
- * aj poistka na posledného správcu sú v službe, nie tu.
+ * User management. This is a thin layer over {@code UserService}; hashing, validation,
+ * and the last-administrator safeguard belong in the service, not here.
  */
 @Controller
 @RequestMapping("/admin/pouzivatelia")
@@ -91,7 +91,7 @@ public class UserAdminController {
         return "redirect:/admin/pouzivatelia";
     }
 
-    /** Odhlási všetky televízory daného používateľa — napríklad po strate zariadenia. */
+    /** Logs out all TVs for the given user, for example after a device is lost. */
     @PostMapping("/{id}/odhlasit")
     public String revokeDevices(@PathVariable long id, RedirectAttributes redirect) {
         int revoked = tokenService.revokeAllFor(userService.require(id).requireId());

@@ -1,9 +1,9 @@
 package org.javerlabd.homecenter.user;
 
 /**
- * Poistka proti zamknutiu sa zo servera: posledný zapnutý správca sa nedá zmazať,
- * vypnúť ani preradiť na {@link Role#USER}. Bez nej by sa do management UI
- * nedalo dostať inak než zásahom do databázy.
+ * Safeguard against server lockout: the last enabled administrator cannot be deleted,
+ * disabled, or changed to {@link Role#USER}. Without it, the management UI could be
+ * recovered only by modifying the database.
  */
 public class LastAdminException extends RuntimeException {
 

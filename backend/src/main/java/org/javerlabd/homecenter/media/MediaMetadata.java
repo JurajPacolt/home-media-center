@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
-/** Filmové údaje pripojené k indexovanému videosúboru. */
+/** Movie data attached to an indexed video file. */
 public record MediaMetadata(
         MetadataStatus status,
         @Nullable VideoKind kind,
@@ -32,7 +32,7 @@ public record MediaMetadata(
         return status == MetadataStatus.MATCHED;
     }
 
-    /** Providerové údaje môžu zostať použiteľné aj po neúspešnom obnovení. */
+    /** Provider data may remain usable after an unsuccessful refresh. */
     public boolean hasProviderData() {
         return provider != null && !provider.isBlank() && providerId != null;
     }

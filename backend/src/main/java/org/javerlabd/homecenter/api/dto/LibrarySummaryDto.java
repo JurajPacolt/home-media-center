@@ -7,7 +7,7 @@ import org.javerlabd.homecenter.media.MediaCategory;
 import org.javerlabd.homecenter.scan.ScanRun;
 import org.jspecify.annotations.Nullable;
 
-/** Podklad pre tri dlaždice na úvodnej obrazovke TV klienta. */
+/** Data for the three tiles on the TV client's home screen. */
 public record LibrarySummaryDto(
         List<CategoryTileDto> categories,
         long totalItems,

@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.concurrent.TimeUnit;
 
-/** Rovnaké cache hlavičky pre plagát v REST API aj management UI. */
+/** Identical poster cache headers for the REST API and management UI. */
 public final class PosterResponse {
 
     private PosterResponse() {

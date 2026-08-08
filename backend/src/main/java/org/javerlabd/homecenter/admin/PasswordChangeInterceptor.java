@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * Kým má správca predvolené heslo z prvého spustenia, pustí ho management UI jedine
- * na stránku zmeny hesla.
+ * While an administrator still has the default password from the first launch, the
+ * management UI allows access only to the password change page.
  *
- * <p>Príznak sa načítava z databázy, nie z prihlásenej relácie: po zmene hesla by
- * v session ostal starý stav a používateľ by tu uviazol v slučke.
+ * <p>The flag is loaded from the database, not the authenticated session: after a
+ * password change, the session would retain the old state and trap the user in a loop.
  */
 @Component
 @RequiredArgsConstructor

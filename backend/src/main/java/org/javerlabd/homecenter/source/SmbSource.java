@@ -5,8 +5,8 @@ import java.time.Instant;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Nastavenie Samba zdroja. Heslo pozná iba server — {@link #toString()} ho zámerne
- * nevypisuje, aby sa neobjavilo v logu.
+ * Samba source configuration. Only the server knows the password; {@link #toString()}
+ * intentionally omits it so it never appears in logs.
  */
 public record SmbSource(
         @Nullable Long id,
@@ -31,7 +31,7 @@ public record SmbSource(
         return id;
     }
 
-    /** Zmení sa ním identita pripojenia — pri zmene treba zahodiť cache spojení. */
+    /** Connection identity; changing it requires discarding the connection cache. */
     public String connectionFingerprint() {
         return host + ":" + port + "/" + shareName + "@" + (domain == null ? "" : domain)
                 + "/" + (username == null ? "" : username) + "#" + (password == null ? 0 : password.hashCode());

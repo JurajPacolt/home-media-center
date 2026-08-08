@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.source;
 
-/** Nie je nastavený žiadny zapnutý Samba zdroj — bez neho sa nedá skenovať ani streamovať. */
+/** No enabled Samba source is configured; scanning and streaming require one. */
 public class NoActiveSourceException extends RuntimeException {
 
     public NoActiveSourceException() {

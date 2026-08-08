@@ -5,9 +5,9 @@ import java.io.Closeable;
 import com.hierynomus.smbj.share.File;
 
 /**
- * Otvorený súbor na Sambe s možnosťou čítať z ľubovoľnej pozície. Práve toto drží
- * pretáčanie vo videu — Range request sa preloží na čítanie od danej pozície,
- * nie na preskakovanie bajtov od začiatku súboru.
+ * Open Samba file that supports reading from any position. This enables video seeking:
+ * a Range request becomes a read from the requested position rather than skipping bytes
+ * from the beginning of the file.
  */
 public final class SmbReadHandle implements Closeable {
 
@@ -22,7 +22,7 @@ public final class SmbReadHandle implements Closeable {
     }
 
     /**
-     * @return počet načítaných bajtov, alebo -1 na konci súboru
+     * @return number of bytes read, or -1 at end of file
      */
     public int read(byte[] buffer, long fileOffset, int bufferOffset, int length) {
         try {

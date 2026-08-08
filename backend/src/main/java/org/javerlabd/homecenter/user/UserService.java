@@ -14,17 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Správa používateľov a overovanie prihlasovacích údajov. Jediné miesto, ktoré vidí
- * heslá a PINy v otvorenom tvare — von z neho idú už len Argon2 hashe.
+ * User management and credential verification. This is the only place that sees plaintext
+ * passwords and PINs; only Argon2 hashes leave it.
  *
- * <p>Spoločná vrstva pre management UI aj REST API: {@code UserAdminController} nad ňou
- * stavia HTML, {@code AuthApiController} JSON.
+ * <p>Shared layer for the management UI and REST API: {@code UserAdminController} builds
+ * HTML on top of it, while {@code AuthApiController} builds JSON.
  */
 @Service
 @Slf4j
 public class UserService {
 
-    /** PIN je na ovládanie diaľkovým ovládačom, preto len číslice a krátky. */
+    /** The PIN is for remote-control entry, so it is short and contains digits only. */
     public static final int PIN_MIN_LENGTH = 4;
     public static final int PIN_MAX_LENGTH = 8;
     public static final int PASSWORD_MIN_LENGTH = 8;
@@ -37,9 +37,8 @@ public class UserService {
     private final ApplicationEventPublisher events;
 
     /**
-     * Hash, o ktorom sa vie, že sa nezhoduje s ničím. Overuje sa proti nemu aj vtedy,
-     * keď používateľ neexistuje — inak by sa dalo z času odpovede vyčítať, ktoré mená
-     * sú v databáze.
+     * Hash known not to match anything. Verification runs against it even when the user
+     * does not exist; otherwise, response timing could reveal which usernames are stored.
      */
     private final String dummyHash;
 
@@ -73,11 +72,11 @@ public class UserService {
     }
 
     /**
-     * Overí meno a tajomstvo. Tajomstvom môže byť heslo alebo — ak to volajúci povolí
-     * a používateľ ho má nastavený — PIN.
+     * Verifies a username and secret. The secret may be a password or, when allowed by
+     * the caller and configured for the user, a PIN.
      *
-     * @param pinAllowed PIN sa uznáva len na REST API pre TV klienta; do management UI
-     *                   sa vyžaduje vždy plné heslo
+     * @param pinAllowed PINs are accepted only by the TV client's REST API; the management
+     *                   UI always requires the full password
      */
     public Optional<AppUser> authenticate(String username, String secret, boolean pinAllowed) {
         Optional<AppUser> found = repository.findByUsername(normalizeUsername(username));
@@ -100,7 +99,7 @@ public class UserService {
         return Optional.empty();
     }
 
-    /** Založí alebo upraví používateľa; hashovanie aj kontroly sú tu. */
+    /** Creates or updates a user, including hashing and validation. */
     @Transactional
     public AppUser save(UserDraft draft) {
         String username = normalizeUsername(draft.username());
@@ -133,7 +132,7 @@ public class UserService {
                 pinHash,
                 draft.role(),
                 draft.enabled(),
-                // Heslo zadal správca ručne, nie je to už vygenerované predvolené.
+                // An administrator entered this password manually; it is no longer a generated default.
                 existing != null && existing.mustChangePassword() && !hasText(draft.password()),
                 null,
                 null));
@@ -146,9 +145,9 @@ public class UserService {
     }
 
     /**
-     * Zmena hesla, PINu alebo vypnutie účtu musí zhodiť prihlásené televízory. Rola sa
-     * medzi ne neráta — tú si {@code AuthTokenService} načítava pri každom requeste
-     * načerstvo z databázy.
+     * A password or PIN change, or disabling the account, must log out authenticated TVs.
+     * A role change is excluded because {@code AuthTokenService} loads the role fresh from
+     * the database on every request.
      */
     private void revokeIfCredentialsChanged(AppUser before, AppUser after) {
         String reason = null;
@@ -164,7 +163,7 @@ public class UserService {
         }
     }
 
-    /** Zmena vlastného hesla — zároveň zhasína príznak vynútenej zmeny. */
+    /** Changes the current user's password and clears the forced-change flag. */
     @Transactional
     public AppUser changePassword(long id, String newPassword) {
         AppUser user = require(id);
@@ -195,7 +194,7 @@ public class UserService {
         log.info("Zmazaný používateľ {}", user.username());
     }
 
-    /** Overí, či sa dané heslo zhoduje s uloženým — pred zmenou vlastného hesla. */
+    /** Verifies a password against the stored hash before changing the current password. */
     public boolean passwordMatches(AppUser user, String password) {
         return encoder.matches(password, user.passwordHash());
     }
@@ -227,8 +226,8 @@ public class UserService {
     }
 
     /**
-     * Bráni tomu, aby úprava zobrala poslednému správcovi rolu alebo ho vypla — server
-     * by sa tým sám zamkol.
+     * Prevents an update from removing the last administrator's role or disabling the
+     * account, which would lock the server.
      */
     private void guardLastAdmin(AppUser existing, Role newRole, boolean newEnabled) {
         boolean stopsBeingUsableAdmin = existing.isAdmin() && existing.enabled()

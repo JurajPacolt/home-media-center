@@ -1,9 +1,9 @@
 package org.javerlabd.homecenter.source;
 
 /**
- * Dva zdroje s rovnakým názvom by boli v zozname aj vo filtri knižnice na nerozoznanie.
- * Adresa ani share sa nekontrolujú — ten istý server pripojený na dva rôzne priečinky
- * je legitímne nastavenie.
+ * Two sources with the same name would be indistinguishable in both the list and library
+ * filter. The address and share are not checked; connecting the same server to two different
+ * directories is a valid configuration.
  */
 public class DuplicateSourceNameException extends RuntimeException {
 

@@ -24,9 +24,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
 /**
- * Jediné miesto, ktoré sa dotýka Samby. Spojenie na share sa drží otvorené a zdieľa
- * medzi requestami — nadviazanie SMB session je drahé a sken aj streamovanie by ho
- * inak platili pri každom súbore.
+ * The only place that accesses Samba. The share connection remains open and is shared
+ * between requests because establishing an SMB session is expensive; otherwise, scanning
+ * and streaming would pay that cost for every file.
  */
 @Component
 @Slf4j
@@ -37,9 +37,9 @@ public class SmbGateway implements DisposableBean {
     private final ReentrantLock lock = new ReentrantLock();
 
     /**
-     * Overí, že sa na zdroj dá pripojiť a že koreňový priečinok existuje. Beží na
-     * vlastnom spojení, ktoré hneď zatvára — test z management UI tak nezhodí
-     * prebiehajúci stream a funguje aj na zdroji, ktorý ešte nie je uložený.
+     * Verifies that the source is reachable and its root directory exists. It uses a
+     * dedicated connection that is closed immediately, so a management UI test does not
+     * interrupt an active stream and also works for a source not yet stored.
      */
     public void verify(SmbSource source) {
         String root = SmbPaths.toSmb(source.rootPath());
@@ -59,7 +59,7 @@ public class SmbGateway implements DisposableBean {
     }
 
     /**
-     * @param relativePath cesta voči koreňu zdroja ('/' ako oddeľovač, prázdna pre koreň)
+     * @param relativePath path relative to the source root ('/' separator, empty for root)
      */
     public List<SmbEntry> list(SmbSource source, String relativePath) {
         String smbPath = SmbPaths.toSmb(SmbPaths.join(source.rootPath(), relativePath));
@@ -71,7 +71,7 @@ public class SmbGateway implements DisposableBean {
                     continue;
                 }
                 long attributes = info.getFileAttributes();
-                // Reparse pointy vedia zacykliť sken, systémové súbory do knižnice nepatria.
+                // Reparse points can create scan loops, and system files do not belong in the library.
                 if (isSet(attributes, FileAttributes.FILE_ATTRIBUTE_SYSTEM)
                         || isSet(attributes, FileAttributes.FILE_ATTRIBUTE_REPARSE_POINT)) {
                     continue;
@@ -102,7 +102,7 @@ public class SmbGateway implements DisposableBean {
         });
     }
 
-    /** Zahodí spojenie na zdroj — volá sa po zmene nastavení. */
+    /** Discards the source connection after its settings change. */
     public void invalidate(long sourceId) {
         lock.lock();
         try {
@@ -117,8 +117,8 @@ public class SmbGateway implements DisposableBean {
     }
 
     /**
-     * Prvý pokus ide cez uložené spojenie. Ak zlyhá, zvyčajne to znamená, že server
-     * medzitým session zahodil — druhý pokus preto beží na čerstvom pripojení.
+     * The first attempt uses the cached connection. Failure usually means the server has
+     * dropped the session, so the second attempt uses a fresh connection.
      */
     private <T> T withShare(SmbSource source, ShareOperation<T> operation) {
         try {
@@ -178,7 +178,7 @@ public class SmbGateway implements DisposableBean {
                 try {
                     connection.close();
                 } catch (IOException | RuntimeException ignored) {
-                    // pôvodná chyba je zaujímavejšia
+                    // The original error is more informative.
                 }
             }
             if (ex instanceof SmbAccessException accessException) {

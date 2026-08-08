@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.media;
 
-/** Jemnejšie zaradenie videa; nemení tri hlavné dlaždice VIDEO / PHOTO / AUDIO. */
+/** Finer video classification that does not change the main VIDEO / PHOTO / AUDIO tiles. */
 public enum VideoKind {
     MOVIE,
     TV_EPISODE

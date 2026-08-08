@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Prihlásenie Android TV klienta.
+ * Android TV client login.
  *
- * @param secret     heslo alebo PIN — server skúsi oboje a klient nemusí vedieť, čo drží
- * @param deviceName ako sa zariadenie ukáže v zozname prihlásených (napr. „Obývačka“)
+ * @param secret     password or PIN; the server tries both, so the client need not identify it
+ * @param deviceName how the device appears in the list of active sessions (for example, "Living Room")
  */
 public record LoginRequestDto(
 

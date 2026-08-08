@@ -1,6 +1,6 @@
--- Filmové metadáta z verejného katalógu, žánre a poradie seriálov/viacdielnych videí.
--- Pôvodná `category` ostáva VIDEO / PHOTO / AUDIO pre tri dlaždice Android TV klienta;
--- žáner je samostatná mnohonásobná klasifikácia (film môže byť zároveň komédia aj sci-fi).
+-- Movie metadata from a public catalog, genres, and ordering for series/multipart videos.
+-- The original `category` remains VIDEO / PHOTO / AUDIO for the Android TV client's three tiles;
+-- genre is a separate multi-value classification (a movie may be both comedy and science fiction).
 
 ALTER TABLE media_item ADD COLUMN video_kind VARCHAR(16);
 ALTER TABLE media_item ADD COLUMN metadata_provider VARCHAR(32);
@@ -17,8 +17,8 @@ ALTER TABLE media_item ADD COLUMN part_number INTEGER;
 ALTER TABLE media_item ADD COLUMN metadata_status VARCHAR(16) NOT NULL DEFAULT 'SKIPPED';
 ALTER TABLE media_item ADD COLUMN metadata_updated_at TIMESTAMP WITH TIME ZONE;
 
--- Existujúce videá sa obohatia pri najbližšom skene. Fotky a hudba filmové metadáta
--- nepotrebujú, preto ostávajú SKIPPED.
+-- Existing videos are enriched during the next scan. Photos and music do not need movie
+-- metadata and therefore remain SKIPPED.
 UPDATE media_item SET metadata_status = 'PENDING' WHERE category = 'VIDEO';
 
 CREATE TABLE media_genre

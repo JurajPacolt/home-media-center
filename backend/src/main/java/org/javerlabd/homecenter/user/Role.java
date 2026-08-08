@@ -1,8 +1,8 @@
 package org.javerlabd.homecenter.user;
 
 /**
- * Rola rozhoduje o tom, kam sa používateľ dostane. {@link #USER} je určený výhradne
- * pre Android TV klienta — do management UI ho Spring Security nepustí.
+ * A role determines which areas a user can access. {@link #USER} is intended exclusively
+ * for the Android TV client, and Spring Security does not allow it into the management UI.
  */
 public enum Role {
 
@@ -25,7 +25,7 @@ public enum Role {
         return description;
     }
 
-    /** Spring Security očakáva autority s prefixom {@code ROLE_}. */
+    /** Spring Security expects authorities with the {@code ROLE_} prefix. */
     public String authority() {
         return "ROLE_" + name();
     }

@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Pokyny pre tento repozitár sú v [AGENTS.md](AGENTS.md), aby platili rovnako pre
-všetky AI nástroje. Needituj ich tu — zmeny rob v `AGENTS.md`.
+Instructions for this repository are in [AGENTS.md](AGENTS.md) so they apply equally
+to all AI tools. Do not edit them here—make changes in `AGENTS.md`.
 
 @AGENTS.md

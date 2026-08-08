@@ -7,7 +7,7 @@ import org.javerlabd.homecenter.media.MediaMetadata;
 import org.javerlabd.homecenter.media.VideoKind;
 import org.jspecify.annotations.Nullable;
 
-/** Filmové údaje a poradie, ktoré Android klient potrebuje na zoskupenie epizód. */
+/** Movie data and ordering required by the Android client to group episodes. */
 public record MediaMetadataDto(
         @Nullable VideoKind kind,
         @Nullable String description,

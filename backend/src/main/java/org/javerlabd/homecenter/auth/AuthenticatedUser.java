@@ -9,9 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * Most medzi doménovým {@link AppUser} a Spring Security. Nesie so sebou celého
- * používateľa, takže controllery sa k nemu dostanú cez {@code @AuthenticationPrincipal}
- * bez ďalšieho dotazu do databázy.
+ * Bridge between the domain {@link AppUser} and Spring Security. It carries the complete
+ * user, allowing controllers to access it through {@code @AuthenticationPrincipal}
+ * without another database query.
  */
 public record AuthenticatedUser(AppUser user) implements UserDetails {
 
@@ -20,7 +20,7 @@ public record AuthenticatedUser(AppUser user) implements UserDetails {
         return List.of(new SimpleGrantedAuthority(user.role().authority()));
     }
 
-    /** Argon2 hash — porovnáva ho {@code DaoAuthenticationProvider} pri prihlásení do UI. */
+    /** Argon2 hash compared by {@code DaoAuthenticationProvider} during UI login. */
     @Override
     public String getPassword() {
         return user.passwordHash();

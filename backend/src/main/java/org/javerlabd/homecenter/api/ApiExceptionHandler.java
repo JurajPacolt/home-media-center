@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/** Chyby REST API v tvare RFC 9457. Management UI má vlastné, HTML ošetrenie. */
+/** REST API errors in RFC 9457 format. The management UI has separate HTML handling. */
 @RestControllerAdvice(basePackages = "org.javerlabd.homecenter.api")
 @Slf4j
 public class ApiExceptionHandler {
@@ -28,7 +28,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(InvalidLoginException.class)
     ProblemDetail handleInvalidLogin(InvalidLoginException ex) {
-        // Bez mena v logu — po nevydarenom pokuse často nasleduje ten správny.
+        // Omit the name from the log; a failed attempt is often followed by the correct one.
         log.info("Neúspešné prihlásenie cez API");
         return problem(HttpStatus.UNAUTHORIZED, "Prihlásenie zlyhalo", ex.getMessage());
     }
@@ -62,7 +62,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(RangeNotSatisfiableException.class)
     ResponseEntity<ProblemDetail> handleRange(RangeNotSatisfiableException ex) {
         return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
-                // Podľa RFC 9110 musí 416 povedať, aká je skutočná dĺžka súboru.
+                // RFC 9110 requires a 416 response to report the file's actual length.
                 .header(HttpHeaders.CONTENT_RANGE, "bytes */" + ex.totalLength())
                 .body(problem(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, "Neplatný rozsah", ex.getMessage()));
     }

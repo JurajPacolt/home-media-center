@@ -1,14 +1,14 @@
 package org.javerlabd.homecenter.user;
 
 /**
- * Používateľovi sa zmenilo heslo alebo PIN, prípadne mu niekto vypol účet. Prihlásené
- * zariadenia treba odhlásiť — inak by starý token prežil práve tú zmenu, ktorá ho mala
- * zneplatniť.
+ * A user's password or PIN changed, or the account was disabled. Authenticated devices
+ * must be logged out; otherwise, an old token would survive the very change intended to
+ * invalidate it.
  *
- * <p>Ide to udalosťou, nie priamym volaním: {@code AuthTokenService} potrebuje
- * {@code UserService}, takže opačná závislosť by uzavrela kruh.
+ * <p>This uses an event rather than a direct call: {@code AuthTokenService} depends on
+ * {@code UserService}, so the reverse dependency would create a cycle.
  *
- * @param reason čo sa stalo — ide len do logu
+ * @param reason what happened; used only in the log
  */
 public record UserCredentialsChangedEvent(long userId, String reason) {
 }

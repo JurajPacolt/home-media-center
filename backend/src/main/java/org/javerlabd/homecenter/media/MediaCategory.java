@@ -1,8 +1,8 @@
 package org.javerlabd.homecenter.media;
 
 /**
- * Tri dlaždice, ktoré vidí používateľ na TV. Zámerne sa nevolá MediaType — to je
- * v controlleroch obsadené triedou {@code org.springframework.http.MediaType}.
+ * The three tiles visible to the TV user. It is intentionally not named MediaType
+ * because controllers already use {@code org.springframework.http.MediaType}.
  */
 public enum MediaCategory {
 
@@ -16,7 +16,7 @@ public enum MediaCategory {
         this.label = label;
     }
 
-    /** Slovenský názov pre management UI. */
+    /** Slovak display name for the management UI. */
     public String label() {
         return label;
     }

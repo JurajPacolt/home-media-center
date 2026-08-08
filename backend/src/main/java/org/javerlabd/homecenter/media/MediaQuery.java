@@ -3,10 +3,10 @@ package org.javerlabd.homecenter.media;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Filter pre výpis knižnice. Limit je zastropovaný, aby jeden request nevytiahol celý index.
+ * Filter for library listings. The limit is capped so one request cannot retrieve the entire index.
  *
- * @param sourceId keď je zdrojov viac, dá sa výpis zúžiť na jeden; {@code null} = všetky
- * @param genreId  interné id filmového žánru; {@code null} = všetky
+ * @param sourceId narrows the listing to one source when several exist; {@code null} means all
+ * @param genreId  internal movie genre ID; {@code null} means all
  */
 public record MediaQuery(
         @Nullable MediaCategory category,

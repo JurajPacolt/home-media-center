@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/** Úvodná obrazovka management UI: stav knižnice, zdrojov a skenov. */
+/** Management UI dashboard: library, source, and scan status. */
 @Controller
 @RequiredArgsConstructor
 public class DashboardController {
@@ -39,7 +39,7 @@ public class DashboardController {
         model.addAttribute("sources", sourceService.findAll());
         model.addAttribute("usage", mediaService.usageBySource());
         model.addAttribute("lastScans", scanService.latestBySource());
-        // História mieša behy viacerých zdrojov, treba pri nich ukázať, ktorého sa týkajú.
+        // The history combines runs for multiple sources, so each run must identify its source.
         model.addAttribute("sourceNames", sourceService.namesById());
         model.addAttribute("scanRunning", scanService.isRunning());
         model.addAttribute("lastScan", scanService.latest().orElse(null));
@@ -48,9 +48,9 @@ public class DashboardController {
     }
 
     /**
-     * Priebeh skenu pre dashboard. Vlastný endpoint má preto, že {@code /api/v1/**} je
-     * bezstavové a prijíma výhradne Bearer token — prehliadač so session by tam neprešiel.
-     * Logika ostáva spoločná, líši sa len spôsob prihlásenia.
+     * Scan progress for the dashboard. It has a dedicated endpoint because {@code /api/v1/**}
+     * is stateless and accepts only a Bearer token; a browser session would not be accepted.
+     * The logic remains shared; only the authentication method differs.
      */
     @GetMapping("/admin/sken/stav")
     @ResponseBody
@@ -60,12 +60,12 @@ public class DashboardController {
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
-    /** Sken všetkých zapnutých zdrojov. Jeden zdroj sa spúšťa z prehľadu zdrojov. */
+    /** Scans all enabled sources. A single source is started from the source overview. */
     @PostMapping("/admin/sken")
     public String startScan(RedirectAttributes redirect) {
         try {
             ScanStart started = scanService.triggerAll(ScanTrigger.MANUAL);
-            // Bez číslovky pred podstatným menom — slovenčina by za ňou striedala pád.
+            // No numeral before the noun because Slovak would change its grammatical case.
             redirect.addFlashAttribute("success", started.count() == 1
                     ? "Sken sa spustil, priebeh sa dopĺňa nižšie."
                     : "Sken sa spustil, zdroje sa prechádzajú za sebou: "

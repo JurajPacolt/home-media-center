@@ -9,8 +9,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.util.unit.DataSize;
 
 /**
- * Nastavenia servera. SMB zdroj tu zámerne nie je — ten sa konfiguruje za behu
- * cez management UI a býva uložený v databáze.
+ * Server settings. The SMB source is intentionally absent because it is configured at
+ * runtime through the management UI and stored in the database.
  */
 @ConfigurationProperties(prefix = "homecenter")
 public record HomeCenterProperties(
@@ -22,7 +22,7 @@ public record HomeCenterProperties(
         @DefaultValue Streaming streaming,
         @DefaultValue Security security) {
 
-    /** Prípony, podľa ktorých sken zaraďuje súbory do kategórií. */
+    /** Extensions used by the scanner to classify files into categories. */
     public record Library(
             @DefaultValue({ "mkv", "mp4", "avi", "mov", "m4v", "webm" }) Set<String> videoExtensions,
             @DefaultValue({ "jpg", "jpeg", "png", "gif", "webp" }) Set<String> photoExtensions,
@@ -30,8 +30,8 @@ public record HomeCenterProperties(
     }
 
     /**
-     * Voliteľné filmové metadáta z TMDb. Prázdny token integráciu úplne vypne;
-     * SMB sken a prehrávanie preto fungujú aj bez internetu alebo účtu TMDb.
+     * Optional movie metadata from TMDb. An empty token disables the integration entirely,
+     * so SMB scanning and playback also work without internet access or a TMDb account.
      */
     public record Metadata(
             @DefaultValue("") String tmdbReadAccessToken,
@@ -63,8 +63,8 @@ public record HomeCenterProperties(
     }
 
     /**
-     * @param tokenValidity ako dlho platí prihlásenie Android klienta. Televízor sa
-     *                      neprihlasuje často, preto rádovo mesiace.
+     * @param tokenValidity how long an Android client login remains valid. The TV does
+     *                      not log in frequently, so this is measured in months.
      */
     public record Security(
             @DefaultValue("90d") Duration tokenValidity) {

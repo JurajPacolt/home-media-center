@@ -17,14 +17,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Prihlásenie Android klienta hlavičkou {@code Authorization: Bearer <token>}.
+ * Authenticates the Android client through the {@code Authorization: Bearer <token>} header.
  *
- * <p>Zámerne nie je {@code @Component} — Spring Boot by ho inak zaregistroval aj do
- * hlavného servletového reťazca a bežal by dvakrát. Inštanciu vytvára {@code SecurityConfig}
- * a vkladá ju len do reťazca pre {@code /api/v1/**}.
+ * <p>It is intentionally not a {@code @Component}; otherwise, Spring Boot would also
+ * register it in the main servlet chain, causing it to run twice. {@code SecurityConfig}
+ * creates the instance and adds it only to the chain for {@code /api/v1/**}.
  *
- * <p>Neplatný token sa tu nerieši chybou — request pokračuje neprihlásený a zamietne
- * ho až autorizácia, ktorá naň odpovie 401.
+ * <p>An invalid token does not produce an error here. The request continues unauthenticated
+ * and is rejected later by authorization with a 401 response.
  */
 @RequiredArgsConstructor
 public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {

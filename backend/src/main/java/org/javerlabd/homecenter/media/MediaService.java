@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Čítacia vrstva nad indexom, spoločná pre REST API aj Thymeleaf UI. Samba sa tu
- * nikdy neskenuje — to je práca {@code ScanService} na pozadí.
+ * Read layer over the index, shared by the REST API and Thymeleaf UI. Samba is never
+ * scanned here; that is the background {@code ScanService}'s responsibility.
  */
 @Service
 @Transactional(readOnly = true)
@@ -40,7 +40,7 @@ public class MediaService {
         return new LibrarySummary(counts, total, repository.totalSizeBytes());
     }
 
-    /** Rozdelenie indexu podľa zdroja — pre prehľad zdrojov v management UI. */
+    /** Index usage by source for the management UI source overview. */
     public Map<Long, SourceUsage> usageBySource() {
         return repository.usageBySource();
     }

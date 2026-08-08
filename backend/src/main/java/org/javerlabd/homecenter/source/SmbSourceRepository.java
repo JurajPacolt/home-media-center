@@ -38,14 +38,14 @@ public class SmbSourceRepository {
                 .optional();
     }
 
-    /** Zdroje, ktoré sa majú skenovať. Poradie je stabilné — sken ich prechádza za sebou. */
+    /** Sources to scan. Their order is stable because the scan processes them sequentially. */
     public List<SmbSource> findAllEnabled() {
         return jdbc.sql("SELECT " + COLUMNS + " FROM smb_source WHERE enabled = TRUE ORDER BY name, id")
                 .query(SmbSourceRepository::map)
                 .list();
     }
 
-    /** Názov je jednoznačný (bez ohľadu na veľkosť písmen) — zdroje sa podľa neho vyberajú v UI. */
+    /** The name is unique regardless of case and identifies sources in the UI. */
     public Optional<SmbSource> findByName(String name) {
         return jdbc.sql("SELECT " + COLUMNS + " FROM smb_source WHERE LOWER(name) = LOWER(:name)")
                 .param("name", name)

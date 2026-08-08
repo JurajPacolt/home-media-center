@@ -3,14 +3,14 @@ package org.javerlabd.homecenter.user;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Vstup do {@link UserService#save(UserDraft)} — to, čo prišlo z formulára, ešte
- * v otvorenom tvare. Rovnako ako pri Samba zdroji platí, že prázdne heslo pri úprave
- * znamená „nechať pôvodné“, nie „zmazať“; UI uložený hash nikdy nezobrazuje.
+ * Input to {@link UserService#save(UserDraft)} containing form data still in plaintext.
+ * As with a Samba source, an empty password during editing means "keep the existing value,"
+ * not "delete"; the UI never displays the stored hash.
  *
- * @param id       {@code null} pre nového používateľa
- * @param password otvorené heslo; pri úprave prázdne = nemeniť
- * @param pin      otvorený PIN; prázdny = nemeniť
- * @param clearPin explicitné zrušenie PINu (má prednosť pred {@code pin})
+ * @param id       {@code null} for a new user
+ * @param password plaintext password; empty during editing means unchanged
+ * @param pin      plaintext PIN; empty means unchanged
+ * @param clearPin explicitly removes the PIN and takes precedence over {@code pin}
  */
 public record UserDraft(
         @Nullable Long id,

@@ -14,7 +14,7 @@ import org.javerlabd.homecenter.media.MetadataStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
-/** Obohatí už zapísaný index; chyba internetu nikdy nesmie zhodiť SMB sken. */
+/** Enriches the stored index; an internet failure must never fail the SMB scan. */
 @Service
 @Slf4j
 public class MetadataEnrichmentService {
@@ -51,7 +51,7 @@ public class MetadataEnrichmentService {
                 log.info("Z cache odstránených {} nepoužívaných plagátov", deleted);
             }
         } catch (RuntimeException ex) {
-            // Upratovanie cache je údržba; nesmie spätne označiť dokončený SMB sken za chybný.
+            // Cache cleanup is maintenance and must not retroactively fail a completed SMB scan.
             log.warn("Cache plagátov sa nepodarilo upratať: {}", message(ex));
         }
     }
@@ -64,8 +64,8 @@ public class MetadataEnrichmentService {
                         scannedItem.sourceId(), scannedItem.relativePath())
                 .orElseThrow();
         ParsedVideoName parsed = parser.parse(scannedItem.relativePath(), scannedItem.fileName());
-        // Lokálny odhad je fallback. Pri opakovanom skene nesmie zmazať presnejší
-        // kľúč TMDb kolekcie/seriálu len preto, že ešte nenastal čas na refresh.
+        // The local estimate is a fallback. A repeated scan must not erase a more precise
+        // TMDb collection/series key merely because its refresh is not due yet.
         if (stored.metadata() == null || !stored.metadata().hasProviderData()) {
             repository.saveStructure(stored.requireId(), parsed.structure());
         }
@@ -114,8 +114,8 @@ public class MetadataEnrichmentService {
     }
 
     private void failedOrMissing(MediaItem stored, MetadataStatus status) {
-        // markMetadata mení iba stav a čas pokusu. Starý popis, plagát aj zoskupenie
-        // ostanú použiteľné, no FAILED sa vďaka retryAfter skúsi znovu už o deň.
+        // markMetadata changes only the status and attempt time. The old description,
+        // poster, and grouping remain usable, while retryAfter retries FAILED in one day.
         repository.markMetadata(stored.requireId(), status);
     }
 

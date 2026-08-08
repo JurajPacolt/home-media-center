@@ -11,8 +11,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Beží proti skutočnému H2 a skutočnému Argon2 — práve hashovanie je to, čo tu má
- * zmysel overovať, mockovaný encoder by test zbavil obsahu.
+ * Runs against real H2 and Argon2 implementations because hashing is the behavior worth
+ * verifying here; a mocked encoder would make the test meaningless.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -24,7 +24,7 @@ class UserServiceTest {
     @Autowired
     private JdbcClient jdbc;
 
-    /** Kontext sa medzi testami zdieľa; {@code UserBootstrap} tu už založil admina. */
+    /** The context is shared between tests; {@code UserBootstrap} has already created the administrator. */
     @BeforeEach
     void clearUsers() {
         jdbc.sql("DELETE FROM auth_token").update();

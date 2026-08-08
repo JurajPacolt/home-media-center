@@ -1,16 +1,16 @@
 package org.javerlabd.homecenter.source;
 
 /**
- * V indexe aj v REST API sa cesty držia s lomkou dopredu a bez úvodného oddeľovača,
- * na Sambu sa prekladajú na spätné lomky. Vďaka tomu je v databáze aj v URL vždy
- * rovnaký tvar bez ohľadu na to, ako cestu vrátil server.
+ * Paths in the index and REST API use forward slashes without a leading separator and
+ * are converted to backslashes for Samba. This keeps the database and URL form consistent
+ * regardless of how the server returned the path.
  */
 public final class SmbPaths {
 
     private SmbPaths() {
     }
 
-    /** Zjednotí oddeľovače, odstráni prázdne segmenty a odmietne pokus o vyskočenie z koreňa. */
+    /** Normalizes separators, removes empty segments, and rejects attempts to escape the root. */
     public static String normalize(String path) {
         if (path == null || path.isBlank()) {
             return "";
@@ -44,7 +44,7 @@ public final class SmbPaths {
         return left + "/" + right;
     }
 
-    /** Tvar, ktorému rozumie SMB server. */
+    /** Form understood by the SMB server. */
     public static String toSmb(String path) {
         return normalize(path).replace('/', '\\');
     }

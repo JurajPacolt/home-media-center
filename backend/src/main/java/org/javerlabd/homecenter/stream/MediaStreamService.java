@@ -13,8 +13,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 /**
- * Preposiela súbory zo Samby klientovi. Klient sa na úložisko nikdy nepripája sám —
- * prihlasovacie údaje pozná výhradne server.
+ * Proxies Samba files to the client. The client never connects to storage directly;
+ * only the server knows the credentials.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,8 +25,8 @@ public class MediaStreamService {
     private final SmbGateway gateway;
 
     /**
-     * Dĺžka sa berie zo Samby, nie z indexu — súbor sa mohol od posledného skenu zmeniť
-     * a nesprávny Content-Length by prehrávaču rozbil pretáčanie.
+     * Length comes from Samba, not the index, because the file may have changed since the
+     * latest scan and an incorrect Content-Length would break player seeking.
      */
     public MediaStream open(long mediaId, @Nullable String rangeHeader) {
         MediaItem item = mediaService.require(mediaId);

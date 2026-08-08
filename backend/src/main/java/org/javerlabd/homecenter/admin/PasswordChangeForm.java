@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Zmena vlastného hesla. Staré heslo sa pýta preto, aby odídená relácia nestačila na jeho prepísanie. */
+/** Changes the current password. The old password prevents an unattended session from replacing it. */
 @Getter
 @Setter
 public class PasswordChangeForm {

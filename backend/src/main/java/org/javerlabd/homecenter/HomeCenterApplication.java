@@ -15,7 +15,7 @@ public class HomeCenterApplication {
 
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(HomeCenterApplication.class);
-        // Dátový priečinok musí existovať skôr, než sa otvorí SQLite datasource.
+        // The data directory must exist before the H2 data source is opened.
         application.addListeners((ApplicationListener<ApplicationEnvironmentPreparedEvent>) event ->
                 DataDirectory.ensureExists(event.getEnvironment()));
         application.run(args);

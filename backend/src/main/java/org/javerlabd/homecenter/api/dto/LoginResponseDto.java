@@ -5,8 +5,8 @@ import java.time.Instant;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Odpoveď na prihlásenie. Token si klient uloží a posiela ho v hlavičke
- * {@code Authorization: Bearer} — heslo ani PIN na televízore neostávajú.
+ * Login response. The client stores the token and sends it in the
+ * {@code Authorization: Bearer} header; neither the password nor PIN remains on the TV.
  */
 public record LoginResponseDto(
 

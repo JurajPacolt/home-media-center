@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Táto špecifikácia je zmluva medzi serverom a Android TV klientom — modely sa
- * medzi Javou a Kotlinom nezdieľajú, drží ich pohromade len OpenAPI.
+ * This specification is the contract between the server and Android TV client. Models
+ * are not shared between Java and Kotlin; OpenAPI is the only link between them.
  */
 @Configuration(proxyBeanMethods = false)
 public class OpenApiConfig {
 
-    /** Meno schémy, na ktoré sa odkazuje {@code @SecurityRequirement} v controlleroch. */
+    /** Name of the scheme referenced by {@code @SecurityRequirement} in controllers. */
     private static final String BEARER_SCHEME = "bearer";
 
     @Bean
@@ -39,7 +39,7 @@ public class OpenApiConfig {
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .description("Token z POST /api/v1/auth/login")))
-                // Predvolene platí pre všetky operácie; /auth/login si to prebíja sám.
+                // Applies to all operations by default; /auth/login overrides it.
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
     }
 }

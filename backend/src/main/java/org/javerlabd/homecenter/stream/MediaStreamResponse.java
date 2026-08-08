@@ -11,9 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Poskladanie HTTP odpovede zo streamu. Používa to REST API pre TV klienta aj náhľad
- * v management UI — obe cesty musia posielať rovnaké hlavičky, inak by sa pretáčanie
- * chovalo v prehliadači inak než na televízore.
+ * Assembles an HTTP response from a stream. Both the TV client's REST API and the
+ * management UI preview use this; both paths must send identical headers, or seeking
+ * would behave differently in the browser and on the TV.
  */
 public final class MediaStreamResponse {
 
@@ -21,29 +21,29 @@ public final class MediaStreamResponse {
     }
 
     /**
-     * Prehrávanie na mieste — prehliadač aj televízor si obsah vykreslia sami.
+     * Inline playback; the browser and TV render the content themselves.
      *
-     * @param headOnly pri HEAD sa telo neposiela — súbor zo Samby netreba čítať,
-     *                 len uvoľniť handle
+     * @param headOnly for HEAD, the body is not sent; the Samba file need not be read,
+     *                 only its handle released
      */
     public static ResponseEntity<Resource> of(MediaStream stream, boolean headOnly) {
         return build(stream, headOnly, ContentDisposition.inline());
     }
 
     /**
-     * To isté, ale s {@code attachment} — prehliadač súbor uloží namiesto toho, aby ho
-     * skúšal prehrať. Pre formáty, ktoré natívne nezvláda (mkv, avi, heic), je stiahnutie
-     * jediné, čo mu v management UI ostáva.
+     * The same response with {@code attachment}; the browser saves the file instead of
+     * attempting playback. For formats it does not support natively (mkv, avi, heic),
+     * downloading is the management UI's only remaining option.
      */
     public static ResponseEntity<Resource> ofDownload(MediaStream stream, boolean headOnly) {
         return build(stream, headOnly, ContentDisposition.attachment());
     }
 
     /**
-     * Prehliadač si musí smieť odpoveď odložiť do cache. Chrome stavia prehrávanie na
-     * multibufferi nad HTTP cache — s {@code no-store}, ktoré Spring Security pridáva
-     * do všetkých odpovedí, nedostane ani prvý blok a načítanie skončí na {@code stalled}.
-     * Obsah je súkromný, preto {@code private}.
+     * The browser must be allowed to cache the response. Chrome builds playback on multiple
+     * buffers over the HTTP cache; with the {@code no-store} that Spring Security adds to
+     * every response, it does not receive even the first block and loading ends at
+     * {@code stalled}. The content is private, hence {@code private}.
      */
     private static final String CACHE_CONTROL = "private, max-age=60";
 

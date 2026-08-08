@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import org.jspecify.annotations.Nullable;
 
-/** Jeden záznam v indexe. Vzniká skenom, REST API číta výhradne odtiaľto. */
+/** One index entry. It is created by a scan, and the REST API reads exclusively from here. */
 public record MediaItem(
         @Nullable Long id,
         long sourceId,

@@ -28,11 +28,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Každá stránka management UI sa musí naozaj vyrenderovať. Chyba v Thymeleaf šablóne
- * sa neprejaví pri kompilácii ani v service testoch — až päťstovkou v prehliadači.
+ * Every management UI page must render successfully. An error in a Thymeleaf template
+ * appears neither during compilation nor in service tests, only as a browser 500 response.
  *
- * <p>Dáta sú tu zámerne dva zdroje a položky z oboch: časť šablón sa pri jedinom zdroji
- * vetví inak (stĺpec „Zdroj“ a filter pribúdajú až od dvoch).
+ * <p>The data intentionally contains two sources and items from both: some templates
+ * branch differently for a single source (the "Source" column and filter appear only
+ * when two or more sources exist).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -106,8 +107,8 @@ class AdminPagesRenderTest {
     }
 
     /**
-     * Náhľad stojí na data-* atribútoch — bez kategórie a Content-Type by JavaScript
-     * nevedel, či má vložiť video, obrázok alebo zvuk.
+     * The preview relies on data-* attributes; without a category and Content-Type,
+     * JavaScript would not know whether to insert video, image, or audio.
      */
     @Test
     void kniznicaNesieUdajePreNahlad() throws Exception {

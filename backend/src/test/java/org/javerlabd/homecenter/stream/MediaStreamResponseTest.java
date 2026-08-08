@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 /**
- * Hlavičky odpovede. Rovnaký kód obsluhuje REST API pre televízor aj náhľad
- * v management UI, líšia sa len v Content-Disposition.
+ * Response headers. The same code serves the TV REST API and management UI preview;
+ * only Content-Disposition differs.
  */
 class MediaStreamResponseTest {
 
@@ -39,9 +39,9 @@ class MediaStreamResponseTest {
     }
 
     /**
-     * Médiá sa musia dať odložiť do cache prehliadača. Spring Security dáva do odpovedí
-     * {@code no-store}, čo prehrávaču zoberie multibuffer, na ktorom stojí pretáčanie —
-     * {@code SecurityConfig} ho preto na týchto adresách nepridáva a hlavička je táto.
+     * Media must be cacheable by the browser. Spring Security adds {@code no-store} to
+     * responses, removing the multiple buffers on which seeking relies. Therefore,
+     * {@code SecurityConfig} omits it for these addresses, and this header is used instead.
      */
     @Test
     void mediaNesuNoStoreAleSukromneCacheovatelne() {

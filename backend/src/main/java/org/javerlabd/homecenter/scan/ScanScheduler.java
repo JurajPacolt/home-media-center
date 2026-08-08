@@ -10,9 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Naplánovaný a štartovací sken nad všetkými zapnutými zdrojmi. Chýbajúci zdroj ani
- * nedostupná Samba nesmú zhodiť server — mediacentrum má bežať aj vtedy, keď je úložisko
- * práve vypnuté.
+ * Scheduled and startup scan across all enabled sources. A missing source or unavailable
+ * Samba must not bring down the server; the media center must run even while storage is offline.
  */
 @Component
 @Slf4j

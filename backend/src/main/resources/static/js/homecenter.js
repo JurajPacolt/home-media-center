@@ -1,7 +1,7 @@
 /*
- * Priebeh skenu sa dopĺňa z /admin/sken/stav, nie z /api/v1/**. Tamten reťazec je
- * bezstavový a prijíma len Bearer token od TV klienta — prehliadač so session by
- * dostal 401. Dáta aj DTO sú rovnaké, líši sa iba spôsob prihlásenia.
+ * Scan progress comes from /admin/sken/stav, not /api/v1/**. The latter chain is
+ * stateless and accepts only a Bearer token from the TV client; a browser session would
+ * receive 401. The data and DTO are identical; only authentication differs.
  */
 (function ($) {
     'use strict';
@@ -9,8 +9,8 @@
     var POLL_MS = 2000;
 
     /*
-     * Potvrdenie pred nezvratnou akciou. Text je v data-hc-confirm, nie v onsubmit —
-     * Thymeleaf 3.1 do on* atribútov premenné nepúšťa a sám odporúča data-*.
+     * Confirmation before an irreversible action. The text is in data-hc-confirm, not
+     * onsubmit; Thymeleaf 3.1 disallows variables in on* attributes and recommends data-*.
      */
     $(function () {
         $(document).on('submit', 'form[data-hc-confirm]', function () {
@@ -19,10 +19,9 @@
     });
 
     /*
-     * Náhľad média v knižnici. Video.js dáva natívnemu <video> jednotné ovládanie,
-     * fullscreen a Picture-in-Picture, dekódovanie však stále robí prehliadač.
-     * Nepodporovaný formát preto odmietneme ešte pred nastavením src, aby sa zo Samby
-     * nezačal zbytočne sťahovať súbor, ktorý nemá šancu prehrať.
+     * Library media preview. Video.js gives native <video> consistent controls, fullscreen,
+     * and Picture-in-Picture, but the browser still performs decoding. Reject unsupported
+     * formats before assigning src so Samba does not start downloading a file that cannot play.
      */
     $(function () {
         var okno = document.getElementById('hc-preview');
@@ -98,7 +97,7 @@
 
             audio.pause();
             audio.removeAttribute('src');
-            // Bez load() drží prehliadač otvorené spojenie na server.
+            // Without load(), the browser keeps its server connection open.
             audio.load();
             audio.hidden = true;
 
@@ -166,7 +165,7 @@
             bootstrap.Modal.getOrCreateInstance(okno).show();
         });
 
-        // MIME typ hovorí len o kontajneri. Nepodporovaný kodek sa prejaví až tu.
+        // The MIME type identifies only the container. An unsupported codec appears only here.
         videoPrehravac.on('error', function () {
             if (videoAktivne) {
                 videoAktivne = false;
@@ -205,7 +204,7 @@
 
                     if (run.status !== 'RUNNING') {
                         window.clearInterval(timer);
-                        // Dokončený sken zmenil počty v dlaždiciach — načítame stránku odznova.
+                        // A completed scan changed tile counts, so reload the page.
                         window.location.reload();
                     }
                 })

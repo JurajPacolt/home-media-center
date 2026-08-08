@@ -1,16 +1,16 @@
--- Viacero Samba zdrojov naraz.
+-- Multiple Samba sources at once.
 --
--- Schéma to uniesla už od V1 — `media_item.source_id` aj `scan_run.source_id` tam sú
--- a index `ux_media_item_path` je nad dvojicou (source_id, relative_path), takže rovnaká
--- cesta na dvoch zdrojoch je v poriadku. Chýbala len jednoznačnosť názvu: keď sa zdroje
--- vypisujú v zozname a vyberajú vo filtri, dva rovnako pomenované sú na nerozoznanie.
+-- The schema supported this from V1: both `media_item.source_id` and `scan_run.source_id`
+-- already exist, and `ux_media_item_path` covers (source_id, relative_path), so identical
+-- paths on two sources are valid. Only name uniqueness was missing: two identically named
+-- sources are indistinguishable when listed or selected in a filter.
 
--- Pozor: index je nad holým stĺpcom, nie nad LOWER(name) — H2 funkcionálne indexy nevie
--- (CREATE INDEX prijíma len názvy stĺpcov). Zhodu bez ohľadu na veľkosť písmen preto
--- kontroluje SmbSourceService dotazom cez LOWER(...); tento index je poistka proti
--- presnému duplikátu. Zápis do smb_source ide výhradne cez tú službu.
+-- Note: the index covers the plain column, not LOWER(name), because H2 does not support
+-- functional indexes (CREATE INDEX accepts only column names). SmbSourceService therefore
+-- checks case-insensitive matches through a LOWER(...) query; this index guards against an
+-- exact duplicate. Only that service writes to smb_source.
 CREATE UNIQUE INDEX ux_smb_source_name ON smb_source (name);
 
--- Dashboard aj knižnica sa pýtajú na počty a posledný sken po zdrojoch.
+-- The dashboard and library query counts and the latest scan by source.
 CREATE INDEX ix_media_item_source ON media_item (source_id, category);
 CREATE INDEX ix_scan_run_source ON scan_run (source_id, id);

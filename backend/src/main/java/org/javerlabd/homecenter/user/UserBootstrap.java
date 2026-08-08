@@ -8,12 +8,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Prvé spustenie: bez účtu by sa do management UI nedalo dostať vôbec, takže server
- * založí správcu {@code admin} s heslom {@code admin} a označí ho príznakom vynútenej
- * zmeny hesla — {@code PasswordChangeInterceptor} ho potom nikam inam nepustí.
+ * First launch: without an account, the management UI would be entirely inaccessible,
+ * so the server creates the {@code admin} administrator with the {@code admin} password
+ * and marks it for a forced password change. {@code PasswordChangeInterceptor} then
+ * blocks access to every other page.
  *
- * <p>Ide zámerne mimo {@link UserService#save(UserDraft)}: predvolené heslo je kratšie,
- * než by validácia pripustila, a to je v poriadku práve preto, že sa musí hneď zmeniť.
+ * <p>This intentionally bypasses {@link UserService#save(UserDraft)}: the default password
+ * is shorter than validation permits, which is acceptable precisely because it must be
+ * changed immediately.
  */
 @Component
 @RequiredArgsConstructor

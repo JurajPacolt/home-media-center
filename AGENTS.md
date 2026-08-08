@@ -1,191 +1,204 @@
 # AGENTS.md
 
-Pokyny pre AI agentov pracujúcich v tomto repozitári.
+Instructions for AI agents working in this repository.
 
-## O projekte
+## About the project
 
-Domáce mediacentrum: Spring Boot server, ktorý indexuje médiá zo Samba úložiska
-a streamuje ich do natívneho Android TV klienta. Server má popri REST API aj
-webové management UI. Do budúcna sa počíta s rozšírením o smart asistenta pre
-domácnosť — architektúra to má znášať, ale zatiaľ sa nerieši.
+Home media center: a Spring Boot server that indexes media from Samba storage
+and streams it to a native Android TV client. In addition to the REST API, the
+server also provides a web-based management UI. The project may be extended
+with a smart home assistant in the future—the architecture must accommodate
+this, but it is not being implemented yet.
 
-Dokumentácia je písaná po slovensky.
+The documentation is written in English.
 
-## Konvencia pre diagramy
+## Diagram convention
 
-Diagramy v dokumentácii kresli v **Mermaide** (` ```mermaid ` blok), nie ASCII
-artom. Týka sa to README, `doc/` aj akýchkoľvek ďalších `.md` súborov.
+Draw documentation diagrams in **Mermaid** (` ```mermaid ` blocks), not as ASCII
+art. This applies to the README, `doc/`, and any other `.md` files.
 
-## Stav a build
+## Status and build
 
-**Backend má funkčný skeleton** — index médií, sken Samby, filmové metadáta z TMDb,
-REST API, streamovanie s Range requestami, Thymeleaf UI a prihlasovanie so správou
-používateľov. **`frontend/` je stále prázdny**, Android TV klient sa ešte nezačal.
+**The backend has a functional skeleton**—media indexing, Samba scanning, TMDb
+movie metadata, a REST API, streaming with Range request support, a Thymeleaf UI,
+and authentication with user management. **`frontend/` is still empty**; work on
+the Android TV client has not started yet.
 
-Prvé spustenie založí správcu **`admin` / `admin`** a vynúti zmenu hesla.
+On first launch, the server creates the **`admin` / `admin`** administrator account
+and forces a password change.
 
-Build je **Maven** (nie Gradle) a vyžaduje **JDK 25**. Predvolené `JAVA_HOME`
-na stroji ukazuje na staršiu Javu, treba ho prepnúť:
+The build uses **Maven** (not Gradle) and requires **JDK 25**. The machine's default
+`JAVA_HOME` points to an older Java version, so it must be changed:
 
 ```powershell
 $env:JAVA_HOME = "d:\java\jdk-25"
 cd backend
 ```
 
-| Príkaz | Čo robí |
+| Command | What it does |
 |---|---|
-| `mvn test` | všetky testy |
-| `mvn "-Dtest=ByteRangeTest" test` | jeden testovací súbor |
-| `mvn "-Dtest=ByteRangeTest#uzavretyRozsah" test` | jeden test |
-| `mvn spring-boot:run` | spustí server na <http://localhost:8085/admin> |
-| `mvn package` | spustiteľný jar do `target/` |
+| `mvn test` | runs all tests |
+| `mvn "-Dtest=ByteRangeTest" test` | runs one test class |
+| `mvn "-Dtest=ByteRangeTest#uzavretyRozsah" test` | runs one test |
+| `mvn spring-boot:run` | starts the server at <http://localhost:8085/admin> |
+| `mvn package` | creates an executable JAR in `target/` |
 
-V PowerShelli musia byť `-D` parametre v úvodzovkách, inak si ich shell rozbije.
+In PowerShell, `-D` parameters must be quoted; otherwise, the shell breaks them
+apart.
 
-Server si pri štarte vytvorí `backend/data/homecenter.mv.db` (H2 index).
-Priečinok `data/` je v `.gitignore` a pokojne sa dá zmazať — vznikne odznova,
-prídeš len o index, ktorý sa doplní ďalším skenom.
+At startup, the server creates `backend/data/homecenter.mv.db` (the H2 index).
+The `data/` directory is in `.gitignore` and can safely be deleted—it will be
+recreated, and only the index is lost; the next scan will rebuild it.
 
-V projekte je **Lombok**. Ak sa po zmene v pom.xml zrazu „stratia" gettery
-alebo `log`, skontroluj `annotationProcessorPaths` v maven-compiler-plugine —
-od JDK 23 sa procesory na classpath nehľadajú samy.
+The project uses **Lombok**. If getters or `log` suddenly "disappear" after a
+change to `pom.xml`, check `annotationProcessorPaths` in the Maven Compiler
+Plugin—since JDK 23, processors are no longer discovered on the classpath
+automatically.
 
-## Rozhodnutia, ktoré sú uzavreté
+## Decisions that are closed
 
-Neotváraj ich znova a neponúkaj alternatívy, pokiaľ o to používateľ výslovne
-nepožiada:
+Do not reopen these decisions or suggest alternatives unless the user explicitly
+asks you to:
 
-| Vrstva | Voľba |
+| Layer | Choice |
 |---|---|
 | Server | **Java 25 (LTS) + Spring Boot 4.1** |
-| Management UI | **Thymeleaf + Bootstrap 5 + jQuery**, grafy cez **Chart.js** |
-| Klient | **Android TV appka v Kotline** (Compose for TV, Media3) |
-| Prihlasovanie | **Argon2id** na heslá aj PINy, **Bearer token** pre klienta |
+| Management UI | **Thymeleaf + Bootstrap 5 + jQuery**, charts with **Chart.js** |
+| Client | **Android TV app in Kotlin** (Compose for TV, Media3) |
+| Authentication | **Argon2id** for passwords and PINs, **Bearer token** for the client |
 
-Zvážené a **zamietnuté**: Python + FastAPI, Kotlin na serveri, postaviť projekt
-na Jellyfine.
+Considered and **rejected**: Python + FastAPI, Kotlin on the server, and basing the
+project on Jellyfin.
 
-Odôvodnenie a zoznam knižníc: [doc/rozhodnutia.md](doc/rozhodnutia.md).
-Ten súbor je zdroj pravdy — pri ďalších rozhodnutiach ho aktualizuj.
+For the rationale and library list, see
+[doc/implementation-plan.md](doc/implementation-plan.md). That file is the source
+of truth—update it when making further decisions.
 
-## Architektonické obmedzenia
+## Architectural constraints
 
-Toto sú pravidlá, ktoré nie sú viditeľné z jedného súboru:
+These rules are not apparent from any single source file:
 
-1. **Server je jediný držiteľ SMB credentials.** Klient nikdy nesiaha na Sambu
-   priamo. Server súbory proxuje cez HTTP a **musí** podporovať Range requesty —
-   bez nich nefunguje pretáčanie vo videu.
+1. **The server is the sole holder of the SMB credentials.** The client never
+   accesses Samba directly. The server proxies files over HTTP and **must** support
+   Range requests—video seeking does not work without them.
 
-2. **Blokujúce IO je zámer, nie nedostatok.** smbj je blokujúce API a beží pod
-   virtuálnymi vláknami (`spring.threads.virtual.enabled=true`). Neprepisuj
-   streamovanie na reaktívny model ani nezavádzaj WebFlux — voľba Javy 25 stojí
-   práve na tomto.
+2. **Blocking I/O is intentional, not a flaw.** smbj is a blocking API and runs on
+   virtual threads (`spring.threads.virtual.enabled=true`). Do not rewrite streaming
+   as a reactive model or introduce WebFlux—the choice of Java 25 relies on this
+   design.
 
-   Čítanie na pozíciu robí `com.hierynomus.smbj.share.File`:
+   Positional reads use `com.hierynomus.smbj.share.File`:
    `read(byte[] buffer, long fileOffset, int bufferOffset, int length)`.
-   `SmbRandomAccessFile` je trieda **jcifs-ng**, nie smbj — nehľadaj ju tu.
+   `SmbRandomAccessFile` is a **jcifs-ng** class, not an smbj class—do not look for
+   it here.
 
-3. **Index-first.** Samba sa neskenuje pri obsluhe requestu. REST API číta
-   z H2 indexu; sken beží na pozadí naplánovane a dá sa spustiť manuálne.
-   Skenovanie v request ceste je regresia.
+3. **Index first.** Samba is not scanned while handling requests. The REST API
+   reads from the H2 index; scanning runs in the background on a schedule and can
+   also be triggered manually. Scanning in the request path is a regression.
 
-   **Zdrojov môže byť nastavených viac.** Nikdy nepredpokladaj „ten jeden“ —
-   každá položka indexu vie svoj `source_id` a podľa neho sa aj streamuje.
-   Sken ich prechádza **za sebou v jednej úlohe** a každý dostane vlastný riadok
-   v `scan_run`; nedostupný zdroj sa označí `FAILED` a pokračuje sa ďalším.
+   **Multiple sources can be configured.** Never assume there is "the one" source—
+   every indexed item carries its `source_id` and is streamed from that source.
+   A scan processes sources **sequentially in a single task**, and each source gets
+   its own row in `scan_run`; an unavailable source is marked `FAILED`, and the scan
+   continues with the next source.
 
-4. **Žiadne transkódovanie, kým to konkrétny súbor nevynúti.** Východisko je
-   direct play — server súbor len preposiela. FFmpeg sa nasadzuje až na
-   preukázateľne nekompatibilný obsah.
+4. **No transcoding until a specific file proves it necessary.** Direct play is
+   the default—the server only forwards the file. FFmpeg is introduced only for
+   demonstrably incompatible content.
 
-   Náhľad v management UI to rešpektuje: čo prehliadač natívne nezvládne
-   (`mkv`, `avi`, `wmv`, `heic`, `wma`), sa ani nezačne sťahovať — ukáže sa hláška
-   a odkaz na stiahnutie. **Nezamieňaj to s tým, čo zvládne televízor** —
-   Media3/ExoPlayer `mkv` aj `avi` prehrá bez problémov.
+   The management UI preview follows this rule: content the browser cannot handle
+   natively (`mkv`, `avi`, `wmv`, `heic`, `wma`) is not downloaded at all—a message
+   and a download link are shown instead. **Do not confuse this with what the TV
+   can handle**—Media3/ExoPlayer plays both `mkv` and `avi` without problems.
 
-   Odpovede so súbormi tiež **nesmú mať `Cache-Control: no-store`**, ktoré Spring
-   Security pridáva všade inde. Chrome stavia prehrávanie na multibufferi nad HTTP
-   cache a bez cache mu prestane fungovať pretáčanie. Rieši to výnimka
-   v `SecurityConfig` a vlastná hlavička v `MediaStreamResponse`.
+   File responses also **must not include `Cache-Control: no-store`**, which Spring
+   Security adds everywhere else. Chrome builds playback on multiple buffers over
+   the HTTP cache, and seeking stops working without that cache. An exception in
+   `SecurityConfig` and a custom header in `MediaStreamResponse` handle this.
 
-5. **Thymeleaf a REST sú dve tenké vrstvy nad spoločnou service vrstvou.**
-   Admin controllery vracajú HTML, API controllery JSON. Logika skenovania,
-   indexácie a práce so Sambou patrí do služieb, nie do controllerov — inak sa
-   začne duplikovať medzi UI a API.
+5. **Thymeleaf and REST are two thin layers over a shared service layer.** Admin
+   controllers return HTML, and API controllers return JSON. Scanning, indexing,
+   and Samba access logic belongs in services, not controllers; otherwise, it will
+   be duplicated between the UI and API.
 
-6. **Kontrakt medzi serverom a klientom drží OpenAPI spec** (springdoc). Server
-   je Java, klient Kotlin, modely sa nezdieľajú. Neprepisuj DTO ručne na oboch
-   stranách.
+6. **The OpenAPI specification is the contract between server and client**
+   (springdoc). The server uses Java, the client uses Kotlin, and models are not
+   shared. Do not manually duplicate DTOs on both sides.
 
-7. **Schéma sa mení iba cez Flyway migrácie.** `V1__init.sql` nesie základnú
-   štruktúru a dátový model a **už sa needituje** — každá ďalšia zmena je nový
-   skript `V2__…`, `V3__…`. Prepísanie existujúcej migrácie rozbije checksum
-   na každom nasadení, kde už raz zbehla.
+7. **The schema changes only through Flyway migrations.** `V1__init.sql` contains
+   the base structure and data model and **must no longer be edited**—every further
+   change is a new `V2__…`, `V3__…` script. Rewriting an existing migration breaks
+   its checksum on every deployment where it has already run.
 
-8. **Frontend knižnice management UI sa servírujú lokálne cez WebJars.**
-   Žiadne `<script src="https://cdn...">` — server beží v domácej sieti a UI
-   musí fungovať bez internetu. Do management UI nezavádzaj build krok
-   (npm, bundler) ani SPA framework; Thymeleaf renderuje HTML na serveri
-   a jQuery ho dopĺňa.
+8. **Management UI frontend libraries are served locally through WebJars.** Do not
+   use `<script src="https://cdn...">`—the server runs on a home network, and the UI
+   must work without internet access. Do not introduce a build step (npm, bundler)
+   or an SPA framework into the management UI; Thymeleaf renders HTML on the server,
+   and jQuery enhances it.
 
-9. **Prihlasovanie má dva oddelené filter chainy a nesmú sa zliať.**
-   `/api/v1/**` je bezstavové, berie výhradne `Authorization: Bearer` a má
-   vypnuté CSRF. Všetko ostatné je session s formulárom, CSRF a rolou `ADMIN`.
-   Keby session platila aj na API, cudzia stránka by vedela prehliadaču
-   prihláseného správcu podstrčiť POST.
+9. **Authentication has two separate filter chains, and they must not be merged.**
+   `/api/v1/**` is stateless, accepts only `Authorization: Bearer`, and has CSRF
+   disabled. Everything else uses a form-based session with CSRF and the `ADMIN`
+   role. If the session also applied to the API, a malicious site could make a
+   logged-in administrator's browser submit a POST request.
 
-   Preto **management UI nesmie volať `/api/v1/**` z prehliadača.** Keď treba
-   v UI dáta, ktoré už API vracia, pridaj tenký endpoint pod `/admin/**`, ktorý
-   volá tú istú službu a vracia to isté DTO — tak to robí `/admin/sken/stav`
-   aj `/admin/kniznica/{id}/stream`.
+   Therefore, **the management UI must not call `/api/v1/**` from the browser.**
+   When the UI needs data already returned by the API, add a thin endpoint under
+   `/admin/**` that calls the same service and returns the same DTO—this is how
+   `/admin/sken/stav` and `/admin/kniznica/{id}/stream` work.
 
-10. **Heslá aj PINy idú cez Argon2id**, nikdy sa neukladajú otvorene a nikdy sa
-    nezobrazujú späť. **PIN platí výhradne na REST API** — do management UI sa
-    vyžaduje plné heslo. Token Android klienta je v databáze ako SHA-256; tam je
-    Argon2 zámerne nesprávna voľba (overuje sa pri každom requeste).
+10. **Passwords and PINs use Argon2id**; they are never stored in plaintext and
+    never displayed again. **The PIN is valid only for the REST API**—the management
+    UI requires the full password. The Android client token is stored in the
+    database as SHA-256; Argon2 is intentionally the wrong choice there because the
+    token is verified on every request.
 
-    `Argon2PasswordEncoder` potrebuje **BouncyCastle**, ktorý Boot BOM nespravuje —
-    verzia `bcprov-jdk18on` je pripnutá v `pom.xml`. Chýbajúca sa prejaví až za behu.
+    `Argon2PasswordEncoder` requires **BouncyCastle**, which is not managed by the
+    Boot BOM—the `bcprov-jdk18on` version is pinned in `pom.xml`. If it is missing,
+    the failure appears only at runtime.
 
-## Štruktúra
+## Structure
 
 ```
-backend/    Spring Boot server — REST API, Thymeleaf UI, SMB, indexácia
-frontend/   Android TV aplikácia (Kotlin) — zatiaľ prázdne
-doc/        zadanie a technologické rozhodnutia
+backend/    Spring Boot server—REST API, Thymeleaf UI, SMB, indexing
+frontend/   Android TV application (Kotlin)—currently empty
+doc/        assignment and technology decisions
 ```
 
-Thymeleaf šablóny patria do `backend/src/main/resources/templates`, **nie** do
-`frontend/`. Priečinok `frontend/` je vyhradený pre Android TV klienta.
+Thymeleaf templates belong in `backend/src/main/resources/templates`, **not** in
+`frontend/`. The `frontend/` directory is reserved for the Android TV client.
 
-Základný package je `org.javerlabd.homecenter`. Balíky sú delené podľa
-zodpovednosti, nie podľa vrstiev:
+The base package is `org.javerlabd.homecenter`. Packages are organized by
+responsibility, not by layer:
 
-| Balík | Čo tam patrí |
+| Package | Contents |
 |---|---|
-| `config` | `@ConfigurationProperties`, OpenAPI, MVC a Spring Security konfigurácia |
-| `source` | Samba: pripojenie (`SmbGateway`), nastavenie zdroja, cesty |
-| `media` | index médií — doména, repository, čítacia service, klasifikácia prípon |
-| `metadata` | parser názvov, TMDb klient, obohatenie indexu a lokálna cache plagátov |
-| `scan` | prechod Samby a údržba indexu, história skenov |
-| `stream` | Range logika, čítanie súboru zo Samby do HTTP odpovede |
-| `user` | účty: doména, repository, roly, hashovanie hesiel a PINov |
-| `auth` | prihlasovanie: tokeny klienta, `UserDetailsService`, Bearer filter |
-| `api` | REST controllery a DTO (JSON) |
-| `admin` | Thymeleaf controllery a formuláre (HTML) |
+| `config` | `@ConfigurationProperties`, OpenAPI, MVC, and Spring Security configuration |
+| `source` | Samba: connection (`SmbGateway`), source configuration, paths |
+| `media` | media index—domain, repository, read service, extension classification |
+| `metadata` | filename parser, TMDb client, index enrichment, and local poster cache |
+| `scan` | Samba traversal and index maintenance, scan history |
+| `stream` | Range logic, reading files from Samba into HTTP responses |
+| `user` | accounts: domain, repository, roles, password and PIN hashing |
+| `auth` | authentication: client tokens, `UserDetailsService`, Bearer filter |
+| `api` | REST controllers and DTOs (JSON) |
+| `admin` | Thymeleaf controllers and forms (HTML) |
 
-`api` a `admin` sú tenké — obe stoja nad rovnakými službami z `media`, `scan`
-a `source`. Keď pribúda logika, patrí do služby, nie do controllera.
+`api` and `admin` are thin—both rely on the same services from `media`, `scan`,
+and `source`. When logic is added, it belongs in a service, not a controller.
 
-`auth` závisí na `user`, nikdy nie naopak. Keď potrebuje `user` niečo oznámiť
-smerom k tokenom (napr. že sa zmenilo heslo a treba odhlásiť televízory), ide to
-udalosťou — `UserCredentialsChangedEvent`. Priame volanie by uzavrelo kruh.
+`auth` depends on `user`, never the other way around. When `user` needs to notify
+the token side about something (for example, a password change requiring all TVs
+to be logged out), it uses an event—`UserCredentialsChangedEvent`. A direct call
+would create a circular dependency.
 
-## UX pravidlo
+## UX rule
 
-Cieľová skupina je bežný používateľ s diaľkovým ovládačom. Na TV ostávajú tri
-dlaždice — **Videá / Fotky / Hudba**. Konfigurácia (SMB zdroj, credentials,
-správa používateľov, spustenie skenu) patrí výhradne do Thymeleaf UI v prehliadači.
+The target audience is an ordinary user with a remote control. The TV retains
+three tiles—**Videos / Photos / Music**. Configuration (SMB sources, credentials,
+user management, and starting a scan) belongs exclusively in the browser-based
+Thymeleaf UI.
 
-Z toho istého dôvodu existuje PIN: heslo sa D-padom píše zle, štyri číslice sa
-zvládnu. Preto PIN otvára televízor, nie správu servera.
+The PIN exists for the same reason: entering a password with a D-pad is awkward,
+while four digits are manageable. The PIN therefore unlocks the TV, not server
+management.

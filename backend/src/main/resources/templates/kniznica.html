@@ -99,9 +99,9 @@
                 <td class="text-end" th:text="${@humanFormat.size(item.sizeBytes())}">—</td>
                 <td class="text-end small" th:text="${@humanFormat.dateTime(item.modifiedAt())}">—</td>
                 <td class="text-end">
-                    <!-- Všetko, čo náhľad potrebuje, ide cez data-* — obsah sa do
-                         prehrávača vkladá až po kliknutí, aby sa stovka položiek
-                         nezačala sťahovať naraz. -->
+                    <!-- Everything needed by the preview is passed through data-*; content is
+                         inserted into the player only after a click so hundreds of items do not
+                         begin downloading at once. -->
                     <button type="button" class="btn btn-sm btn-outline-secondary"
                             data-hc-preview
                             th:data-hc-id="${item.requireId()}"
@@ -147,9 +147,9 @@
         </ul>
     </nav>
 
-    <!-- Náhľad média. Jedno okno pre celú tabuľku; homecenter.js podľa kategórie
-         aktivuje správny prvok a pri zatvorení ho zase vyprázdni, aby prenos zo Samby
-         nebežal ďalej na pozadí. -->
+    <!-- Media preview. One dialog serves the entire table; homecenter.js activates the
+         correct element by category and clears it on close so the Samba transfer does
+         not continue in the background. -->
     <div class="modal fade" id="hc-preview" tabindex="-1" aria-hidden="true"
          aria-labelledby="hc-preview-title">
         <div class="modal-dialog modal-lg modal-dialog-centered">

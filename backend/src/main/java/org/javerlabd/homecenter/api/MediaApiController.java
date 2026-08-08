@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
-/** Čítanie knižnice pre Android TV klienta. Všetko ide z indexu, Samba sa tu nedotýka. */
+/** Reads the library for the Android TV client. Everything comes from the index; Samba is not accessed here. */
 @RestController
 @RequestMapping("/api/v1")
 @Tag(name = "Knižnica", description = "Prehľad a výpis indexovaných médií")

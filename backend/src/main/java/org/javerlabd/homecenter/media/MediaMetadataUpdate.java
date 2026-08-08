@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-/** Úspešne rozpoznané video pripravené na zápis do indexu. */
+/** Successfully identified video ready to be written to the index. */
 public record MediaMetadataUpdate(
         String title,
         VideoKind kind,

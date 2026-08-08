@@ -7,9 +7,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Načítanie účtu pre prihlásenie do management UI. PIN sa tadiaľto nedostane —
- * {@code DaoAuthenticationProvider} porovnáva výhradne hash hesla. PIN je vyhradený
- * pre REST API a rieši ho {@code AuthApiController}.
+ * Loads an account for management UI login. A PIN never passes through here;
+ * {@code DaoAuthenticationProvider} compares only the password hash. PIN handling is
+ * reserved for the REST API and performed by {@code AuthApiController}.
  */
 @Service
 @RequiredArgsConstructor

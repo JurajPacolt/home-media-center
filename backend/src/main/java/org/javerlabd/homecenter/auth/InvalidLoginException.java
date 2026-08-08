@@ -1,11 +1,12 @@
 package org.javerlabd.homecenter.auth;
 
 /**
- * Nesprávne meno, heslo alebo PIN — prípadne vypnutý účet. Správa je zámerne jedna
- * pre všetky prípady, aby sa z odpovede nedalo zistiť, ktoré mená v systéme existujú.
+ * Incorrect username, password, or PIN, or a disabled account. A single message is used
+ * intentionally for all cases so the response cannot reveal which usernames exist.
  *
- * <p>Nededí od {@code AuthenticationException} úmyselne: tú by odchytil
- * {@code ExceptionTranslationFilter} a nahradil prázdnou 401 bez vysvetlenia.
+ * <p>It intentionally does not extend {@code AuthenticationException}, which would be
+ * caught by {@code ExceptionTranslationFilter} and replaced with an empty, unexplained
+ * 401 response.
  */
 public class InvalidLoginException extends RuntimeException {
 

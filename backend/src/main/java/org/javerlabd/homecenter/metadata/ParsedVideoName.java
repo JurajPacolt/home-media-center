@@ -4,7 +4,7 @@ import org.javerlabd.homecenter.media.MediaStructure;
 import org.javerlabd.homecenter.media.VideoKind;
 import org.jspecify.annotations.Nullable;
 
-/** Informácie bezpečne vyčítateľné z názvu a cesty bez otvorenia videosúboru. */
+/** Information safely derived from the name and path without opening the video file. */
 public record ParsedVideoName(
         String queryTitle,
         @Nullable Integer year,

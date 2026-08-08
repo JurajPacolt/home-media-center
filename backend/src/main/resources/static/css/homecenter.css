@@ -25,8 +25,8 @@
     display: none;
 }
 
-/* Náhľad média: video aj fotka sa zmestia do okna bez pretečenia, nech je súbor
-   akokoľvek veľký. Pozadie je len pod samotným prehrávačom, nie pod hláškou. */
+/* Media preview: video and photos fit within the dialog without overflowing, regardless
+   of file size. The background appears only behind the player, not behind messages. */
 .hc-preview-body {
     min-height: 6rem;
     display: flex;
@@ -42,8 +42,8 @@
     background-color: #000;
 }
 
-/* Video.js má vlastný vnútorný obal. Rozmer preto riadi jeho kontajner, nie
-   pôvodný <video> element, ktorý po inicializácii už nie je koreňom prehrávača. */
+/* Video.js has its own inner wrapper, so its container controls dimensions rather than
+   the original <video> element, which is no longer the player root after initialization. */
 .hc-preview-video {
     width: 100%;
     max-height: 70vh;
@@ -102,7 +102,7 @@
     height: auto;
 }
 
-/* Prihlasovacia stránka nemá navigáciu, formulár preto sadá do stredu okna. */
+/* The login page has no navigation, so the form is centered in the viewport. */
 .hc-login {
     display: flex;
     align-items: center;

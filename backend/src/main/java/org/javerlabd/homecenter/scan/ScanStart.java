@@ -3,11 +3,11 @@ package org.javerlabd.homecenter.scan;
 import java.util.List;
 
 /**
- * Čo sa práve postavilo do radu. Riadky v {@code scan_run} tu ešte neexistujú — vznikajú
- * až vtedy, keď na zdroj príde rad, aby „posledný sken“ v UI ukazoval ten, ktorý naozaj
- * beží, a nie ten, ktorý sa ešte nezačal.
+ * Describes what was just queued. Rows in {@code scan_run} do not exist yet; they are
+ * created only when a source's turn begins so the UI's "latest scan" shows the one
+ * actually running rather than one that has not started.
  *
- * @param sources názvy zdrojov v poradí, v akom sa budú prechádzať
+ * @param sources source names in traversal order
  */
 public record ScanStart(List<String> sources) {
 

@@ -38,7 +38,7 @@ public class UserRepository {
                 .optional();
     }
 
-    /** Meno je v databáze vždy malými písmenami — normalizuje ho {@link UserService}. */
+    /** The username is always lowercase in the database, normalized by {@link UserService}. */
     public Optional<AppUser> findByUsername(String username) {
         return jdbc.sql("SELECT " + COLUMNS + " FROM app_user WHERE username = :username")
                 .param("username", username)
@@ -54,7 +54,7 @@ public class UserRepository {
         return jdbc.sql("SELECT COUNT(*) FROM app_user").query(Long.class).single();
     }
 
-    /** Koľko zapnutých správcov ostane, keď sa vynechá jeden konkrétny účet. */
+    /** Number of enabled administrators remaining when one specific account is excluded. */
     public long countOtherEnabledAdmins(long excludedId) {
         return jdbc.sql("""
                 SELECT COUNT(*) FROM app_user

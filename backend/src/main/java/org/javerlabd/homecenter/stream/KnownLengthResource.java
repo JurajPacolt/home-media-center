@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.AbstractResource;
 
 /**
- * Resource nad už otvoreným streamom, ktorého dĺžku poznáme vopred.
- * {@code InputStreamResource} by ju zisťoval prečítaním celého obsahu — pri filme
- * zo Samby by to znamenalo stiahnuť ho dvakrát.
+ * Resource over an already open stream whose length is known in advance.
+ * {@code InputStreamResource} would determine it by reading all content, which would
+ * download a Samba movie twice.
  */
 @Slf4j
 public final class KnownLengthResource extends AbstractResource implements Closeable {
@@ -60,7 +60,7 @@ public final class KnownLengthResource extends AbstractResource implements Close
         return stream;
     }
 
-    /** Uvoľní zdroj, ak sa telo odpovede nakoniec neposielalo — napríklad pri HEAD. */
+    /** Releases the resource if the response body was not sent, for example on HEAD. */
     @Override
     public synchronized void close() {
         if (consumed) {

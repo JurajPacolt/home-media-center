@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-/** Prehliadanie indexu — kontrola, čo sken naozaj našiel. */
+/** Browses the index to verify what the scan actually found. */
 @Controller
 @RequestMapping("/admin/kniznica")
 @RequiredArgsConstructor
@@ -58,7 +58,7 @@ public class LibraryAdminController {
         model.addAttribute("selectedSourceId", sourceId);
         model.addAttribute("genres", mediaService.genres());
         model.addAttribute("selectedGenreId", genreId);
-        // Jeden dotaz namiesto vyhľadávania zdroja ku každému riadku.
+        // One query instead of looking up the source for every row.
         model.addAttribute("sourceNames", sourceService.namesById());
         model.addAttribute("search", search);
         model.addAttribute("total", total);
@@ -68,13 +68,13 @@ public class LibraryAdminController {
     }
 
     /**
-     * Náhľad priamo z management UI — z tejto adresy sa plní {@code <video>},
-     * {@code <img>} aj {@code <audio>} v okne náhľadu.
+     * Preview directly from the management UI. This address supplies the {@code <video>},
+     * {@code <img>}, and {@code <audio>} elements in the preview dialog.
      *
-     * <p>Vlastnú adresu má preto, že {@code /api/v1/**} prijíma len Bearer token od TV
-     * klienta — prehliadač so session by dostal 401. Odpoveď skladá rovnaký
-     * {@link MediaStreamResponse} ako REST API vrátane Range hlavičiek, takže sa
-     * pretáčanie vo videu chová rovnako.
+     * <p>It has a dedicated address because {@code /api/v1/**} accepts only a Bearer token
+     * from the TV client; a browser session would receive 401. The response uses the same
+     * {@link MediaStreamResponse} as the REST API, including Range headers, so video seeking
+     * behaves identically.
      */
     @GetMapping("/{id}/stream")
     @ResponseBody
@@ -89,8 +89,8 @@ public class LibraryAdminController {
     }
 
     /**
-     * Ten istý súbor, ale na uloženie. Náhľad naň odkazuje pri formátoch, ktoré
-     * prehliadač natívne neprehrá — server ich zámerne netranskóduje.
+     * The same file, but as a download. The preview links to it for formats the browser
+     * cannot play natively; the server intentionally does not transcode them.
      */
     @GetMapping("/{id}/stiahnut")
     @ResponseBody

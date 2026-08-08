@@ -10,8 +10,8 @@ import org.javerlabd.homecenter.config.HomeCenterProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Zaradí súbor do kategórie podľa prípony a určí Content-Type. Typ sa nezisťuje
- * čítaním obsahu — sken by inak musel siahnuť na každý súbor na Sambe.
+ * Classifies a file by extension and determines its Content-Type. The type is not
+ * detected by reading content, which would require the scan to access every Samba file.
  */
 @Component
 public class MediaClassifier {
@@ -73,7 +73,7 @@ public class MediaClassifier {
         }
     }
 
-    /** Prázdny výsledok znamená, že súbor do knižnice nepatrí a sken ho preskočí. */
+    /** An empty result means the file does not belong in the library and is skipped. */
     public Optional<MediaCategory> categoryOf(String fileName) {
         return Optional.ofNullable(categoriesByExtension.get(extensionOf(fileName)));
     }
@@ -91,8 +91,8 @@ public class MediaClassifier {
     }
 
     /**
-     * Základný názov na zobrazenie pred obohatením. Zámerne len uprace
-     * oddeľovače; rok a release značky spracúva následne {@code MediaNameParser}.
+     * Basic display name before enrichment. This intentionally cleans up only separators;
+     * {@code MediaNameParser} subsequently processes the year and release tags.
      */
     public static String titleOf(String fileName) {
         int dot = fileName.lastIndexOf('.');

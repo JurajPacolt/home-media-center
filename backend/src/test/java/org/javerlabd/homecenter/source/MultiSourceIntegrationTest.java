@@ -20,8 +20,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Súbeh viacerých Samba zdrojov nad jedným indexom. Kľúčové je, že položky ostávajú
- * viazané na svoj zdroj — inak by sa pri streamovaní siahalo na nesprávny NAS.
+ * Multiple Samba sources sharing one index. Items must remain associated with their source;
+ * otherwise, streaming would access the wrong NAS.
  */
 @SpringBootTest
 @ActiveProfiles("test")

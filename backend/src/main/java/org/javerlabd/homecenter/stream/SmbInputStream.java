@@ -6,8 +6,8 @@ import java.util.Objects;
 import org.javerlabd.homecenter.source.SmbReadHandle;
 
 /**
- * Číta presne vymedzené okno súboru na Sambe. Čítanie ide priamo na pozíciu, takže
- * pretáčanie na koniec filmu nestojí prenos celého súboru.
+ * Reads a precisely bounded window of a Samba file. Reads go directly to the position,
+ * so seeking to the end of a movie does not transfer the entire file.
  */
 final class SmbInputStream extends InputStream {
 
@@ -46,7 +46,7 @@ final class SmbInputStream extends InputStream {
         return read;
     }
 
-    /** Preskočenie je len posun pozície — žiadne bajty sa cez sieť neťahajú. */
+    /** Skipping only moves the position; no bytes are transferred over the network. */
     @Override
     public long skip(long count) {
         if (count <= 0) {

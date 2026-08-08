@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.scan;
 
-/** Naraz beží najviac jeden sken — dva by si v indexe navzájom mazali položky. */
+/** At most one scan runs at a time; two scans would delete each other's index entries. */
 public class ScanAlreadyRunningException extends RuntimeException {
 
     public ScanAlreadyRunningException() {

@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.media;
 
-/** V indexe nie je položka s daným id. */
+/** The index contains no item with the given ID. */
 public class MediaNotFoundException extends RuntimeException {
 
     public MediaNotFoundException(long id) {

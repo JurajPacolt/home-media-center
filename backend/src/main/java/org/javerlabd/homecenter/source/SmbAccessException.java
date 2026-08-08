@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.source;
 
-/** Samba je nedostupná alebo odmietla operáciu. */
+/** Samba is unavailable or rejected an operation. */
 public class SmbAccessException extends RuntimeException {
 
     public SmbAccessException(String message, Throwable cause) {

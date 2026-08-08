@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Spoločná vrstva nad Samba zdrojmi pre management UI aj REST API — controllery
- * si sem nesmú nič duplikovať.
+ * Shared Samba source layer for the management UI and REST API. Controllers must not
+ * duplicate its logic.
  *
- * <p>Zdrojov môže byť viac naraz. Každá položka indexu vie, z ktorého pochádza
- * ({@code media_item.source_id}), takže streamovanie aj sken pracujú vždy s konkrétnym
- * zdrojom, nie s „tým jedným“.
+ * <p>Multiple sources may exist simultaneously. Every index item records its source
+ * ({@code media_item.source_id}), so streaming and scanning always operate on a specific
+ * source rather than assuming "the one" source.
  */
 @Service
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class SmbSourceService {
         return repository.findAll();
     }
 
-    /** Zdroje, ktoré sa majú skenovať. Prázdny zoznam znamená, že nie je čo indexovať. */
+    /** Sources to scan. An empty list means there is nothing to index. */
     public List<SmbSource> findAllEnabled() {
         return repository.findAllEnabled();
     }
@@ -40,13 +40,13 @@ public class SmbSourceService {
         return repository.findById(id);
     }
 
-    /** Zdroj, ku ktorému patrí konkrétna položka indexu. */
+    /** Source to which a specific index item belongs. */
     public SmbSource require(long id) {
         return repository.findById(id).orElseThrow(() -> new NoActiveSourceException(
                 "Zdroj s id " + id + " už neexistuje"));
     }
 
-    /** Aspoň jeden zapnutý zdroj — bez neho sa sken nemá o čo oprieť. */
+    /** At least one enabled source, which is required for scanning. */
     public List<SmbSource> requireEnabled() {
         List<SmbSource> enabled = repository.findAllEnabled();
         if (enabled.isEmpty()) {
@@ -59,7 +59,7 @@ public class SmbSourceService {
         return repository.count() == 0;
     }
 
-    /** Názvy zdrojov pre zobrazenie pri položkách knižnice — jeden dotaz namiesto N. */
+    /** Source names displayed with library items, retrieved with one query instead of N. */
     public Map<Long, String> namesById() {
         return repository.findAll().stream()
                 .collect(Collectors.toMap(SmbSource::requireId, SmbSource::name));
@@ -71,8 +71,8 @@ public class SmbSourceService {
     }
 
     /**
-     * Ak sa v hesle príde prázdna hodnota, ostáva pôvodné — management UI heslo
-     * nikdy nezobrazuje, takže prázdne pole znamená „nemeniť“, nie „zmazať“.
+     * If an empty password is submitted, the existing value remains. The management UI
+     * never displays the password, so an empty field means "do not change," not "delete."
      */
     @Transactional
     public SmbSource save(SmbSource source) {
@@ -89,14 +89,14 @@ public class SmbSourceService {
         return saved;
     }
 
-    /** Skúšobné pripojenie z management UI — funguje aj pred prvým uložením zdroja. */
+    /** Test connection from the management UI, available before the source is first stored. */
     public void verify(SmbSource source) {
         gateway.verify(normalize(withStoredPasswordIfBlank(source)));
     }
 
     /**
-     * Zmazanie zdroja vyhodí z indexu aj všetky jeho položky — stará sa o to
-     * {@code ON DELETE CASCADE} v schéme.
+     * Deleting a source also removes all its index items through the schema's
+     * {@code ON DELETE CASCADE}.
      */
     @Transactional
     public void delete(long id) {

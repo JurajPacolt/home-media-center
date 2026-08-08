@@ -27,21 +27,23 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;
 
 /**
- * Prechádza Sambu a udržiava index. Beží výhradne na pozadí — v ceste HTTP requestu
- * sa skenovať nesmie, REST API číta len hotový index.
+ * Traverses Samba and maintains the index. It runs exclusively in the background;
+ * scanning must not occur in the HTTP request path, and the REST API reads only the
+ * completed index.
  *
- * <p>Zdrojov môže byť viac. Prechádzajú sa <b>za sebou v jednej úlohe</b>, nie paralelne:
- * domáci NAS nemá dôvod obsluhovať niekoľko súbežných prechodov a sekvenčný priebeh
- * sa dá v UI zmysluplne zobraziť. Každý zdroj dostane vlastný riadok v {@code scan_run},
- * takže sa počítadlá aj prípadná chyba viažu na konkrétny zdroj.
+ * <p>Multiple sources are supported. They are processed <b>sequentially in one task</b>,
+ * not in parallel: a home NAS has no reason to serve several concurrent traversals,
+ * and sequential progress can be represented meaningfully in the UI. Each source gets
+ * its own row in {@code scan_run}, associating counters and any error with that source.
  *
- * <p>Nedostupný zdroj nezhodí zvyšok — zapíše sa mu {@code FAILED} a pokračuje sa ďalším.
+ * <p>An unavailable source does not stop the rest; it is marked {@code FAILED}, and
+ * processing continues with the next source.
  */
 @Service
 @Slf4j
 public class ScanService implements DisposableBean {
 
-    /** Po koľkých súboroch sa priebeh zapíše do databázy, aby ho UI videlo. */
+    /** Number of files between progress writes to the database for UI visibility. */
     private static final int PROGRESS_EVERY = 250;
 
     private final SmbSourceService sourceService;
@@ -77,19 +79,19 @@ public class ScanService implements DisposableBean {
     }
 
     /**
-     * Naštartuje sken všetkých zapnutých zdrojov a hneď sa vráti — volajúci (UI aj REST)
-     * nečaká na dobehnutie.
+     * Starts a scan of all enabled sources and returns immediately; neither UI nor REST
+     * callers wait for completion.
      *
-     * @throws org.javerlabd.homecenter.source.NoActiveSourceException ak nie je zapnutý žiadny zdroj
-     * @throws ScanAlreadyRunningException                            ak už jeden sken beží
+     * @throws org.javerlabd.homecenter.source.NoActiveSourceException if no source is enabled
+     * @throws ScanAlreadyRunningException                            if a scan is already running
      */
     public ScanStart triggerAll(ScanTrigger trigger) {
         return start(sourceService.requireEnabled(), trigger);
     }
 
     /**
-     * Naštartuje sken jedného konkrétneho zdroja. Vypnutý zdroj sa takto dá preskenovať
-     * zámerne — vypnutie hovorí len to, že sa nemá brať do naplánovaného behu.
+     * Starts a scan of one specific source. A disabled source can intentionally be scanned
+     * this way; disabling only excludes it from scheduled runs.
      */
     public ScanStart triggerOne(long sourceId, ScanTrigger trigger) {
         return start(List.of(sourceService.require(sourceId)), trigger);
@@ -126,12 +128,12 @@ public class ScanService implements DisposableBean {
         return runRepository.findRecent(limit);
     }
 
-    /** Posledný sken každého zdroja — dashboard z toho skladá stĺpec „naposledy skenované“. */
+    /** Latest scan for each source, used by the dashboard's "last scanned" column. */
     public Map<Long, ScanRun> latestBySource() {
         return runRepository.findLatestBySource();
     }
 
-    /** Uzavrie behy, ktoré ostali v stave RUNNING po páde servera. */
+    /** Closes runs left in the RUNNING state after a server failure. */
     public void closeInterruptedRuns() {
         int closed = runRepository.markInterrupted();
         if (closed > 0) {
@@ -140,8 +142,8 @@ public class ScanService implements DisposableBean {
     }
 
     /**
-     * Jeden zdroj. Chyba sa zapíše do jeho {@code scan_run} a ostatné zdroje pokračujú —
-     * vypnutý NAS nesmie znamenať, že sa nepreindexuje ani ten druhý.
+     * Processes one source. An error is written to its {@code scan_run}, and the remaining
+     * sources continue; an offline NAS must not prevent another one from being reindexed.
      */
     private void scanQuietly(SmbSource source, ScanTrigger trigger,
                              TmdbMetadataResolver.Session metadataSession) {
@@ -192,7 +194,7 @@ public class ScanService implements DisposableBean {
                     counters.getFilesSeen(), counters.getItemsAdded(), counters.getItemsUpdated(),
                     counters.getItemsRemoved());
         } catch (SmbAccessException ex) {
-            // Nedostupné úložisko je bežný stav (vypnutý NAS), netreba k nemu stack trace.
+            // Unavailable storage is an ordinary state (an offline NAS); no stack trace is needed.
             log.warn("Sken #{} zdroja {} zlyhal: {}", scanId, source.name(), ex.getMessage());
             runRepository.finish(scanId, ScanStatus.FAILED, counters, message(ex));
         } catch (RuntimeException ex) {
@@ -236,7 +238,7 @@ public class ScanService implements DisposableBean {
         executor.shutdownNow();
     }
 
-    /** Priečinok čakajúci na spracovanie spolu s hĺbkou, v ktorej leží. */
+    /** Directory awaiting processing together with its depth. */
     private record Location(String path, int depth) {
     }
 }

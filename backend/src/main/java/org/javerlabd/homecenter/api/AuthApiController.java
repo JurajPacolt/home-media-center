@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Prihlasovanie Android TV klienta. Heslom aj PINom — PIN funguje výhradne tadiaľto,
- * do management UI sa ním dostať nedá.
+ * Android TV client login with either a password or PIN. The PIN works exclusively
+ * through this endpoint and cannot be used to access the management UI.
  */
 @RestController
 @RequestMapping("/api/v1/auth")

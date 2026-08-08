@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.javerlabd.homecenter.media.MediaClassifier;
 import org.springframework.stereotype.Component;
 
-/** Rozpozná bežné názvy S01E02, 1x02, CD2/Part 2 a rok vydania. */
+/** Recognizes common S01E02, 1x02, and CD2/Part 2 patterns and release years. */
 @Component
 public class MediaNameParser {
 

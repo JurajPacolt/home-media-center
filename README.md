@@ -1,24 +1,24 @@
-# Domáce mediacentrum
+# Home Media Center
 
-Serverová aplikácia, ktorá sprístupňuje médiá zo Samba úložiska, a natívny klient
-pre Android TV. Do budúcna je server navrhnutý tak, aby sa rozšíril o funkcie
-smart asistenta pre domácnosť.
+A server application that makes media from Samba storage available to a native
+Android TV client. The server is designed to support smart home assistant
+features in the future.
 
-**Stav:** server má funkčný základ — indexuje Sambu, dopĺňa filmové metadáta,
-streamuje s podporou pretáčania a má webové management UI. Android TV klient sa
-ešte nezačal.
+**Status:** the server has a functional foundation—it indexes Samba, enriches
+movies with metadata, supports seekable streaming, and provides a web-based
+management UI. Work on the Android TV client has not started yet.
 
-## Ako to funguje
+## How it works
 
 ```mermaid
 flowchart LR
-    SMB[("Samba úložisko
-    filmy, fotky, hudba")]
+    SMB[("Samba storage
+    movies, photos, music")]
     SRV["Server
     index + HTTP proxy"]
-    TV["Android TV klient
+    TV["Android TV client
     Compose for TV"]
-    WEB["Prehliadač
+    WEB["Browser
     Thymeleaf management UI"]
 
     SMB -->|SMB2/3| SRV
@@ -26,49 +26,50 @@ flowchart LR
     SRV -->|HTML| WEB
 ```
 
-Server je jediný, kto pozná prihlasovacie údaje k Sambe. Médiá indexuje do lokálnej
-databázy a klientovi ich preposiela cez HTTP s podporou Range requestov, takže
-funguje pretáčanie bez sťahovania celého súboru.
+The server is the only component that knows the Samba credentials. It indexes
+media in a local database and forwards it to the client over HTTP with Range
+request support, enabling seeking without downloading the entire file.
 
-Médiá sú rozdelené na tri kategórie: **videá**, **fotky** a **hudba**.
+Media is divided into three categories: **videos**, **photos**, and **music**.
 
-**Zdrojov môže byť nastavených viac** — napríklad filmový NAS a samostatný archív fotiek.
-Každá položka indexu si pamätá, odkiaľ pochádza. Sken ich prechádza za sebou a každý
-dostane vlastný záznam v histórii; keď je jeden NAS vypnutý, ostatné sa preindexujú
-normálne.
+**Multiple sources can be configured**—for example, a movie NAS and a separate
+photo archive. Each indexed item remembers its source. A scan processes the
+sources sequentially, giving each one its own history record; if one NAS is
+offline, the others are still reindexed normally.
 
-### Kto sa kam dostane
+### Who can access what
 
-Server má účty s dvomi rolami a dva oddelené spôsoby prihlásenia:
+The server has accounts with two roles and two separate authentication methods:
 
 ```mermaid
 flowchart LR
-    A["Správca (ADMIN)"]
-    U["Používateľ (USER)"]
+    A["Administrator (ADMIN)"]
+    U["User (USER)"]
     UI["Management UI
-    /admin — heslo"]
+    /admin—password"]
     API["REST API
-    /api/v1 — token"]
+    /api/v1—token"]
 
-    A -->|heslo| UI
-    A -->|heslo alebo PIN| API
-    U -->|heslo alebo PIN| API
-    U -.->|"nemá prístup"| UI
+    A -->|password| UI
+    A -->|password or PIN| API
+    U -->|password or PIN| API
+    U -.->|"no access"| UI
 
     linkStyle 3 stroke-dasharray: 4 4
 ```
 
-**Heslá aj PINy sú hashované Argon2id.** Do management UI treba vždy plné heslo —
-PIN je pohodlie pre diaľkový ovládač a otvára výhradne televízor.
+**Passwords and PINs are hashed with Argon2id.** The management UI always requires
+the full password—the PIN is a convenience for remote controls and unlocks only
+the TV.
 
-Android klient sa prihlási raz a dostane **token**, ktorý si uloží; heslo ani PIN na
-zariadení neostávajú. Zmena hesla, zmena PINu aj vypnutie účtu všetky televízory
-odhlásia.
+The Android client logs in once and receives a **token**, which it stores locally;
+neither the password nor the PIN remains on the device. Changing the password or
+PIN, or disabling the account, logs out every TV.
 
-### Prečo sa dá pretáčať
+### Why seeking works
 
-Klient nesťahuje celý film. Pýta si rozsah bajtov a server ho zo Samby prečíta
-priamo z tej pozície:
+The client does not download the whole movie. It requests a byte range, and the
+server reads it directly from that position on Samba:
 
 ```mermaid
 sequenceDiagram
@@ -78,137 +79,144 @@ sequenceDiagram
     participant SMB as Samba
 
     TV->>S: GET /api/v1/media/42/stream<br/>Range: bytes=734003200-
-    S->>DB: cesta a typ súboru (bez dotyku Samby)
-    DB-->>S: filmy/matrix.mkv
-    S->>SMB: otvor súbor, čítaj od 734003200
-    SMB-->>S: bajty od žiadanej pozície
+    S->>DB: file path and type (without touching Samba)
+    DB-->>S: movies/matrix.mkv
+    S->>SMB: open file, read from 734003200
+    SMB-->>S: bytes from the requested position
     S-->>TV: 206 Partial Content<br/>Content-Range: bytes 734003200-…/2147483648
 ```
 
-Bez `Range` odpovie server 200 a celým súborom, pri rozsahu mimo súboru 416.
+Without `Range`, the server responds with 200 and the entire file; a range outside
+the file produces 416.
 
-## Technologický stack
+## Technology stack
 
-**Server** — Java 25 (LTS), Spring Boot 4.1, smbj pre SMB prístup, H2 ako
-index (schéma cez Flyway), Lombok a voliteľné TMDb API pre filmové metadáta.
+**Server**—Java 25 (LTS), Spring Boot 4.1, smbj for SMB access, H2 as the index
+(schema managed by Flyway), Lombok, and an optional TMDb API integration for movie
+metadata.
 
-**Management UI** — Thymeleaf + Bootstrap 5 + jQuery, video cez Video.js, grafy cez Chart.js
-(pridá sa až keď bude treba). Servírované lokálne cez WebJars, nie z CDN.
+**Management UI**—Thymeleaf + Bootstrap 5 + jQuery, Video.js for browser video,
+and Chart.js for charts (to be added only when needed). Everything is served
+locally through WebJars, not from a CDN.
 
-**Klient** — Kotlin, Jetpack Compose for TV, Media3/ExoPlayer, Retrofit.
+**Client**—Kotlin, Jetpack Compose for TV, Media3/ExoPlayer, and Retrofit.
 
-Úplný zoznam knižníc aj odôvodnenie výberu je v
-[doc/rozhodnutia.md](doc/rozhodnutia.md).
+The complete library list and rationale are in
+[doc/implementation-plan.md](doc/implementation-plan.md).
 
-## Ako to spustiť
+## How to run it
 
-Treba **JDK 25**.
+**JDK 25** is required.
 
 ```powershell
 $env:JAVA_HOME = "d:\java\jdk-25"
-# Voliteľné: TMDb API Read Access Token pre popisy, žánre a plagáty.
-$env:TMDB_READ_ACCESS_TOKEN = "sem-vloz-token"
+# Optional: TMDb API Read Access Token for descriptions, genres, and posters.
+$env:TMDB_READ_ACCESS_TOKEN = "insert-token-here"
 cd backend
 mvn spring-boot:run
 ```
 
-Potom otvor <http://localhost:8085/admin>. Pri prvom spustení si server založí
-správcu **`admin` / `admin`** a hneď si vypýta zmenu hesla — kým ju neurobíš,
-nikam inam ťa nepustí. Na stránke **Samba zdroje** potom pridaj úložisko
-(adresa, share, prihlasovacie údaje) a spusti sken. Zdrojov môžeš pridať viac.
-Index sa uloží do `backend/data/homecenter.mv.db`.
+Then open <http://localhost:8085/admin>. On its first launch, the server creates
+the **`admin` / `admin`** administrator account and immediately requires a password
+change—you cannot access anything else until you change it. Next, open **Samba
+sources**, add storage (address, share, and credentials), and start a scan. You can
+add multiple sources. The index is stored in `backend/data/homecenter.mv.db`.
 
-`TMDB_READ_ACCESS_TOKEN` sa získava po registrácii API prístupu v
-[nastaveniach TMDb](https://www.themoviedb.org/settings/api). Nie je povinný:
-bez neho sken naďalej rozpozná a zoradí seriálové epizódy podľa názvu súboru,
-iba nestiahne popisy, hodnotenie, žánre a plagáty. Token sa neukladá do databázy.
+Obtain `TMDB_READ_ACCESS_TOKEN` after registering for API access in the
+[TMDb settings](https://www.themoviedb.org/settings/api). It is optional: without
+it, scanning still recognizes and sorts TV episodes by filename, but does not
+download descriptions, ratings, genres, or posters. The token is not stored in the
+database.
 
-### Filmové metadáta a radenie
+### Movie metadata and sorting
 
-Pri skene sa videá obohatia zo služby TMDb a výsledok sa uloží do lokálneho H2
-indexu. Plagáty sa ukladajú do `backend/data/posters`, takže otvorenie knižnice
-už verejné API nevolá. Žánre (napríklad Komédia alebo Horor) sú samostatný filter
-vo videoknižnici; nemenia tri hlavné kategórie Videá / Fotky / Hudba.
+During a scan, videos are enriched through TMDb, and the result is stored in the
+local H2 index. Posters are saved in `backend/data/posters`, so opening the library
+does not call the public API. Genres (such as Comedy or Horror) are a separate
+filter in the video library; they do not change the three main categories of
+Videos / Photos / Music.
 
-Automatické rozpoznanie je najspoľahlivejšie pri zaužívaných názvoch:
+Automatic recognition is most reliable with conventional filenames:
 
-- film: `The Matrix (1999).mkv`,
-- epizóda: `Dark.S01E02.mkv` alebo `Dark.1x02.mkv`,
-- viacdielny film: `Dune Part 2 (2024).mkv`.
+- movie: `The Matrix (1999).mkv`,
+- episode: `Dark.S01E02.mkv` or `Dark.1x02.mkv`,
+- multipart movie: `Dune Part 2 (2024).mkv`.
 
-Epizódy rovnakého seriálu dostanú spoločnú skupinu a radia sa podľa série a čísla
-epizódy, nie abecedne (`S01E02` pred `S01E10`). To isté platí pre očíslované časti.
-TMDb obohatenie je best-effort: výpadok internetu alebo nenájdený titul nikdy
-nezastaví samotný SMB sken.
+Episodes of the same series share a group and are sorted by season and episode
+number rather than alphabetically (`S01E02` before `S01E10`). The same applies to
+numbered parts. TMDb enrichment is best-effort: an internet outage or a missing
+title never stops the SMB scan itself.
 
-### Rozhranie
+### Interfaces
 
-| Adresa | Čo je tam |
+| Address | Contents |
 |---|---|
-| `/admin` | prehľad — počty médií, stav zdrojov, história skenov |
-| `/admin/zdroje` | Samba zdroje (jediné miesto, kde sa zadáva heslo k úložisku) |
-| `/admin/kniznica` | knižnica s plagátmi, popismi, žánrovým filtrom a náhľadom médií |
-| `/admin/pouzivatelia` | účty, roly a PINy |
-| `/api/swagger-ui.html` | REST API pre TV klienta (vyžaduje prihlásenie správcu) |
-| `/api/openapi` | OpenAPI spec — zmluva medzi serverom a klientom |
+| `/admin` | overview—media counts, source status, scan history |
+| `/admin/zdroje` | Samba sources (the only place where storage credentials are entered) |
+| `/admin/kniznica` | library with posters, descriptions, genre filtering, and media previews |
+| `/admin/pouzivatelia` | accounts, roles, and PINs |
+| `/api/swagger-ui.html` | REST API for the TV client (requires administrator login) |
+| `/api/openapi` | OpenAPI specification—the contract between server and client |
 
-Kľúčové API endpointy: `POST /api/v1/auth/login` (vráti token),
-`GET /api/v1/library` (tri dlaždice), `GET /api/v1/media?category=video`,
-`GET /api/v1/media/{id}/stream` (Range requesty),
-`GET /api/v1/media/{id}/poster`, `GET /api/v1/genres` a `POST /api/v1/scan`.
+Key API endpoints: `POST /api/v1/auth/login` (returns a token),
+`GET /api/v1/library` (the three tiles), `GET /api/v1/media?category=video`,
+`GET /api/v1/media/{id}/stream` (Range requests),
+`GET /api/v1/media/{id}/poster`, `GET /api/v1/genres`, and `POST /api/v1/scan`.
 
-Okrem prihlásenia vyžaduje všetko hlavičku `Authorization: Bearer <token>`:
+Except for login, every endpoint requires the `Authorization: Bearer <token>`
+header:
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8085/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"jano","secret":"4321","deviceName":"Obývačka"}' \
+  -d '{"username":"john","secret":"4321","deviceName":"Living Room"}' \
   | jq -r .token)
 
 curl http://localhost:8085/api/v1/library -H "Authorization: Bearer $TOKEN"
 ```
 
-## Štruktúra repozitára
+## Repository structure
 
 ```
-backend/    Spring Boot server — REST API, Thymeleaf UI, SMB a indexácia
-frontend/   Android TV aplikácia (Kotlin) — zatiaľ prázdne
-doc/        zadanie a technologické rozhodnutia
+backend/    Spring Boot server—REST API, Thymeleaf UI, SMB, and indexing
+frontend/   Android TV application (Kotlin)—currently empty
+doc/        assignment and technology decisions
 ```
 
-Poznámka: Thymeleaf management UI je súčasťou **backendu**
-(`src/main/resources/templates`), nie priečinka `frontend/`. Ten je vyhradený
-pre Android TV klienta.
+Note: the Thymeleaf management UI is part of the **backend**
+(`src/main/resources/templates`), not the `frontend/` directory. That directory is
+reserved for the Android TV client.
 
-## Kľúčové zásady
+## Key principles
 
-1. SMB credentials pozná len server, klient nesiaha na úložisko priamo.
-2. Samba sa neskenuje pri každom requeste — REST API číta z indexu, sken beží
-   na pozadí a dá sa spustiť manuálne.
-3. Žiadne transkódovanie, kým to konkrétny súbor nevynúti. Server súbory
-   preposiela (direct play).
-4. Konfigurácia patrí do Thymeleaf UI v prehliadači, nie na diaľkový ovládač.
-   Na TV ostávajú tri dlaždice: Videá / Fotky / Hudba.
-5. Kontrakt medzi serverom a klientom drží OpenAPI spec — jazyky sú rôzne,
-   modely sa nezdieľajú.
-6. Prihlasovanie má dva oddelené režimy: session s CSRF pre prehliadač,
-   bezstavový token pre televízor. Miešať sa nesmú.
+1. Only the server knows the SMB credentials; the client does not access storage
+   directly.
+2. Samba is not scanned on every request—the REST API reads from the index, while
+   scanning runs in the background and can also be triggered manually.
+3. No transcoding until a specific file requires it. The server forwards files
+   directly (direct play).
+4. Configuration belongs in the browser-based Thymeleaf UI, not on a remote
+   control. The TV retains three tiles: Videos / Photos / Music.
+5. The OpenAPI specification defines the contract between server and client—the
+   languages differ, and models are not shared.
+6. Authentication has two separate modes: a CSRF-protected browser session and a
+   stateless token for the TV. They must not be mixed.
 
-## Čo ešte nie je hotové
+## What is not finished yet
 
-- **Android TV klient** — priečinok `frontend/` je zatiaľ prázdny.
-- **Technické metadáta súborov a náhľady fotiek** — dĺžka, kodeky a rozmery cez
-  ffprobe ani samostatné thumbnaily fotiek zatiaľ nie sú. Filmové popisy, žánre
-  a plagáty z TMDb už server indexuje.
-- **Server beží na HTTP.** V domácej sieti idú tokeny aj heslá nešifrovane;
-  pred vystavením mimo LAN treba HTTPS.
-- **Heslo k Sambe je v databáze v otvorenom tvare.** Účty sú hashované, tento
-  jeden stĺpec nie — server ho potrebuje poslať Sambe.
-- **Prihlasovanie nemá obmedzenie počtu pokusov.** Pri 4-číslicovom PINe to stojí
-  za doriešenie.
+- **Android TV client**—the `frontend/` directory is still empty.
+- **Technical file metadata and photo thumbnails**—duration, codecs, and dimensions
+  through ffprobe, as well as separate photo thumbnails, have not been implemented.
+  The server already indexes movie descriptions, genres, and posters from TMDb.
+- **The server runs over HTTP.** Tokens and passwords travel unencrypted on the home
+  network; HTTPS is required before exposing the server outside the LAN.
+- **The Samba password is stored in plaintext in the database.** Account passwords
+  are hashed, but this one column is not—the server needs to send it to Samba.
+- **Login attempts are not rate-limited.** This is worth addressing for a four-digit
+  PIN.
 
-## Dokumentácia
+## Documentation
 
-- [doc/zadanie.md](doc/zadanie.md) — pôvodné zadanie a požiadavky
-- [doc/rozhodnutia.md](doc/rozhodnutia.md) — technologické rozhodnutia
-  s odôvodnením a zamietnutými alternatívami
+- [doc/assignment.md](doc/assignment.md)—original assignment and requirements
+- [doc/implementation-plan.md](doc/implementation-plan.md)—technology decisions,
+  their rationale, and rejected alternatives

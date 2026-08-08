@@ -10,8 +10,8 @@ import org.javerlabd.homecenter.user.UserDraft;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Formulár používateľa. Nie je to record — {@code th:field} potrebuje settery.
- * Heslo ani PIN sa nikdy nepredvypĺňajú; prázdne pole znamená „nechať pôvodné“.
+ * User form. It is not a record because {@code th:field} needs setters.
+ * The password and PIN are never prefilled; an empty field means "keep the existing value."
  */
 @Getter
 @Setter
@@ -34,10 +34,10 @@ public class UserForm {
 
     private @Nullable String pin;
 
-    /** Zaškrtnutím sa PIN zruší — používateľ sa potom prihlási už len heslom. */
+    /** Selecting this removes the PIN, after which the user can log in only with a password. */
     private boolean clearPin;
 
-    /** Či má už uložený PIN; podľa toho sa v šablóne mení nápoveda. */
+    /** Whether a PIN is already stored; the template changes its hint accordingly. */
     private boolean pinSet;
 
     public static UserForm from(AppUser user) {

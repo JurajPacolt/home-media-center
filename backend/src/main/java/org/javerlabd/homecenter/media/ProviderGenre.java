@@ -1,5 +1,5 @@
 package org.javerlabd.homecenter.media;
 
-/** Žáner v identite externého katalógu pred uložením do lokálneho indexu. */
+/** Genre in the external catalog's identity before storage in the local index. */
 public record ProviderGenre(long providerId, String name) {
 }

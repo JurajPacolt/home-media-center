@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
-/** Tenký klient nad oficiálnym TMDb API v3. Token sa nikdy neloguje. */
+/** Thin client for the official TMDb API v3. The token is never logged. */
 @Component
 public class TmdbClient {
 
@@ -120,8 +120,8 @@ public class TmdbClient {
         RestClient client = require(images);
         throttle();
         byte[] body = client.get()
-                // URI skladáme explicitne: cesta začínajúca lomkou by pri bežnom
-                // URI resolution zahodila /t/p/w342 z imageBaseUrl.
+                // Build the URI explicitly: during normal URI resolution, a path starting
+                // with a slash would discard /t/p/w342 from imageBaseUrl.
                 .uri(posterUri(properties.imageBaseUrl(), remotePath))
                 .accept(MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG)
                 .retrieve()

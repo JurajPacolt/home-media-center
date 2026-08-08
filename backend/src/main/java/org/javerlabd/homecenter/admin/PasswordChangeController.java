@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Zmena vlastného hesla. Sem posiela {@link PasswordChangeInterceptor} každého, kto má
- * ešte predvolené heslo z prvého spustenia.
+ * Changes the current user's password. {@link PasswordChangeInterceptor} sends anyone
+ * who still has the initial default password here.
  */
 @Controller
 @RequestMapping("/admin/heslo")
@@ -44,7 +44,7 @@ public class PasswordChangeController {
         if (binding.hasErrors()) {
             return prepare(principal, model);
         }
-        // Načerstvo z databázy — v session môže byť stav spred zmeny.
+        // Read fresh from the database because the session may contain pre-change state.
         AppUser user = userService.require(principal.user().requireId());
 
         if (!userService.passwordMatches(user, form.getCurrentPassword())) {
@@ -68,7 +68,7 @@ public class PasswordChangeController {
 
     private String prepare(AuthenticatedUser principal, Model model) {
         model.addAttribute("active", "heslo");
-        // Kým platí, stránka vysvetlí, prečo sa inam nedá prejsť.
+        // While it applies, the page explains why navigation elsewhere is blocked.
         model.addAttribute("forced",
                 userService.findById(principal.user().requireId())
                         .map(AppUser::mustChangePassword)

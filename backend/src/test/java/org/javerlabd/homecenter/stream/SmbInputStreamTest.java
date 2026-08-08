@@ -14,8 +14,8 @@ import org.javerlabd.homecenter.source.SmbReadHandle;
 import org.junit.jupiter.api.Test;
 
 /**
- * Toto je jadro pretáčania: čítanie musí ísť na absolútnu pozíciu v súbore a skok
- * nesmie preniesť ani bajt navyše.
+ * This is the core of seeking: reads must use an absolute file position, and a skip
+ * must not transfer any extra bytes.
  */
 class SmbInputStreamTest {
 
@@ -60,7 +60,7 @@ class SmbInputStreamTest {
         }
     }
 
-    /** Handle, ktorý sa správa ako súbor {@link #FILE} s čítaním na ľubovoľnej pozícii. */
+    /** Handle behaving like {@link #FILE}, with reads from any position. */
     private static SmbReadHandle handle() {
         SmbReadHandle handle = mock(SmbReadHandle.class);
         given(handle.size()).willReturn((long) FILE.length);

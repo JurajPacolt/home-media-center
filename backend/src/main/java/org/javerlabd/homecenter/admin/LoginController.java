@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Prihlasovacia stránka management UI. Samotné overenie robí Spring Security na
- * rovnakej adrese cez POST — tento controller len vykresľuje formulár a hlášky.
+ * Management UI login page. Spring Security performs authentication through POST at
+ * the same address; this controller only renders the form and messages.
  */
 @Controller
 public class LoginController {
@@ -20,7 +20,7 @@ public class LoginController {
         if (chyba != null) {
             model.addAttribute("error", "Nesprávne meno alebo heslo.");
         } else if (rola != null) {
-            // Prihlásenie prešlo, ale rola USER patrí výhradne do TV klienta.
+            // Authentication succeeded, but the USER role belongs exclusively to the TV client.
             model.addAttribute("error",
                     "Tento účet je určený len pre televízor — do správy servera nemá prístup.");
         } else if (odhlasene != null) {

@@ -16,8 +16,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Beží proti skutočnému H2 (v pamäti) — overuje aj to, že Flyway migrácia prejde
- * a že sa generované kľúče vracajú späť.
+ * Runs against a real in-memory H2 instance, verifying that the Flyway migration succeeds
+ * and generated keys are returned.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,7 +35,7 @@ class MediaIndexIntegrationTest {
     @Autowired
     private JdbcClient jdbc;
 
-    /** Kontext (a s ním databáza) sa medzi testami zdieľa, preto sa začína načisto. */
+    /** The context and database are shared between tests, so each test starts clean. */
     @BeforeEach
     void clearIndex() {
         jdbc.sql("DELETE FROM media_item").update();
@@ -82,7 +82,7 @@ class MediaIndexIntegrationTest {
                 .containsEntry(MediaCategory.PHOTO, 0L);
         assertThat(mediaRepository.totalSizeBytes()).isEqualTo(1024);
 
-        // Tretí sken súbor už nenašiel — má vypadnúť z indexu.
+        // The third scan no longer found the file, so it must leave the index.
         assertThat(mediaRepository.deleteMissedBy(sourceId, 3L)).isEqualTo(1);
         assertThat(mediaRepository.count(new MediaQuery(null, null, null, null, 50, 0))).isZero();
     }
@@ -142,8 +142,8 @@ class MediaIndexIntegrationTest {
         assertThat(mediaRepository.count(new MediaQuery(
                 MediaCategory.VIDEO, null, actionGenre, null, 50, 0))).isEqualTo(1);
 
-        // Ďalší sken bez TMDb tokenu nesmie presný kľúč kolekcie nahradiť
-        // hrubým lokálnym odhadom z názvu súboru.
+        // Another scan without a TMDb token must not replace the precise collection key
+        // with a rough local estimate derived from the filename.
         metadataEnrichmentService.enrich(
                 item(sourceId, "filmy/matrix.mkv", "matrix.mkv"),
                 metadataEnrichmentService.newSession());

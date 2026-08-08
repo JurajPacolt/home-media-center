@@ -1,6 +1,6 @@
 package org.javerlabd.homecenter.media;
 
-/** Stav automatického doplnenia filmových metadát. */
+/** Status of automatic movie metadata enrichment. */
 public enum MetadataStatus {
     PENDING,
     MATCHED,

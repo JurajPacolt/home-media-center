@@ -2,6 +2,6 @@ package org.javerlabd.homecenter.api.dto;
 
 import java.util.List;
 
-/** Stránka výpisu knižnice. */
+/** A page of library results. */
 public record MediaPageDto(List<MediaItemDto> items, long total, int limit, int offset) {
 }

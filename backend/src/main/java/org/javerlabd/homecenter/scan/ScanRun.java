@@ -5,7 +5,7 @@ import java.time.Instant;
 
 import org.jspecify.annotations.Nullable;
 
-/** Záznam o jednom behu skenu — z neho žije história aj ukazovateľ priebehu v UI. */
+/** Record of one scan run, used by both the history and UI progress indicator. */
 public record ScanRun(
         @Nullable Long id,
         @Nullable Long sourceId,

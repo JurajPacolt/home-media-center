@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="sk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${title} · Mediacentrum|">Mediacentrum</title>
+    <!-- Knižnice sa servírujú z WebJarov, nie z CDN — server beží v domácej sieti. -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/video.js/dist/video-js.min.css}">
+    <link rel="stylesheet" th:href="@{/css/homecenter.css}">
+</head>
+
+<body>
+
+<nav th:fragment="navbar(active)" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/admin}">Mediacentrum</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hc-nav"
+                aria-controls="hc-nav" aria-expanded="false" aria-label="Menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="hc-nav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${active == 'dashboard'} ? 'active'"
+                       th:href="@{/admin}">Prehľad</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${active == 'kniznica'} ? 'active'"
+                       th:href="@{/admin/kniznica}">Knižnica</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${active == 'zdroje'} ? 'active'"
+                       th:href="@{/admin/zdroje}">Samba zdroje</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${active == 'pouzivatelia'} ? 'active'"
+                       th:href="@{/admin/pouzivatelia}">Používatelia</a>
+                </li>
+            </ul>
+            <a class="nav-link text-secondary me-3" th:href="@{/api/swagger-ui.html}" target="_blank">API</a>
+
+            <div class="dropdown" sec:authorize="isAuthenticated()">
+                <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <span sec:authentication="principal.user.displayName">Správca</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" th:href="@{/admin/heslo}">Zmeniť heslo</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <form th:action="@{/odhlasenie}" method="post" class="m-0">
+                            <button class="dropdown-item" type="submit">Odhlásiť sa</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div th:fragment="alerts" class="hc-alerts">
+    <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+</div>
+
+<div th:fragment="scripts">
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/webjars/video.js/dist/video.min.js}"></script>
+    <script th:src="@{/webjars/video.js/dist/lang/sk.js}"></script>
+    <script th:src="@{/js/homecenter.js}"></script>
+</div>
+
+</body>
+</html>

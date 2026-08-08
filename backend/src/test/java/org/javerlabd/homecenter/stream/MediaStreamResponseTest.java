@@ -1,0 +1,91 @@
+package org.javerlabd.homecenter.stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+/**
+ * Hlavičky odpovede. Rovnaký kód obsluhuje REST API pre televízor aj náhľad
+ * v management UI, líšia sa len v Content-Disposition.
+ */
+class MediaStreamResponseTest {
+
+    private static final byte[] CONTENT = "0123456789".getBytes(StandardCharsets.US_ASCII);
+
+    @Test
+    void nahladPosielaInlineNechSiToPrehliadacVykresliSam() {
+        var response = MediaStreamResponse.of(stream(null), false);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
+                .startsWith("inline")
+                .contains("matrix.mkv");
+        assertThat(response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
+    }
+
+    @Test
+    void stiahnutiePosielaAttachmentNechToPrehliadacUlozi() {
+        var response = MediaStreamResponse.ofDownload(stream(null), false);
+
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
+                .startsWith("attachment")
+                .contains("matrix.mkv");
+    }
+
+    /**
+     * Médiá sa musia dať odložiť do cache prehliadača. Spring Security dáva do odpovedí
+     * {@code no-store}, čo prehrávaču zoberie multibuffer, na ktorom stojí pretáčanie —
+     * {@code SecurityConfig} ho preto na týchto adresách nepridáva a hlavička je táto.
+     */
+    @Test
+    void mediaNesuNoStoreAleSukromneCacheovatelne() {
+        var response = MediaStreamResponse.of(stream(null), false);
+
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL))
+                .isEqualTo("private, max-age=60")
+                .doesNotContain("no-store");
+    }
+
+    @Test
+    void stiahnutieRovnakoPodporujeRangeAko206() {
+        var response = MediaStreamResponse.ofDownload(stream("bytes 2-5/10"), false);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE)).isEqualTo("bytes 2-5/10");
+    }
+
+    @Test
+    void nezmyselnyContentTypeSpadneNaOctetStreamMiestoVynimky() {
+        MediaStream stream = new MediaStream(
+                new KnownLengthResource(new ByteArrayInputStream(CONTENT), CONTENT.length, "x.bin"),
+                "toto nie je mime typ", CONTENT.length, CONTENT.length, null, "x.bin");
+
+        var response = MediaStreamResponse.of(stream, false);
+
+        assertThat(response.getHeaders().getContentType())
+                .isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    @Test
+    void headNeposielaTeloAleZatvoriHandle() {
+        MediaStream stream = stream(null);
+
+        var response = MediaStreamResponse.of(stream, true);
+
+        assertThat(response.getBody()).isNull();
+        assertThat(response.getHeaders().getContentLength()).isEqualTo(CONTENT.length);
+    }
+
+    private static MediaStream stream(String contentRange) {
+        int length = contentRange == null ? CONTENT.length : 4;
+        return new MediaStream(
+                new KnownLengthResource(new ByteArrayInputStream(CONTENT), length, "matrix.mkv"),
+                "video/x-matroska", length, CONTENT.length, contentRange, "matrix.mkv");
+    }
+}

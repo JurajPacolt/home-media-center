@@ -1,0 +1,111 @@
+.hc-tile {
+    transition: border-color .15s ease-in-out, transform .15s ease-in-out;
+}
+
+.hc-tile:hover {
+    border-color: var(--bs-primary);
+    transform: translateY(-2px);
+}
+
+.hc-tile-count {
+    font-size: 2.5rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--bs-body-color);
+}
+
+.hc-tile-label {
+    color: var(--bs-secondary-color);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-size: .85rem;
+}
+
+.hc-alerts:empty {
+    display: none;
+}
+
+/* Náhľad média: video aj fotka sa zmestia do okna bez pretečenia, nech je súbor
+   akokoľvek veľký. Pozadie je len pod samotným prehrávačom, nie pod hláškou. */
+.hc-preview-body {
+    min-height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.hc-preview-media {
+    max-width: 100%;
+    max-height: 70vh;
+    background-color: #000;
+}
+
+/* Video.js má vlastný vnútorný obal. Rozmer preto riadi jeho kontajner, nie
+   pôvodný <video> element, ktorý po inicializácii už nie je koreňom prehrávača. */
+.hc-preview-video {
+    width: 100%;
+    max-height: 70vh;
+}
+
+.hc-preview-video .video-js {
+    width: 100%;
+    max-height: 70vh;
+}
+
+.hc-preview-video .vjs-poster img,
+.hc-preview-video video {
+    object-fit: contain;
+}
+
+.hc-poster-column,
+.hc-poster-cell {
+    width: 3.5rem;
+}
+
+.hc-library-poster {
+    display: block;
+    width: 3rem;
+    height: 4.5rem;
+    object-fit: cover;
+    border-radius: var(--bs-border-radius-sm);
+    background: var(--bs-secondary-bg);
+}
+
+.hc-preview-metadata {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+}
+
+.hc-preview-metadata[hidden] {
+    display: none;
+}
+
+.hc-preview-poster {
+    width: 7rem;
+    max-height: 10.5rem;
+    object-fit: cover;
+    border-radius: var(--bs-border-radius);
+}
+
+.hc-tmdb-attribution {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.hc-tmdb-attribution img {
+    width: 5rem;
+    height: auto;
+}
+
+/* Prihlasovacia stránka nemá navigáciu, formulár preto sadá do stredu okna. */
+.hc-login {
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bs-tertiary-bg);
+}

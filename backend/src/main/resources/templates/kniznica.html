@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="sk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Knižnica')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar(${active})}"></nav>
+
+<main class="container">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-4">Knižnica</h1>
+
+    <form class="row g-2 mb-4" method="get" th:action="@{/admin/kniznica}">
+        <div class="col-12 col-md-2">
+            <select class="form-select" name="category">
+                <option value="" th:selected="${selectedCategory == null}">Všetky kategórie</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.name()}"
+                        th:text="${category.label()}"
+                        th:selected="${category == selectedCategory}">—</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2" th:if="${sources.size() > 1}">
+            <select class="form-select" name="sourceId">
+                <option value="" th:selected="${selectedSourceId == null}">Všetky zdroje</option>
+                <option th:each="source : ${sources}"
+                        th:value="${source.requireId()}"
+                        th:text="${source.name()}"
+                        th:selected="${source.requireId() == selectedSourceId}">—</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2" th:if="${!genres.isEmpty()}">
+            <select class="form-select" name="genreId">
+                <option value="" th:selected="${selectedGenreId == null}">Všetky žánre</option>
+                <option th:each="genre : ${genres}"
+                        th:value="${genre.id()}"
+                        th:text="${genre.name()}"
+                        th:selected="${genre.id() == selectedGenreId}">—</option>
+            </select>
+        </div>
+        <div class="col-12 col-md">
+            <input class="form-control" type="search" name="search" th:value="${search}"
+                   placeholder="Hľadať v názve, seriáli, žánri alebo ceste">
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+            <button class="btn btn-outline-primary" type="submit">Filtrovať</button>
+        </div>
+    </form>
+
+    <p class="text-secondary">Nájdených <strong th:text="${total}">0</strong> položiek.</p>
+
+    <div class="table-responsive" th:if="${!items.isEmpty()}">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th class="hc-poster-column" aria-label="Náhľad"></th>
+                <th>Názov</th>
+                <th>Kategória</th>
+                <th>Filmové údaje</th>
+                <th th:if="${sources.size() > 1}">Zdroj</th>
+                <th>Cesta</th>
+                <th class="text-end">Veľkosť</th>
+                <th class="text-end">Zmenené</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${items}">
+                <td class="hc-poster-cell">
+                    <img th:if="${item.metadata() != null && item.metadata().hasPoster()}"
+                         class="hc-library-poster"
+                         th:src="@{|/admin/kniznica/${item.requireId()}/poster|}"
+                         th:alt="|Plagát: ${item.title()}|" loading="lazy">
+                </td>
+                <td>
+                    <div th:text="${item.title()}">—</div>
+                    <div class="small text-secondary"
+                         th:if="${item.metadata() != null && item.metadata().groupTitle() != null}"
+                         th:text="${item.metadata().groupTitle()}">—</div>
+                </td>
+                <td><span class="badge text-bg-light" th:text="${item.category().label()}">—</span></td>
+                <td>
+                    <div th:if="${item.metadata() != null && !item.metadata().genres().isEmpty()}"
+                         class="d-flex flex-wrap gap-1 mb-1">
+                        <span class="badge text-bg-secondary" th:each="genre : ${item.metadata().genres()}"
+                              th:text="${genre.name()}">—</span>
+                    </div>
+                    <div class="small text-secondary" th:if="${item.metadata() != null}">
+                        <span th:if="${item.metadata().releaseYear() != null}"
+                              th:text="${item.metadata().releaseYear()}">—</span>
+                        <span th:if="${item.metadata().rating() != null}"
+                              th:text="| · ★ ${item.metadata().rating()}|">—</span>
+                    </div>
+                </td>
+                <td th:if="${sources.size() > 1}" class="small"
+                    th:text="${sourceNames.getOrDefault(item.sourceId(), '—')}">—</td>
+                <td class="small text-secondary" th:text="${item.relativePath()}">—</td>
+                <td class="text-end" th:text="${@humanFormat.size(item.sizeBytes())}">—</td>
+                <td class="text-end small" th:text="${@humanFormat.dateTime(item.modifiedAt())}">—</td>
+                <td class="text-end">
+                    <!-- Všetko, čo náhľad potrebuje, ide cez data-* — obsah sa do
+                         prehrávača vkladá až po kliknutí, aby sa stovka položiek
+                         nezačala sťahovať naraz. -->
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-hc-preview
+                            th:data-hc-id="${item.requireId()}"
+                            th:data-hc-category="${item.category().name()}"
+                            th:data-hc-extension="${item.extension()}"
+                            th:data-hc-type="${item.contentType()}"
+                            th:data-hc-title="${item.title()}"
+                            th:data-hc-subtitle="${item.relativePath()}"
+                            th:data-hc-description="${item.metadata() != null ? item.metadata().description() : null}"
+                            th:data-hc-genres="${item.metadata() != null ? item.metadata().genreNames() : null}"
+                            th:data-hc-year="${item.metadata() != null ? item.metadata().releaseYear() : null}"
+                            th:data-hc-rating="${item.metadata() != null ? item.metadata().rating() : null}"
+                            th:data-hc-group="${item.metadata() != null ? item.metadata().groupTitle() : null}"
+                            th:data-hc-has-poster="${item.metadata() != null && item.metadata().hasPoster()}"
+                            th:data-hc-poster-url="@{|/admin/kniznica/${item.requireId()}/poster|}"
+                            th:text="${item.category().name() == 'VIDEO'} ? 'Prehrať'
+                                     : (${item.category().name() == 'AUDIO'} ? 'Vypočuť' : 'Zobraziť')">
+                        Otvoriť
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p th:if="${items.isEmpty()}" class="text-secondary">
+        Nič tu nie je. Skontroluj nastavenie zdroja a spusti sken.
+    </p>
+
+    <nav th:if="${lastPage > 0}" class="mb-5">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${page == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/kniznica(category=${selectedCategory?.name()}, sourceId=${selectedSourceId}, genreId=${selectedGenreId}, search=${search}, page=${page - 1})}">Späť</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link" th:text="|Strana ${page + 1} z ${lastPage + 1}|">—</span>
+            </li>
+            <li class="page-item" th:classappend="${page >= lastPage} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/kniznica(category=${selectedCategory?.name()}, sourceId=${selectedSourceId}, genreId=${selectedGenreId}, search=${search}, page=${page + 1})}">Ďalej</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Náhľad média. Jedno okno pre celú tabuľku; homecenter.js podľa kategórie
+         aktivuje správny prvok a pri zatvorení ho zase vyprázdni, aby prenos zo Samby
+         nebežal ďalej na pozadí. -->
+    <div class="modal fade" id="hc-preview" tabindex="-1" aria-hidden="true"
+         aria-labelledby="hc-preview-title">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="hc-preview-title">Náhľad</h5>
+                        <div class="small text-secondary" id="hc-preview-subtitle"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Zavrieť"></button>
+                </div>
+
+                <div class="modal-body hc-preview-body">
+                    <section id="hc-preview-metadata" class="hc-preview-metadata" hidden>
+                        <img id="hc-preview-poster" class="hc-preview-poster" alt="" hidden>
+                        <div>
+                            <div id="hc-preview-facts" class="small text-secondary mb-2"></div>
+                            <p id="hc-preview-description" class="mb-0"></p>
+                        </div>
+                    </section>
+                    <div id="hc-preview-video-container" class="hc-preview-video" hidden>
+                        <video id="hc-preview-video"
+                               class="video-js vjs-big-play-centered"
+                               controls preload="metadata" playsinline></video>
+                    </div>
+                    <audio id="hc-preview-audio" class="w-100" controls preload="metadata" hidden></audio>
+                    <img id="hc-preview-image" class="hc-preview-media" alt="" hidden>
+
+                    <div id="hc-preview-unsupported" class="alert alert-warning mb-0" hidden>
+                        <p class="mb-1">
+                            <strong>Prehliadač tento formát nevie otvoriť</strong>
+                            (<span id="hc-preview-format">—</span>).
+                        </p>
+                        <p class="mb-0 small">
+                            Video.js používa dekódovanie zabudované v prehliadači, preto nevie
+                            doplniť chýbajúci kontajner alebo kodek. Server zatiaľ nič neprevádza,
+                            takže súbor stiahni a otvor v inom prehrávači.
+                            <strong>Televízora sa to netýka</strong> — Media3 podporuje aj formáty,
+                            ktoré webové prehliadače neprehrajú.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-between">
+                    <a class="btn btn-outline-secondary btn-sm" id="hc-preview-download"
+                       th:href="@{/admin/kniznica}">Stiahnuť súbor</a>
+                    <button type="button" class="btn btn-secondary btn-sm"
+                            data-bs-dismiss="modal">Zavrieť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside class="hc-tmdb-attribution small text-secondary mb-4" aria-label="Zdroj filmových metadát">
+        <a href="https://www.themoviedb.org" target="_blank" rel="noopener">
+            <img th:src="@{/img/tmdb.svg}" alt="TMDB">
+        </a>
+        <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
+    </aside>
+
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

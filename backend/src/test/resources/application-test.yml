@@ -1,0 +1,17 @@
+homecenter:
+  data-dir: ./target
+  scan:
+    # '-' vypína naplánovanú úlohu — testy si sken spúšťajú samy.
+    cron: "-"
+    on-startup: false
+
+spring:
+  # Testy bežia nad H2 v pamäti — žiadne súbory na upratovanie medzi behmi.
+  datasource:
+    url: jdbc:h2:mem:homecenter;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  thymeleaf:
+    cache: false

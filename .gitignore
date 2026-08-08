@@ -1,0 +1,64 @@
+# Maven / Java build
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+.flattened-pom.xml
+!**/.mvn/wrapper/maven-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# Lokálne dáta backendu (H2 index a cache plagátov)
+/backend/data/
+*.mv.db
+*.trace.db
+*.lock.db
+
+# Logy a diagnostické výpisy JVM
+*.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/
+
+# Eclipse / Spring Tool Suite
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.sts4-cache/
+
+# Android / Gradle (frontend)
+/frontend/.gradle/
+/frontend/local.properties
+/frontend/**/build/
+/frontend/**/.cxx/
+/frontend/captures/
+*.apk
+*.aab
+
+# Lokálne nastavenia a tajomstvá
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+
+# Operačný systém a dočasné súbory editorov
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.swp
+*.swo
+*.tmp
+*~

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="sk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Prihlásenie')}"></head>
+<body class="hc-login">
+
+<main class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+
+            <h1 class="h4 text-center mb-1">Mediacentrum</h1>
+            <p class="text-secondary text-center mb-4">Správa servera</p>
+
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Spring Security spracúva POST na tej istej adrese; th:action doplní CSRF token. -->
+            <form th:action="@{/prihlasenie}" method="post" class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Meno</label>
+                        <input class="form-control" id="username" name="username"
+                               autocomplete="username" autofocus required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="password">Heslo</label>
+                        <input class="form-control" id="password" name="password" type="password"
+                               autocomplete="current-password" required>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Prihlásiť sa</button>
+                </div>
+            </form>
+
+            <p class="text-secondary small text-center mt-3 mb-0">
+                PIN slúži na prihlásenie do televízora, sem sa ním dostať nedá.
+            </p>
+
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

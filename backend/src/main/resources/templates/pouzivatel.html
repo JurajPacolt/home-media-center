@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="sk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Používateľ')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar(${active})}"></nav>
+
+<main class="container">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-4" th:text="${form.isNew()} ? 'Nový používateľ' : 'Úprava používateľa'">
+        Používateľ</h1>
+
+    <form th:action="@{/admin/pouzivatelia}" th:object="${form}" method="post" class="card">
+        <div class="card-body">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="username">Prihlasovacie meno</label>
+                    <input class="form-control" id="username" th:field="*{username}"
+                           th:errorclass="is-invalid" autocomplete="off" placeholder="jano">
+                    <div class="invalid-feedback" th:errors="*{username}"></div>
+                    <div class="form-text">Malé písmená, číslice, bodka, pomlčka a podčiarkovník.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="displayName">Zobrazované meno</label>
+                    <input class="form-control" id="displayName" th:field="*{displayName}"
+                           th:errorclass="is-invalid" placeholder="Jano">
+                    <div class="invalid-feedback" th:errors="*{displayName}"></div>
+                    <div class="form-text">Nechaj prázdne a použije sa prihlasovacie meno.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="role">Rola</label>
+                    <select class="form-select" id="role" th:field="*{role}">
+                        <option th:each="option : ${roles}"
+                                th:value="${option.name()}"
+                                th:text="|${option.label()} — ${option.description()}|">—</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="enabled" th:field="*{enabled}">
+                        <label class="form-check-label" for="enabled">Účet je zapnutý</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <hr class="my-2">
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="password">Heslo</label>
+                    <input class="form-control" id="password" type="password" th:field="*{password}"
+                           autocomplete="new-password">
+                    <div class="form-text" th:if="${form.isNew()}">Aspoň 8 znakov.</div>
+                    <div class="form-text" th:unless="${form.isNew()}">
+                        Uložené heslo sa nezobrazuje. Prázdne pole ho nechá tak, ako je.
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="pin">PIN</label>
+                    <input class="form-control" id="pin" type="password" th:field="*{pin}"
+                           inputmode="numeric" autocomplete="off">
+                    <div class="form-text">
+                        4–8 číslic. Slúži na prihlásenie do televízora — do tejto správy sa
+                        ním dostať nedá.
+                    </div>
+                    <div class="form-check mt-2" th:if="${form.pinSet}">
+                        <input class="form-check-input" type="checkbox" id="clearPin" th:field="*{clearPin}">
+                        <label class="form-check-label" for="clearPin">Zrušiť nastavený PIN</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Uložiť</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/pouzivatelia}">Späť</a>
+        </div>
+    </form>
+
+    <div class="card mt-4" th:if="${devices != null and !devices.isEmpty()}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Prihlásené televízory</span>
+            <form method="post" class="m-0"
+                  th:action="@{|/admin/pouzivatelia/${form.id}/odhlasit|}">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Odhlásiť všetky</button>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Zariadenie</th>
+                    <th>Prihlásené</th>
+                    <th>Naposledy použité</th>
+                    <th>Platí do</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="device : ${devices}">
+                    <td th:text="${device.deviceName()} ?: '(neuvedené)'">—</td>
+                    <td th:text="${@humanFormat.dateTime(device.createdAt())}">—</td>
+                    <td th:text="${@humanFormat.dateTime(device.lastUsedAt())}">—</td>
+                    <td th:text="${@humanFormat.dateTime(device.expiresAt())}">—</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

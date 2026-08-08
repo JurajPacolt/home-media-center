@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="sk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Zmena hesla')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar(${active})}"></nav>
+
+<main class="container">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row">
+        <div class="col-12 col-md-8 col-lg-6">
+
+            <h1 class="h3 mb-3">Zmena hesla</h1>
+
+            <div th:if="${forced}" class="alert alert-warning">
+                Účet má stále predvolené heslo z prvého spustenia. Kým ho nezmeníš,
+                nikam inam sa v správe servera nedostaneš.
+            </div>
+
+            <form th:action="@{/admin/heslo}" th:object="${form}" method="post" class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="currentPassword">Súčasné heslo</label>
+                        <input class="form-control" id="currentPassword" type="password"
+                               th:field="*{currentPassword}" th:errorclass="is-invalid"
+                               autocomplete="current-password">
+                        <div class="invalid-feedback" th:errors="*{currentPassword}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="newPassword">Nové heslo</label>
+                        <input class="form-control" id="newPassword" type="password"
+                               th:field="*{newPassword}" th:errorclass="is-invalid"
+                               autocomplete="new-password">
+                        <div class="invalid-feedback" th:errors="*{newPassword}"></div>
+                        <div class="form-text">Aspoň 8 znakov.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="confirmPassword">Nové heslo ešte raz</label>
+                        <input class="form-control" id="confirmPassword" type="password"
+                               th:field="*{confirmPassword}" th:errorclass="is-invalid"
+                               autocomplete="new-password">
+                        <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                    </div>
+                    <p class="text-secondary small mb-0">
+                        Zmena hesla odhlási všetky prihlásené televízory.
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" type="submit">Zmeniť heslo</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

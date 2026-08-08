@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: homecenter
+
+  # Blokujúce SMB IO beží pod virtuálnymi vláknami — pozri doc/rozhodnutia.md.
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    # H2 v súborovom režime — databázu drží otvorenú jediný proces servera.
+    url: jdbc:h2:file:${homecenter.data-dir}/homecenter
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+    hikari:
+      pool-name: homecenter-h2
+      maximum-pool-size: 10
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  thymeleaf:
+    cache: true
+
+server:
+  port: 8085
+  shutdown: graceful
+
+homecenter:
+  # Kam si server ukladá H2 index (a neskôr náhľady).
+  data-dir: ./data
+
+  security:
+    # Ako dlho platí prihlásenie Android klienta. Televízor sa neprihlasuje často,
+    # preto rádovo mesiace — token sa dá kedykoľvek zneplatniť z management UI.
+    token-validity: 90d
+
+  library:
+    # Podľa prípony sa súbor zaradí do jednej z troch kategórií, ktoré vidí TV klient.
+    # Čokoľvek, čo tu nie je, sken preskočí.
+    video-extensions: [ mkv, mp4, avi, mov, m4v, wmv, mpg, mpeg, ts, m2ts, webm, flv, 3gp ]
+    photo-extensions: [ jpg, jpeg, png, gif, bmp, webp, heic, heif, tif, tiff ]
+    audio-extensions: [ mp3, flac, m4a, aac, ogg, oga, opus, wav, wma, alac, aiff ]
+
+  metadata:
+    # TMDb API Read Access Token z https://www.themoviedb.org/settings/api.
+    # Prázdna hodnota obohacovanie vypne; nikdy sa neloguje ani neposiela klientovi.
+    tmdb-read-access-token: ${TMDB_READ_ACCESS_TOKEN:}
+    language: sk-SK
+    fallback-language: en-US
+    # Podmienky TMDb dovoľujú cache najviac 6 mesiacov; obnovujeme výrazne skôr.
+    refresh-after: 30d
+    retry-after: 1d
+    # Prvý veľký sken nesmie zasypať verejné API požiadavkami.
+    request-delay: 250ms
+    api-base-url: https://api.themoviedb.org/3
+    image-base-url: https://image.tmdb.org/t/p/w342
+
+  scan:
+    # Nočný sken na pozadí. Manuálny sa spúšťa z management UI alebo cez REST.
+    cron: "0 30 3 * * *"
+    on-startup: false
+    max-depth: 32
+
+  streaming:
+    # Veľkosť bloku, ktorý sa naraz ťahá zo Samby do HTTP odpovede.
+    buffer-size: 256KB
+
+springdoc:
+  api-docs:
+    path: /api/openapi
+  swagger-ui:
+    path: /api/swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+
+logging:
+  level:
+    org.javerlabd.homecenter: INFO
+    com.hierynomus: WARN
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    org.javerlabd.homecenter: DEBUG

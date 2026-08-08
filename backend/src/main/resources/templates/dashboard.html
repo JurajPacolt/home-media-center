@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="sk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Prehľad')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar(${active})}"></nav>
+
+<main class="container">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-4">Prehľad</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4" th:each="tile : ${summary.tiles()}">
+            <a class="text-decoration-none"
+               th:href="@{/admin/kniznica(category=${tile.category().name()})}">
+                <div class="card hc-tile h-100">
+                    <div class="card-body">
+                        <div class="hc-tile-count" th:text="${tile.count()}">0</div>
+                        <div class="hc-tile-label" th:text="${tile.label()}">Kategória</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Samba zdroje</span>
+                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/zdroje}">Spravovať</a>
+                </div>
+                <div class="card-body">
+                    <p th:if="${sources.isEmpty()}" class="mb-0 text-secondary">
+                        Zdroj zatiaľ nie je nastavený. Bez neho sa knižnica nenaplní.
+                    </p>
+                    <table th:if="${!sources.isEmpty()}" class="table table-sm mb-0 align-middle">
+                        <tbody>
+                        <tr th:each="source : ${sources}" th:with="id=${source.requireId()},
+                                                                   use=${usage.get(id)},
+                                                                   scan=${lastScans.get(id)}">
+                            <td>
+                                <a th:href="@{|/admin/zdroje/${id}|}" th:text="${source.name()}">—</a>
+                                <div class="small text-secondary"
+                                     th:text="|${source.host()}/${source.shareName()}|">—</div>
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <span th:text="${use == null} ? '0' : ${use.items()}">0</span>
+                                <div class="small text-secondary"
+                                     th:text="${use == null} ? '—' : ${@humanFormat.size(use.sizeBytes())}">—</div>
+                            </td>
+                            <td class="text-end">
+                                <span th:if="${!source.enabled()}" class="badge text-bg-secondary">Vypnutý</span>
+                                <span th:if="${source.enabled() and scan != null}" class="badge"
+                                      th:classappend="${scan.status().name() == 'FAILED'} ? 'text-bg-danger'
+                                                     : (${scan.status().name() == 'RUNNING'} ? 'text-bg-primary' : 'text-bg-success')"
+                                      th:text="${scan.status().label()}">—</span>
+                                <span th:if="${source.enabled() and scan == null}"
+                                      class="badge text-bg-light">neskenované</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Skenovanie</span>
+                    <form th:action="@{/admin/sken}" method="post" class="m-0">
+                        <button class="btn btn-primary btn-sm" type="submit"
+                                th:disabled="${scanRunning or sources.isEmpty()}">Spustiť sken</button>
+                    </form>
+                </div>
+                <div class="card-body" id="hc-scan" th:data-running="${scanRunning}">
+                    <p th:if="${lastScan == null}" class="text-secondary mb-0">Zatiaľ neprebehol žiadny sken.</p>
+                    <dl th:if="${lastScan != null}" class="row mb-0">
+                        <dt class="col-5">Stav</dt>
+                        <dd class="col-7">
+                            <span class="badge" id="hc-scan-status"
+                                  th:classappend="${lastScan.status().name() == 'FAILED'} ? 'text-bg-danger'
+                                                 : (${lastScan.status().name() == 'RUNNING'} ? 'text-bg-primary' : 'text-bg-success')"
+                                  th:text="${lastScan.status().label()}">—</span>
+                        </dd>
+                        <dt class="col-5">Spustený</dt>
+                        <dd class="col-7" th:text="${@humanFormat.dateTime(lastScan.startedAt())}">—</dd>
+                        <dt class="col-5">Priečinkov</dt>
+                        <dd class="col-7" id="hc-scan-dirs" th:text="${lastScan.directoriesScanned()}">0</dd>
+                        <dt class="col-5">Súborov</dt>
+                        <dd class="col-7" id="hc-scan-files" th:text="${lastScan.filesSeen()}">0</dd>
+                        <dt class="col-5">Pribudlo / zmenilo / ubudlo</dt>
+                        <dd class="col-7" id="hc-scan-delta"
+                            th:text="|${lastScan.itemsAdded()} / ${lastScan.itemsUpdated()} / ${lastScan.itemsRemoved()}|">0 / 0 / 0</dd>
+                    </dl>
+                    <div th:if="${lastScan != null and lastScan.errorMessage() != null}"
+                         class="alert alert-danger mb-0 mt-3 py-2" th:text="${lastScan.errorMessage()}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4" th:if="${!history.isEmpty()}">
+        <div class="card-header">História skenov</div>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Spustený</th>
+                    <th>Zdroj</th>
+                    <th>Vyvolal</th>
+                    <th>Stav</th>
+                    <th class="text-end">Trvanie</th>
+                    <th class="text-end">Súbory</th>
+                    <th class="text-end">+ / ~ / −</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="run : ${history}">
+                    <td th:text="${@humanFormat.dateTime(run.startedAt())}">—</td>
+                    <td th:text="${run.sourceId() == null} ? '—'
+                                 : (${sourceNames.getOrDefault(run.sourceId(), '(zmazaný)')})">—</td>
+                    <td th:text="${run.trigger().label()}">—</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${run.status().name() == 'FAILED'} ? 'text-bg-danger'
+                                             : (${run.status().name() == 'RUNNING'} ? 'text-bg-primary' : 'text-bg-success')"
+                              th:text="${run.status().label()}">—</span>
+                    </td>
+                    <td class="text-end" th:text="${@humanFormat.duration(run.duration().toSeconds())}">—</td>
+                    <td class="text-end" th:text="${run.filesSeen()}">0</td>
+                    <td class="text-end"
+                        th:text="|${run.itemsAdded()} / ${run.itemsUpdated()} / ${run.itemsRemoved()}|">0 / 0 / 0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-secondary mt-4 mb-5 small">
+        Index má <span th:text="${summary.totalItems()}">0</span> položiek,
+        spolu <span th:text="${@humanFormat.size(summary.totalSizeBytes())}">0 B</span>.
+    </p>
+
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

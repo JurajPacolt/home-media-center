@@ -87,7 +87,7 @@ management:
 
 logging:
   level:
-    org.javerlabd.homecenter: INFO
+    org.javerland.homecenter: INFO
     com.hierynomus: WARN
 
 ---
@@ -100,4 +100,4 @@ spring:
 
 logging:
   level:
-    org.javerlabd.homecenter: DEBUG
+    org.javerland.homecenter: DEBUG

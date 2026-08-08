@@ -229,7 +229,7 @@ doc/        assignment and technology decisions
 Thymeleaf templates belong in `backend/src/main/resources/templates`, **not** in
 `frontend/`. The `frontend/` directory holds only the Android TV client.
 
-The base package is `org.javerlabd.homecenter`. Packages are organized by
+The base package is `org.javerland.homecenter`. Packages are organized by
 responsibility, not by layer:
 
 | Package | Contents |
@@ -253,7 +253,7 @@ the token side about something (for example, a password change requiring all TVs
 to be logged out), it uses an event—`UserCredentialsChangedEvent`. A direct call
 would create a circular dependency.
 
-The client's base package is `org.javerlabd.homecenter.tv`, organized the same way:
+The client's base package is `org.javerland.homecenter.tv`, organized the same way:
 
 | Package | Contents |
 |---|---|

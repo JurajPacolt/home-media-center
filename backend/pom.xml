@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>org.javerlabd</groupId>
+    <groupId>org.javerland</groupId>
     <artifactId>homecenter</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>homecenter</name>

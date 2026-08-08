@@ -91,7 +91,7 @@ on a home network, and the management UI must work without internet access.
 
 ## 2026-08-06—Server foundation
 
-The base package is `org.javerlabd.homecenter`. The `backend/` module was created
+The base package is `org.javerland.homecenter`. The `backend/` module was created
 with a functional skeleton: media indexing, Samba scanning, a REST API, streaming
 with Range requests, and a Thymeleaf management UI.
 
@@ -101,7 +101,7 @@ with Range requests, and a Thymeleaf management UI.
 Gradle 6.4.1, which is far from supporting Java 25, while Maven 3.9.6 runs with it
 without problems. Maven also has no daemon that would need tuning alongside Spring.
 
-Project version: `org.javerlabd:homecenter:0.1.0-SNAPSHOT`.
+Project version: `org.javerland:homecenter:0.1.0-SNAPSHOT`.
 
 ### Resolved open questions
 

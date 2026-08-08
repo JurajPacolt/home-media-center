@@ -2,10 +2,10 @@
 # R8 cannot see the reflective link, so both sides have to survive shrinking.
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.**
--keepclassmembers class org.javerlabd.homecenter.tv.api.model.** {
+-keepclassmembers class org.javerland.homecenter.tv.api.model.** {
     *** Companion;
 }
--keepclasseswithmembers class org.javerlabd.homecenter.tv.api.model.** {
+-keepclasseswithmembers class org.javerland.homecenter.tv.api.model.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

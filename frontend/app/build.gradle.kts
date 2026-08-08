@@ -34,9 +34,9 @@ openApi.inputSpec.set(
         .asFile.invariantSeparatorsPath
 )
 openApi.outputDir.set(generatedApiDir.map { it.asFile.path })
-openApi.packageName.set("org.javerlabd.homecenter.tv.api")
-openApi.apiPackage.set("org.javerlabd.homecenter.tv.api")
-openApi.modelPackage.set("org.javerlabd.homecenter.tv.api.model")
+openApi.packageName.set("org.javerland.homecenter.tv.api")
+openApi.apiPackage.set("org.javerland.homecenter.tv.api")
+openApi.modelPackage.set("org.javerland.homecenter.tv.api.model")
 openApi.generateApiTests.set(false)
 openApi.generateModelTests.set(false)
 openApi.generateApiDocumentation.set(false)
@@ -56,11 +56,11 @@ openApi.configOptions.set(
 )
 
 android {
-    namespace = "org.javerlabd.homecenter.tv"
+    namespace = "org.javerland.homecenter.tv"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "org.javerlabd.homecenter.tv"
+        applicationId = "org.javerland.homecenter.tv"
         minSdk = 23
         targetSdk = 37
         versionCode = 1

@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 /** Reads the library for the Android TV client. Everything comes from the index; Samba is not accessed here. */
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Knižnica", description = "Prehľad a výpis indexovaných médií")
+@Tag(name = "Kniznica", description = "Prehľad a výpis indexovaných médií")
 @RequiredArgsConstructor
 public class MediaApiController {
 

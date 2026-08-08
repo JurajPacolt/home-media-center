@@ -1,0 +1,797 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Domáce mediacentrum — API",
+    "description": "REST rozhranie pre Android TV klienta. Médiá sú rozdelené na tri kategórie\n(VIDEO, PHOTO, AUDIO). Server číta z lokálneho indexu a súbory zo Samby\npreposiela cez /api/v1/media/{id}/stream s podporou Range requestov.\n\nVšetko okrem /api/v1/auth/login vyžaduje hlavičku\n`Authorization: Bearer <token>`. Token vydá prihlásenie menom a heslom\nalebo menom a PINom.\n",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    },
+    "version": "v1"
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Skenovanie",
+      "description": "Spustenie skenu Samby a jeho história"
+    },
+    {
+      "name": "Kniznica",
+      "description": "Prehľad a výpis indexovaných médií"
+    },
+    {
+      "name": "Prehravanie",
+      "description": "Prenos súborov zo Samby s podporou Range requestov"
+    },
+    {
+      "name": "Prihlasenie",
+      "description": "Vydávanie a rušenie tokenov pre TV klienta"
+    }
+  ],
+  "paths": {
+    "/api/v1/scan": {
+      "get": {
+        "tags": [
+          "Skenovanie"
+        ],
+        "summary": "História skenov naprieč všetkými zdrojmi",
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScanRunDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Skenovanie"
+        ],
+        "summary": "Spustí sken na pozadí a hneď sa vráti; bez sourceId prejde všetky zapnuté zdroje",
+        "operationId": "start",
+        "parameters": [
+          {
+            "name": "sourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanStartedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Prihlasenie"
+        ],
+        "summary": "Zneplatní token, ktorým je request podpísaný",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Prihlasenie"
+        ],
+        "summary": "Prihlási menom a heslom alebo menom a PINom, vráti token",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scan/latest": {
+      "get": {
+        "tags": [
+          "Skenovanie"
+        ],
+        "summary": "Posledný sken vrátane priebehu toho, ktorý práve beží",
+        "operationId": "latest",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanRunDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/media": {
+      "get": {
+        "tags": [
+          "Kniznica"
+        ],
+        "summary": "Výpis médií, voliteľne filtrovaný podľa kategórie, zdroja a hľadaného textu",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "VIDEO",
+                "PHOTO",
+                "AUDIO"
+              ]
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "genreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 60
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaPageDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/{id}": {
+      "get": {
+        "tags": [
+          "Kniznica"
+        ],
+        "summary": "Detail jednej položky",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaItemDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/{id}/stream": {
+      "get": {
+        "tags": [
+          "Prehravanie"
+        ],
+        "summary": "Prehrá súbor; s hlavičkou Range vráti 206 a žiadanú časť",
+        "operationId": "stream",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/media/{id}/poster": {
+      "get": {
+        "tags": [
+          "Kniznica"
+        ],
+        "summary": "Lokálne cachovaný plagát alebo náhľad epizódy",
+        "operationId": "poster",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/library": {
+      "get": {
+        "tags": [
+          "Kniznica"
+        ],
+        "summary": "Prehľad knižnice — počty pre dlaždice Videá / Fotky / Hudba",
+        "operationId": "library",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibrarySummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/genres": {
+      "get": {
+        "tags": [
+          "Kniznica"
+        ],
+        "summary": "Filmové žánre, ktoré sa v knižnici aktuálne používajú",
+        "operationId": "genres",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaGenreDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Prihlasenie"
+        ],
+        "summary": "Kto je prihlásený týmto tokenom",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ScanStartedDto": {
+        "type": "object",
+        "properties": {
+          "queuedSources": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Počet zdrojov, ktoré sa budú prechádzať"
+          },
+          "sources": {
+            "type": "array",
+            "description": "Názvy zdrojov v poradí, v akom sa prejdú",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LoginRequestDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1
+          },
+          "secret": {
+            "type": "string",
+            "description": "Heslo alebo PIN, ak ho používateľ má nastavený",
+            "minLength": 1
+          },
+          "deviceName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "secret",
+          "username"
+        ]
+      },
+      "AuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "username": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "USER"
+            ]
+          },
+          "hasPin": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Server ho ukazuje jediný raz, znovu sa zobraziť nedá"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserDto"
+          }
+        }
+      },
+      "ScanRunDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "SCHEDULED",
+              "STARTUP"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "directoriesScanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesSeen": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemsAdded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemsUpdated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemsRemoved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaGenreDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sourceId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "VIDEO",
+              "PHOTO",
+              "AUDIO"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "relativePath": {
+            "type": "string"
+          },
+          "extension": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MediaMetadataDto"
+          },
+          "streamUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaMetadataDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "MOVIE",
+              "TV_EPISODE"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "releaseYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "groupKey": {
+            "type": "string"
+          },
+          "groupTitle": {
+            "type": "string"
+          },
+          "seasonNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "episodeNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "partNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaGenreDto"
+            }
+          },
+          "posterUrl": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaItemDto"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CategoryTileDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "VIDEO",
+              "PHOTO",
+              "AUDIO"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LibrarySummaryDto": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTileDto"
+            }
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalSizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastScan": {
+            "$ref": "#/components/schemas/ScanRunDto"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "description": "Token z POST /api/v1/auth/login",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

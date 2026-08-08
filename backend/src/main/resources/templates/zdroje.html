@@ -9,95 +9,119 @@
 
     <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="hc-page-head">
         <div>
-            <h1 class="h3 mb-1">Samba zdroje</h1>
-            <p class="text-secondary mb-0">
+            <h1 class="hc-page-title">Samba zdroje</h1>
+            <p class="hc-page-lead">
                 Prihlasovacie údaje ostávajú na serveri — televízor sa na úložisko nikdy
                 nepripája sám. Zdrojov môže byť viac, sken ich prechádza za sebou.
             </p>
         </div>
-        <a class="btn btn-primary" th:href="@{/admin/zdroje/novy}">Pridať zdroj</a>
+        <div class="hc-page-actions">
+            <a class="btn btn-primary" th:href="@{/admin/zdroje/novy}">
+                <span class="hc-i hc-i-plus" aria-hidden="true"></span>Pridať zdroj
+            </a>
+        </div>
     </div>
 
-    <p th:if="${sources.isEmpty()}" class="alert alert-info">
-        Zatiaľ nie je nastavený žiadny zdroj. Bez neho sa knižnica nenaplní.
-    </p>
+    <div th:if="${sources.isEmpty()}" class="card">
+        <div class="hc-empty">
+            <span class="hc-empty-icon"><span class="hc-i hc-i-server" aria-hidden="true"></span></span>
+            <p class="hc-empty-title">Zatiaľ nie je nastavený žiadny zdroj</p>
+            <p>Bez zdroja sa knižnica nenaplní. Pridaj Samba zdieľanie a spusti sken.</p>
+            <a class="btn btn-primary btn-sm mt-1" th:href="@{/admin/zdroje/novy}">
+                <span class="hc-i hc-i-plus" aria-hidden="true"></span>Pridať zdroj
+            </a>
+        </div>
+    </div>
 
-    <div class="table-responsive" th:if="${!sources.isEmpty()}">
-        <table class="table table-striped align-middle">
-            <thead>
-            <tr>
-                <th>Názov</th>
-                <th>Umiestnenie</th>
-                <th>Stav</th>
-                <th class="text-end">Položiek</th>
-                <th class="text-end">Veľkosť</th>
-                <th>Posledný sken</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="source : ${sources}" th:with="id=${source.requireId()},
-                                                       use=${usage.get(id)},
-                                                       scan=${lastScans.get(id)}">
-                <td>
-                    <a th:href="@{|/admin/zdroje/${id}|}" th:text="${source.name()}">—</a>
-                </td>
-                <td class="small text-secondary">
-                    <span th:text="|${source.host()}:${source.port()}/${source.shareName()}|">—</span>
-                    <span th:if="${!#strings.isEmpty(source.rootPath())}"
-                          th:text="|/${source.rootPath()}|">—</span>
-                </td>
-                <td>
-                    <span class="badge"
-                          th:classappend="${source.enabled()} ? 'text-bg-success' : 'text-bg-secondary'"
-                          th:text="${source.enabled()} ? 'Zapnutý' : 'Vypnutý'">—</span>
-                </td>
-                <td class="text-end" th:text="${use == null} ? '0' : ${use.items()}">0</td>
-                <td class="text-end"
-                    th:text="${use == null} ? '—' : ${@humanFormat.size(use.sizeBytes())}">—</td>
-                <td class="small">
-                    <span th:if="${scan == null}" class="text-secondary">nikdy</span>
-                    <span th:if="${scan != null}">
+    <div class="card" th:if="${!sources.isEmpty()}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th>Názov</th>
+                    <th>Umiestnenie</th>
+                    <th>Stav</th>
+                    <th class="text-end">Položiek</th>
+                    <th class="text-end">Veľkosť</th>
+                    <th>Posledný sken</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="source : ${sources}" th:with="id=${source.requireId()},
+                                                           use=${usage.get(id)},
+                                                           scan=${lastScans.get(id)}">
+                    <td>
+                        <a class="hc-item-title" th:href="@{|/admin/zdroje/${id}|}"
+                           th:text="${source.name()}">—</a>
+                    </td>
+                    <!-- One span, not two: separate elements put whitespace between the
+                         share and the subfolder, which reads as "/media /filmy". -->
+                    <td class="hc-path"
+                        th:text="|${source.host()}:${source.port()}/${source.shareName()}${#strings.isEmpty(source.rootPath()) ? '' : '/' + source.rootPath()}|">—</td>
+                    <td>
                         <span class="badge"
-                              th:classappend="${scan.status().name() == 'FAILED'} ? 'text-bg-danger'
-                                             : (${scan.status().name() == 'RUNNING'} ? 'text-bg-primary' : 'text-bg-success')"
-                              th:text="${scan.status().label()}">—</span>
-                        <span class="text-secondary" th:text="${@humanFormat.dateTime(scan.startedAt())}">—</span>
-                    </span>
-                </td>
-                <td class="text-end text-nowrap">
-                    <form class="d-inline m-0" method="post" th:action="@{|/admin/zdroje/${id}/sken|}">
-                        <button class="btn btn-sm btn-outline-primary" type="submit"
-                                th:disabled="${scanRunning}">Skenovať</button>
-                    </form>
-                    <a class="btn btn-sm btn-outline-secondary" th:href="@{|/admin/zdroje/${id}|}">Upraviť</a>
-                    <!-- Confirmation text uses data-*; Thymeleaf 3.1 intentionally disallows
-                         variables in on* attributes. homecenter.js binds it. -->
-                    <form class="d-inline m-0" method="post" th:action="@{|/admin/zdroje/${id}/zmazat|}"
-                          th:data-hc-confirm="|Zmazať zdroj ${source.name()} aj s jeho položkami v indexe?|">
-                        <button class="btn btn-sm btn-outline-danger" type="submit">Zmazať</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                              th:classappend="${source.enabled()} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${source.enabled()} ? 'Zapnutý' : 'Vypnutý'">—</span>
+                    </td>
+                    <td class="text-end" th:text="${use == null} ? '0' : ${use.items()}">0</td>
+                    <td class="text-end text-nowrap"
+                        th:text="${use == null} ? '—' : ${@humanFormat.size(use.sizeBytes())}">—</td>
+                    <td class="small text-nowrap">
+                        <span th:if="${scan == null}" class="text-secondary">nikdy</span>
+                        <span th:if="${scan != null}" class="d-inline-flex align-items-center gap-2">
+                            <span class="badge"
+                                  th:classappend="${scan.status().name() == 'FAILED'} ? 'text-bg-danger'
+                                                 : (${scan.status().name() == 'RUNNING'} ? 'text-bg-primary' : 'text-bg-success')"
+                                  th:text="${scan.status().label()}">—</span>
+                            <span class="text-secondary" th:text="${@humanFormat.dateTime(scan.startedAt())}">—</span>
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <div class="hc-row-actions">
+                            <form method="post" th:action="@{|/admin/zdroje/${id}/sken|}">
+                                <button class="btn btn-sm btn-outline-primary" type="submit"
+                                        th:disabled="${scanRunning}" title="Skenovať tento zdroj">
+                                    <span class="hc-i hc-i-scan" aria-hidden="true"></span>Skenovať
+                                </button>
+                            </form>
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{|/admin/zdroje/${id}|}">
+                                <span class="hc-i hc-i-edit" aria-hidden="true"></span>Upraviť
+                            </a>
+                            <!-- Confirmation text uses data-*; Thymeleaf 3.1 intentionally disallows
+                                 variables in on* attributes. homecenter.js binds it. -->
+                            <form method="post" th:action="@{|/admin/zdroje/${id}/zmazat|}"
+                                  th:data-hc-confirm="|Zmazať zdroj ${source.name()} aj s jeho položkami v indexe?|">
+                                <button class="btn btn-sm btn-outline-danger" type="submit"
+                                        th:title="|Zmazať zdroj ${source.name()}|">
+                                    <span class="hc-i hc-i-trash" aria-hidden="true"></span>Zmazať
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex flex-wrap gap-2 align-items-center">
+            <form method="post" th:action="@{/admin/sken}" class="m-0">
+                <button class="btn btn-outline-primary" type="submit" th:disabled="${scanRunning}">
+                    <span class="hc-i hc-i-scan" aria-hidden="true"></span>Skenovať všetky zapnuté
+                </button>
+            </form>
+            <span th:if="${scanRunning}" class="badge text-bg-primary">Sken práve beží</span>
+        </div>
     </div>
 
-    <div th:if="${!sources.isEmpty()}" class="d-flex gap-2 align-items-center">
-        <form method="post" th:action="@{/admin/sken}" class="m-0">
-            <button class="btn btn-outline-primary" type="submit" th:disabled="${scanRunning}">
-                Skenovať všetky zapnuté
-            </button>
-        </form>
-        <span th:if="${scanRunning}" class="text-secondary small">Sken práve beží.</span>
-    </div>
-
-    <p class="text-secondary small mt-4 mb-5">
+    <p class="text-secondary small mt-3" th:if="${!sources.isEmpty()}">
         Vypnutý zdroj sa nezaraďuje do naplánovaného skenu, ale jeho položky ostávajú
         v indexe. Zmazanie zdroja ich odstráni.
     </p>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </main>
 

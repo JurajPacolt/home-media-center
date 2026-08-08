@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Compose paints everything, so this theme only prevents a white flash between the
+        window opening and the first frame.
+    -->
+    <style name="Theme.HomeCenter" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/hc_background</item>
+        <item name="android:colorBackground">@color/hc_background</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+    </style>
+</resources>

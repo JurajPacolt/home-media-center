@@ -9,59 +9,75 @@
 
     <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="hc-page-head">
         <div>
-            <h1 class="h3 mb-1">Používatelia</h1>
-            <p class="text-secondary mb-0">
+            <h1 class="hc-page-title">Používatelia</h1>
+            <p class="hc-page-lead">
                 Správca sa dostane sem aj do televízora, používateľ iba do televízora.
+                PIN odomyká televízor, do správy servera treba plné heslo.
             </p>
         </div>
-        <a class="btn btn-primary" th:href="@{/admin/pouzivatelia/novy}">Pridať</a>
+        <div class="hc-page-actions">
+            <a class="btn btn-primary" th:href="@{/admin/pouzivatelia/novy}">
+                <span class="hc-i hc-i-plus" aria-hidden="true"></span>Pridať
+            </a>
+        </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-            <tr>
-                <th>Meno</th>
-                <th>Zobrazované meno</th>
-                <th>Rola</th>
-                <th>PIN</th>
-                <th>Stav</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="user : ${users}">
-                <td th:text="${user.username()}">—</td>
-                <td class="text-secondary" th:text="${user.displayName()}">—</td>
-                <td>
-                    <span class="badge"
-                          th:classappend="${user.isAdmin()} ? 'text-bg-primary' : 'text-bg-light'"
-                          th:text="${user.role().label()}">—</span>
-                </td>
-                <td>
-                    <span th:if="${user.hasPin()}" class="badge text-bg-success">nastavený</span>
-                    <span th:unless="${user.hasPin()}" class="text-secondary small">—</span>
-                </td>
-                <td>
-                    <span class="badge"
-                          th:classappend="${user.enabled()} ? 'text-bg-success' : 'text-bg-secondary'"
-                          th:text="${user.enabled()} ? 'Zapnutý' : 'Vypnutý'">—</span>
-                </td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-secondary"
-                       th:href="@{|/admin/pouzivatelia/${user.requireId()}|}">Upraviť</a>
-                    <form class="d-inline m-0" method="post"
-                          th:action="@{|/admin/pouzivatelia/${user.requireId()}/zmazat|}"
-                          th:data-hc-confirm="|Naozaj zmazať používateľa ${user.username()}?|">
-                        <button class="btn btn-sm btn-outline-danger" type="submit">Zmazať</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th>Meno</th>
+                    <th>Zobrazované meno</th>
+                    <th>Rola</th>
+                    <th>PIN</th>
+                    <th>Stav</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td class="hc-item-title" th:text="${user.username()}">—</td>
+                    <td class="text-secondary" th:text="${user.displayName()}">—</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${user.isAdmin()} ? 'text-bg-primary' : 'text-bg-light'"
+                              th:text="${user.role().label()}">—</span>
+                    </td>
+                    <td>
+                        <span th:if="${user.hasPin()}" class="badge text-bg-success">nastavený</span>
+                        <span th:unless="${user.hasPin()}" class="text-secondary small">—</span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${user.enabled()} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${user.enabled()} ? 'Zapnutý' : 'Vypnutý'">—</span>
+                    </td>
+                    <td class="text-end">
+                        <div class="hc-row-actions">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{|/admin/pouzivatelia/${user.requireId()}|}">
+                                <span class="hc-i hc-i-edit" aria-hidden="true"></span>Upraviť
+                            </a>
+                            <form method="post"
+                                  th:action="@{|/admin/pouzivatelia/${user.requireId()}/zmazat|}"
+                                  th:data-hc-confirm="|Naozaj zmazať používateľa ${user.username()}?|">
+                                <button class="btn btn-sm btn-outline-danger" type="submit"
+                                        th:title="|Zmazať používateľa ${user.username()}|">
+                                    <span class="hc-i hc-i-trash" aria-hidden="true"></span>Zmazať
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </main>
 

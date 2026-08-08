@@ -110,8 +110,10 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(requests -> requests
                         // Static files must be available without authentication, or the login
-                        // page will have no Bootstrap styling.
-                        .requestMatchers("/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                        // page will have no Bootstrap styling. /img/** carries the favicon and
+                        // the TMDB logo—branding, nothing that needs protecting.
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**",
+                                "/favicon.ico").permitAll()
                         .requestMatchers("/prihlasenie").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         // The error page must be accessible, or every sendError() from any chain

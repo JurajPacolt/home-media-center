@@ -12,6 +12,11 @@ import org.springframework.context.annotation.Configuration;
 /**
  * This specification is the contract between the server and Android TV client. Models
  * are not shared between Java and Kotlin; OpenAPI is the only link between them.
+ *
+ * <p><b>Tag names must stay free of diacritics.</b> The client generator turns each tag
+ * into a Kotlin interface name and strips whatever it cannot spell, so {@code Knižnica}
+ * would arrive as {@code KninicaApi}. Descriptions are prose and keep their diacritics;
+ * only the names are identifiers.
  */
 @Configuration(proxyBeanMethods = false)
 public class OpenApiConfig {
@@ -34,7 +39,10 @@ public class OpenApiConfig {
                                 `Authorization: Bearer <token>`. Token vydá prihlásenie menom a heslom
                                 alebo menom a PINom.
                                 """)
-                        .license(new License().name("Domáce použitie")))
+                        // OpenAPI 3.1 rejects a license that carries only a name; the client's
+                        // code generator validates the specification and refuses to run without
+                        // an SPDX identifier here.
+                        .license(new License().name("Apache-2.0").identifier("Apache-2.0")))
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME, new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")

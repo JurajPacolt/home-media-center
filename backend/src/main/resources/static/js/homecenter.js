@@ -7,6 +7,66 @@
     'use strict';
 
     var POLL_MS = 2000;
+    var THEME_KEY = 'hc-theme';
+
+    /*
+     * Theme switching. The theme itself is already applied by the inline script in
+     * fragments/layout.html—waiting for this file would mean a flash of the light theme
+     * on every page load. What is left here is the menu: reading the stored choice,
+     * writing a new one, and keeping the button icon in sync.
+     *
+     * Three states, because "auto" is not the same as either fixed theme: it follows the
+     * operating system and has to keep doing so after the system setting changes.
+     */
+    $(function () {
+        var button = document.getElementById('hc-theme-button');
+        if (button === null) {
+            return;
+        }
+
+        var icon = document.getElementById('hc-theme-icon');
+        var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function stored() {
+            try {
+                var value = window.localStorage.getItem(THEME_KEY);
+                return value === 'light' || value === 'dark' ? value : 'auto';
+            } catch (e) {
+                // Private mode blocks localStorage; the system setting still works.
+                return 'auto';
+            }
+        }
+
+        function apply(choice) {
+            var dark = choice === 'dark' || (choice === 'auto' && systemDark.matches);
+            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+            icon.className = 'hc-i ' + (dark ? 'hc-i-moon' : 'hc-i-sun');
+            $('.hc-theme-option').each(function () {
+                this.setAttribute('aria-checked', String(this.dataset.hcTheme === choice));
+            });
+        }
+
+        $('.hc-theme-option').on('click', function () {
+            var choice = this.dataset.hcTheme;
+            try {
+                if (choice === 'auto') {
+                    window.localStorage.removeItem(THEME_KEY);
+                } else {
+                    window.localStorage.setItem(THEME_KEY, choice);
+                }
+            } catch (e) {
+                // The choice then lasts only until the page is left.
+            }
+            apply(choice);
+        });
+
+        // Only meaningful while "auto" is selected, hence the re-read instead of a flag.
+        systemDark.addEventListener('change', function () {
+            apply(stored());
+        });
+
+        apply(stored());
+    });
 
     /*
      * Confirmation before an irreversible action. The text is in data-hc-confirm, not

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Mediacentrum">
+    <!--
+      The same mark as .hc-brand-mark in the top bar: an Iris-to-Aqua tile with a play
+      glyph. Drawn as SVG so a browser tab, a bookmark and a pinned shortcut all stay
+      sharp; the colours are the literal palette values because an icon file cannot
+      read the stylesheet's custom properties.
+    -->
+    <defs>
+        <linearGradient id="hc-brand" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8b87ef"/>
+            <stop offset=".6" stop-color="#6149d9"/>
+            <stop offset="1" stop-color="#159a9c"/>
+        </linearGradient>
+    </defs>
+    <rect width="32" height="32" rx="8" fill="url(#hc-brand)"/>
+    <path d="M12.5 9.8a1 1 0 0 1 1.54-.84l8 5.2a1 1 0 0 1 0 1.68l-8 5.2a1 1 0 0 1-1.54-.84Z" fill="#fff"/>
+</svg>

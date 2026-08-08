@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Prehrávanie", description = "Prenos súborov zo Samby s podporou Range requestov")
+@Tag(name = "Prehravanie", description = "Prenos súborov zo Samby s podporou Range requestov")
 @RequiredArgsConstructor
 public class StreamApiController {
 

@@ -9,97 +9,135 @@
 
     <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <h1 class="h3 mb-1" th:text="${form.isNew()} ? 'Nový Samba zdroj' : 'Úprava zdroja'">Samba zdroj</h1>
-    <p class="text-secondary mb-4">
-        Prihlasovacie údaje ostávajú na serveri — televízor sa na úložisko nikdy nepripája sám.
-    </p>
+    <div class="hc-page-head">
+        <div>
+            <h1 class="hc-page-title"
+                th:text="${form.isNew()} ? 'Nový Samba zdroj' : 'Úprava zdroja'">Samba zdroj</h1>
+            <p class="hc-page-lead">
+                Prihlasovacie údaje ostávajú na serveri — televízor sa na úložisko nikdy
+                nepripája sám.
+            </p>
+        </div>
+        <div class="hc-page-actions">
+            <a class="btn btn-outline-secondary" th:href="@{/admin/zdroje}">Späť na zoznam</a>
+        </div>
+    </div>
 
-    <form th:action="@{/admin/zdroje}" th:object="${form}" method="post" class="card">
-        <div class="card-body">
-            <input type="hidden" th:field="*{id}">
+    <div class="row g-4">
+        <div class="col-12 col-lg-9">
+            <form th:action="@{/admin/zdroje}" th:object="${form}" method="post" class="card">
+                <div class="card-header"><span>Pripojenie</span></div>
+                <div class="card-body">
+                    <input type="hidden" th:field="*{id}">
 
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <label class="form-label" for="name">Názov</label>
-                    <input class="form-control" id="name" th:field="*{name}"
-                           th:errorclass="is-invalid" placeholder="Domáci NAS">
-                    <div class="invalid-feedback" th:errors="*{name}"></div>
-                    <div class="form-text">Musí byť jedinečný — podľa neho sa zdroj vyberá vo filtri knižnice.</div>
-                </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="name">Názov</label>
+                            <input class="form-control" id="name" th:field="*{name}"
+                                   th:errorclass="is-invalid" placeholder="Domáci NAS">
+                            <div class="invalid-feedback" th:errors="*{name}"></div>
+                            <div class="form-text">Musí byť jedinečný — podľa neho sa zdroj vyberá vo filtri knižnice.</div>
+                        </div>
 
-                <div class="col-12 col-md-4">
-                    <label class="form-label" for="host">Server</label>
-                    <input class="form-control" id="host" th:field="*{host}"
-                           th:errorclass="is-invalid" placeholder="192.168.1.10">
-                    <div class="invalid-feedback" th:errors="*{host}"></div>
-                </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="host">Server</label>
+                            <input class="form-control" id="host" th:field="*{host}"
+                                   th:errorclass="is-invalid" placeholder="192.168.1.10">
+                            <div class="invalid-feedback" th:errors="*{host}"></div>
+                        </div>
 
-                <div class="col-12 col-md-2">
-                    <label class="form-label" for="port">Port</label>
-                    <input class="form-control" id="port" type="number" th:field="*{port}"
-                           th:errorclass="is-invalid">
-                    <div class="invalid-feedback" th:errors="*{port}"></div>
-                </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label" for="port">Port</label>
+                            <input class="form-control" id="port" type="number" th:field="*{port}"
+                                   th:errorclass="is-invalid">
+                            <div class="invalid-feedback" th:errors="*{port}"></div>
+                        </div>
 
-                <div class="col-12 col-md-6">
-                    <label class="form-label" for="shareName">Zdieľaný priečinok</label>
-                    <input class="form-control" id="shareName" th:field="*{shareName}"
-                           th:errorclass="is-invalid" placeholder="media">
-                    <div class="invalid-feedback" th:errors="*{shareName}"></div>
-                </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="shareName">Zdieľaný priečinok</label>
+                            <input class="form-control" id="shareName" th:field="*{shareName}"
+                                   th:errorclass="is-invalid" placeholder="media">
+                            <div class="invalid-feedback" th:errors="*{shareName}"></div>
+                        </div>
 
-                <div class="col-12 col-md-6">
-                    <label class="form-label" for="rootPath">Podpriečinok</label>
-                    <input class="form-control" id="rootPath" th:field="*{rootPath}"
-                           placeholder="filmy">
-                    <div class="form-text">Nechaj prázdne, ak sa má skenovať celý zdieľaný priečinok.</div>
-                </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="rootPath">Podpriečinok</label>
+                            <input class="form-control" id="rootPath" th:field="*{rootPath}"
+                                   placeholder="filmy">
+                            <div class="form-text">Nechaj prázdne, ak sa má skenovať celý zdieľaný priečinok.</div>
+                        </div>
 
-                <div class="col-12 col-md-4">
-                    <label class="form-label" for="username">Používateľ</label>
-                    <input class="form-control" id="username" th:field="*{username}"
-                           autocomplete="off">
-                    <div class="form-text">Prázdne = anonymné pripojenie.</div>
-                </div>
+                        <div class="col-12">
+                            <hr class="my-1">
+                        </div>
 
-                <div class="col-12 col-md-4">
-                    <label class="form-label" for="password">Heslo</label>
-                    <input class="form-control" id="password" type="password" th:field="*{password}"
-                           autocomplete="new-password">
-                    <div class="form-text" th:if="${form.hasStoredPassword()}">
-                        Uložené heslo sa nezobrazuje. Prázdne pole ho nechá tak, ako je.
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="username">Používateľ</label>
+                            <input class="form-control" id="username" th:field="*{username}"
+                                   autocomplete="off">
+                            <div class="form-text">Prázdne = anonymné pripojenie.</div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="password">Heslo</label>
+                            <input class="form-control" id="password" type="password" th:field="*{password}"
+                                   autocomplete="new-password">
+                            <div class="form-text" th:if="${form.hasStoredPassword()}">
+                                Uložené heslo sa nezobrazuje. Prázdne pole ho nechá tak, ako je.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="domain">Doména</label>
+                            <input class="form-control" id="domain" th:field="*{domain}" autocomplete="off">
+                            <div class="form-text">Nepovinné (workgroup).</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enabled" th:field="*{enabled}">
+                                <label class="form-check-label" for="enabled">
+                                    Zaraďovať do naplánovaného skenu
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-4">
-                    <label class="form-label" for="domain">Doména</label>
-                    <input class="form-control" id="domain" th:field="*{domain}" autocomplete="off">
-                    <div class="form-text">Nepovinné (workgroup).</div>
+                <div class="card-footer d-flex flex-wrap gap-2">
+                    <button class="btn btn-primary" type="submit">Uložiť</button>
+                    <button class="btn btn-outline-secondary" type="submit"
+                            th:formaction="@{/admin/zdroje/test}">
+                        <span class="hc-i hc-i-plug" aria-hidden="true"></span>Otestovať pripojenie
+                    </button>
                 </div>
+            </form>
+        </div>
 
-                <div class="col-12">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="enabled" th:field="*{enabled}">
-                        <label class="form-check-label" for="enabled">
-                            Zaraďovať do naplánovaného skenu
-                        </label>
-                    </div>
+        <div class="col-12 col-lg-3">
+            <div class="card" th:if="${usage != null and usage.items() > 0}">
+                <div class="card-header"><span>V indexe</span></div>
+                <div class="card-body">
+                    <dl class="hc-facts">
+                        <dt>Položiek</dt>
+                        <dd th:text="${usage.items()}">0</dd>
+                        <dt>Veľkosť</dt>
+                        <dd th:text="${@humanFormat.size(usage.sizeBytes())}">0 B</dd>
+                    </dl>
                 </div>
             </div>
-        </div>
 
-        <div class="card-footer d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Uložiť</button>
-            <button class="btn btn-outline-secondary" type="submit"
-                    th:formaction="@{/admin/zdroje/test}">Otestovať pripojenie</button>
-            <a class="btn btn-link ms-auto" th:href="@{/admin/zdroje}">Späť na zoznam</a>
+            <div class="alert alert-info mt-3">
+                <span class="hc-i hc-i-info" aria-hidden="true"></span>
+                <span>
+                    Uložené heslo sa už nikdy nezobrazí — prázdne pole ho nechá nezmenené.
+                    Test pripojenia použije údaje z formulára, aj keď ešte nie sú uložené.
+                </span>
+            </div>
         </div>
-    </form>
+    </div>
 
-    <p class="text-secondary small mt-3 mb-5" th:if="${usage != null and usage.items() > 0}">
-        Tento zdroj má v indexe <strong th:text="${usage.items()}">0</strong> položiek,
-        spolu <strong th:text="${@humanFormat.size(usage.sizeBytes())}">0 B</strong>.
-    </p>
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </main>
 

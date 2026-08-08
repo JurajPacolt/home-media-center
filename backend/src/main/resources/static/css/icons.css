@@ -1,0 +1,215 @@
+/*
+ * Icon set for the management UI.
+ *
+ * The icons are inline SVG data URIs used as a CSS mask, not an icon font and not
+ * <img>. Three reasons: no extra WebJar and no font file to download on a network
+ * that may be offline, no additional HTTP requests, and — because a mask is painted
+ * with background-color — every icon inherits currentColor. A button, a badge and a
+ * link therefore tint their icon automatically, in both themes.
+ *
+ * Usage: <span class="hc-i hc-i-film" aria-hidden="true"></span>
+ * Icons are always decorative; the adjacent text carries the meaning. Where an icon
+ * stands alone, the control needs its own aria-label.
+ */
+
+.hc-i {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex: none;
+    vertical-align: -.135em;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+/* Slightly larger than the surrounding text, for tiles and empty states. */
+.hc-i-lg {
+    width: 1.35em;
+    height: 1.35em;
+}
+
+.hc-i-dashboard {
+    -webkit-mask-image: var(--hc-icon-dashboard);
+    mask-image: var(--hc-icon-dashboard);
+}
+
+.hc-i-library {
+    -webkit-mask-image: var(--hc-icon-library);
+    mask-image: var(--hc-icon-library);
+}
+
+.hc-i-server {
+    -webkit-mask-image: var(--hc-icon-server);
+    mask-image: var(--hc-icon-server);
+}
+
+.hc-i-users {
+    -webkit-mask-image: var(--hc-icon-users);
+    mask-image: var(--hc-icon-users);
+}
+
+.hc-i-user {
+    -webkit-mask-image: var(--hc-icon-user);
+    mask-image: var(--hc-icon-user);
+}
+
+.hc-i-code {
+    -webkit-mask-image: var(--hc-icon-code);
+    mask-image: var(--hc-icon-code);
+}
+
+.hc-i-key {
+    -webkit-mask-image: var(--hc-icon-key);
+    mask-image: var(--hc-icon-key);
+}
+
+.hc-i-logout {
+    -webkit-mask-image: var(--hc-icon-logout);
+    mask-image: var(--hc-icon-logout);
+}
+
+.hc-i-film {
+    -webkit-mask-image: var(--hc-icon-film);
+    mask-image: var(--hc-icon-film);
+}
+
+.hc-i-photo {
+    -webkit-mask-image: var(--hc-icon-photo);
+    mask-image: var(--hc-icon-photo);
+}
+
+.hc-i-music {
+    -webkit-mask-image: var(--hc-icon-music);
+    mask-image: var(--hc-icon-music);
+}
+
+.hc-i-play {
+    -webkit-mask-image: var(--hc-icon-play);
+    mask-image: var(--hc-icon-play);
+}
+
+.hc-i-scan {
+    -webkit-mask-image: var(--hc-icon-scan);
+    mask-image: var(--hc-icon-scan);
+}
+
+.hc-i-plus {
+    -webkit-mask-image: var(--hc-icon-plus);
+    mask-image: var(--hc-icon-plus);
+}
+
+.hc-i-trash {
+    -webkit-mask-image: var(--hc-icon-trash);
+    mask-image: var(--hc-icon-trash);
+}
+
+.hc-i-edit {
+    -webkit-mask-image: var(--hc-icon-edit);
+    mask-image: var(--hc-icon-edit);
+}
+
+.hc-i-download {
+    -webkit-mask-image: var(--hc-icon-download);
+    mask-image: var(--hc-icon-download);
+}
+
+.hc-i-search {
+    -webkit-mask-image: var(--hc-icon-search);
+    mask-image: var(--hc-icon-search);
+}
+
+.hc-i-filter {
+    -webkit-mask-image: var(--hc-icon-filter);
+    mask-image: var(--hc-icon-filter);
+}
+
+.hc-i-check {
+    -webkit-mask-image: var(--hc-icon-check);
+    mask-image: var(--hc-icon-check);
+}
+
+.hc-i-alert {
+    -webkit-mask-image: var(--hc-icon-alert);
+    mask-image: var(--hc-icon-alert);
+}
+
+.hc-i-info {
+    -webkit-mask-image: var(--hc-icon-info);
+    mask-image: var(--hc-icon-info);
+}
+
+.hc-i-sun {
+    -webkit-mask-image: var(--hc-icon-sun);
+    mask-image: var(--hc-icon-sun);
+}
+
+.hc-i-moon {
+    -webkit-mask-image: var(--hc-icon-moon);
+    mask-image: var(--hc-icon-moon);
+}
+
+.hc-i-auto {
+    -webkit-mask-image: var(--hc-icon-auto);
+    mask-image: var(--hc-icon-auto);
+}
+
+.hc-i-plug {
+    -webkit-mask-image: var(--hc-icon-plug);
+    mask-image: var(--hc-icon-plug);
+}
+
+.hc-i-inbox {
+    -webkit-mask-image: var(--hc-icon-inbox);
+    mask-image: var(--hc-icon-inbox);
+}
+
+.hc-i-tv {
+    -webkit-mask-image: var(--hc-icon-tv);
+    mask-image: var(--hc-icon-tv);
+}
+
+/*
+ * The shapes. They live in custom properties rather than directly in the rules
+ * above so a single icon can be swapped in one place, and so the same drawing can
+ * be reused by a rule that is not an .hc-i-* class (the media tiles key theirs off
+ * the category name).
+ *
+ * All are a 24x24 stroked grid with round caps — one drawing style, so no icon
+ * looks heavier than its neighbours. Black stroke is intentional: a mask reads
+ * only the alpha channel, so the colour in the SVG never reaches the screen.
+ */
+:root {
+    --hc-icon-dashboard: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7.5' height='7.5' rx='2'/%3E%3Crect x='13.5' y='3' width='7.5' height='7.5' rx='2'/%3E%3Crect x='3' y='13.5' width='7.5' height='7.5' rx='2'/%3E%3Crect x='13.5' y='13.5' width='7.5' height='7.5' rx='2'/%3E%3C/svg%3E");
+    --hc-icon-library: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='4.5' height='16' rx='1.5'/%3E%3Crect x='9.5' y='4' width='4.5' height='16' rx='1.5'/%3E%3Cpath d='m16.8 5.6 3.6 1.1a1.5 1.5 0 0 1 1 1.9l-3.3 11a1.5 1.5 0 0 1-1.9 1l-1.1-.3'/%3E%3C/svg%3E");
+    --hc-icon-server: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3.5' width='18' height='7' rx='2'/%3E%3Crect x='3' y='13.5' width='18' height='7' rx='2'/%3E%3Cpath d='M7 7h.01M7 17h.01'/%3E%3C/svg%3E");
+    --hc-icon-users: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.5'/%3E%3Cpath d='M2.5 20a6.5 6.5 0 0 1 13 0'/%3E%3Cpath d='M16.5 4.8a3.5 3.5 0 0 1 0 6.4M18 14.2a6.5 6.5 0 0 1 3.5 5.8'/%3E%3C/svg%3E");
+    --hc-icon-user: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.75'/%3E%3Cpath d='M4.75 20a7.25 7.25 0 0 1 14.5 0'/%3E%3C/svg%3E");
+    --hc-icon-code: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8.5 7.5-5 4.5 5 4.5M15.5 7.5l5 4.5-5 4.5M13.5 4l-3 16'/%3E%3C/svg%3E");
+    --hc-icon-key: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7.5' cy='15.5' r='4'/%3E%3Cpath d='m10.5 12.5 8-8M16.5 6.5l2.5 2.5M14.5 8.5l2.5 2.5'/%3E%3C/svg%3E");
+    --hc-icon-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H14'/%3E%3Cpath d='m16.5 8.5 3.5 3.5-3.5 3.5M20 12H9.5'/%3E%3C/svg%3E");
+    --hc-icon-film: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='4' width='19' height='16' rx='2.5'/%3E%3Cpath d='M7.5 4v16M16.5 4v16M2.5 12h19M2.5 8h5M2.5 16h5M16.5 8h5M16.5 16h5'/%3E%3C/svg%3E");
+    --hc-icon-photo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2.5'/%3E%3Ccircle cx='8.75' cy='9.5' r='1.75'/%3E%3Cpath d='m3.5 17.5 4.75-4.5a2 2 0 0 1 2.7-.05L16 17.5M14 15l2.1-2a2 2 0 0 1 2.7-.03l1.7 1.5'/%3E%3C/svg%3E");
+    --hc-icon-music: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='17.5' r='3'/%3E%3Ccircle cx='17.5' cy='15' r='3'/%3E%3Cpath d='M9 17.5v-11l11.5-2.5V15'/%3E%3C/svg%3E");
+    --hc-icon-play: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 5.2a1 1 0 0 1 1.53-.85l9.2 6.8a1 1 0 0 1 0 1.7l-9.2 6.8a1 1 0 0 1-1.53-.85Z'/%3E%3C/svg%3E");
+    --hc-icon-scan: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.5 12a8.5 8.5 0 1 1-2.6-6.1'/%3E%3Cpath d='M20.5 4v5h-5'/%3E%3C/svg%3E");
+    --hc-icon-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");
+    --hc-icon-trash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5h16M9.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v1.5'/%3E%3Cpath d='M6.5 6.5 7.4 19a2 2 0 0 0 2 1.9h5.2a2 2 0 0 0 2-1.9l.9-12.5M10.5 10.5v6M13.5 10.5v6'/%3E%3C/svg%3E");
+    --hc-icon-edit: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4l10.5-10.5a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z'/%3E%3Cpath d='m14 7 3.5 3.5'/%3E%3C/svg%3E");
+    --hc-icon-download: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5v11M7.5 10.5 12 15l4.5-4.5M4.5 17.5v1a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-1'/%3E%3C/svg%3E");
+    --hc-icon-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 4.5 4.5'/%3E%3C/svg%3E");
+    --hc-icon-filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 5.5h17l-6.5 7.5v6l-4 2v-8Z'/%3E%3C/svg%3E");
+    --hc-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='m8.5 12 2.5 2.5 4.5-5'/%3E%3C/svg%3E");
+    --hc-icon-alert: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.7 4.2 2.9 17.5a1.5 1.5 0 0 0 1.3 2.3h15.6a1.5 1.5 0 0 0 1.3-2.3L13.3 4.2a1.5 1.5 0 0 0-2.6 0Z'/%3E%3Cpath d='M12 9.5v4M12 16.8h.01'/%3E%3C/svg%3E");
+    --hc-icon-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 11v5.5M12 7.8h.01'/%3E%3C/svg%3E");
+    --hc-icon-sun: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4'/%3E%3C/svg%3E");
+    --hc-icon-moon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 14.2A8.5 8.5 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2Z'/%3E%3C/svg%3E");
+    --hc-icon-auto: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='18' height='12' rx='2'/%3E%3Cpath d='M2 20h20'/%3E%3C/svg%3E");
+    --hc-icon-plug: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2.5v5M15 2.5v5M6.5 7.5h11v3a5.5 5.5 0 0 1-11 0Z'/%3E%3Cpath d='M12 16v5.5'/%3E%3C/svg%3E");
+    --hc-icon-inbox: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 13.5h4.5l1.5 3h6l1.5-3H21'/%3E%3Cpath d='M6 4.5h12l3 9v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4Z'/%3E%3C/svg%3E");
+    --hc-icon-tv: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='6.5' width='19' height='13' rx='2.5'/%3E%3Cpath d='m8 2.5 4 4 4-4'/%3E%3C/svg%3E");
+}

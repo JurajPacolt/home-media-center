@@ -73,6 +73,11 @@ springdoc:
     path: /api/openapi
   swagger-ui:
     path: /api/swagger-ui.html
+  # The specification is the contract with the Android TV client, so it describes only
+  # what the client may call. The /admin/** endpoints are internal to the management UI
+  # (see the Thymeleaf/REST separation) and the client never calls them; generating a
+  # Kotlin API for them would suggest otherwise.
+  paths-to-match: /api/v1/**
 
 management:
   endpoints:

@@ -6,17 +6,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="|${title} · Mediacentrum|">Mediacentrum</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+
+    <!--
+      The theme is applied before the first paint, not from homecenter.js. Setting it
+      after the stylesheets have rendered means every page load flashes the light theme
+      first. The script is deliberately tiny and inline for the same reason: an external
+      file would have to be fetched first.
+
+      "auto" is the default and follows the operating system; the stored choice only
+      overrides it. th:inline="none" stops Thymeleaf from reading double-bracket
+      sequences in the script as inline expressions.
+    -->
+    <script th:inline="none">
+        (function () {
+            var stored = null;
+            try {
+                stored = window.localStorage.getItem('hc-theme');
+            } catch (e) {
+                /* Private mode blocks localStorage; fall back to the system setting. */
+            }
+            var dark = stored === 'dark' || (stored !== 'light'
+                && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+        })();
+    </script>
+
     <!-- Libraries are served from WebJars, not a CDN; the server runs on a home network. -->
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/video.js/dist/video-js.min.css}">
+    <!-- Tokens define the colour scale, icons the shapes; both must load before the
+         component styling that consumes them. -->
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/icons.css}">
     <link rel="stylesheet" th:href="@{/css/homecenter.css}">
 </head>
 
 <body>
 
-<nav th:fragment="navbar(active)" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav th:fragment="navbar(active)" class="navbar navbar-expand-lg hc-topbar">
     <div class="container">
-        <a class="navbar-brand" th:href="@{/admin}">Mediacentrum</a>
+        <a class="navbar-brand" th:href="@{/admin}">
+            <span class="hc-brand-mark" aria-hidden="true">
+                <span class="hc-i hc-i-play"></span>
+            </span>
+            Mediacentrum
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hc-nav"
                 aria-controls="hc-nav" aria-expanded="false" aria-label="Menu">
             <span class="navbar-toggler-icon"></span>
@@ -25,48 +60,110 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${active == 'dashboard'} ? 'active'"
-                       th:href="@{/admin}">Prehľad</a>
+                       th:href="@{/admin}">
+                        <span class="hc-i hc-i-dashboard" aria-hidden="true"></span>Prehľad
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${active == 'kniznica'} ? 'active'"
-                       th:href="@{/admin/kniznica}">Knižnica</a>
+                       th:href="@{/admin/kniznica}">
+                        <span class="hc-i hc-i-library" aria-hidden="true"></span>Knižnica
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${active == 'zdroje'} ? 'active'"
-                       th:href="@{/admin/zdroje}">Samba zdroje</a>
+                       th:href="@{/admin/zdroje}">
+                        <span class="hc-i hc-i-server" aria-hidden="true"></span>Samba zdroje
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${active == 'pouzivatelia'} ? 'active'"
-                       th:href="@{/admin/pouzivatelia}">Používatelia</a>
+                       th:href="@{/admin/pouzivatelia}">
+                        <span class="hc-i hc-i-users" aria-hidden="true"></span>Používatelia
+                    </a>
                 </li>
             </ul>
-            <a class="nav-link text-secondary me-3" th:href="@{/api/swagger-ui.html}" target="_blank">API</a>
 
-            <div class="dropdown" sec:authorize="isAuthenticated()">
-                <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    <span sec:authentication="principal.user.displayName">Správca</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" th:href="@{/admin/heslo}">Zmeniť heslo</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li>
-                        <form th:action="@{/odhlasenie}" method="post" class="m-0">
-                            <button class="dropdown-item" type="submit">Odhlásiť sa</button>
-                        </form>
-                    </li>
-                </ul>
+            <div class="hc-topbar-actions">
+                <a class="hc-shell-btn" th:href="@{/api/swagger-ui.html}" target="_blank">
+                    <span class="hc-i hc-i-code" aria-hidden="true"></span>API
+                </a>
+
+                <!-- Three states, not a two-way switch: "auto" has to stay reachable, or a
+                     user who once clicked the toggle can never return to the system setting. -->
+                <div class="dropdown">
+                    <button class="hc-shell-btn hc-shell-btn-icon" type="button" id="hc-theme-button"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Vzhľad">
+                        <span class="hc-i hc-i-sun" id="hc-theme-icon" aria-hidden="true"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="hc-theme-button">
+                        <li><h6 class="dropdown-header">Vzhľad</h6></li>
+                        <li>
+                            <button class="dropdown-item hc-theme-option" type="button"
+                                    data-hc-theme="light" role="menuitemradio" aria-checked="false">
+                                <span class="hc-i hc-i-sun" aria-hidden="true"></span>Svetlý
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item hc-theme-option" type="button"
+                                    data-hc-theme="dark" role="menuitemradio" aria-checked="false">
+                                <span class="hc-i hc-i-moon" aria-hidden="true"></span>Tmavý
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item hc-theme-option" type="button"
+                                    data-hc-theme="auto" role="menuitemradio" aria-checked="true">
+                                <span class="hc-i hc-i-auto" aria-hidden="true"></span>Podľa systému
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="dropdown" sec:authorize="isAuthenticated()">
+                    <button class="hc-shell-btn dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="hc-i hc-i-user" aria-hidden="true"></span>
+                        <span sec:authentication="principal.user.displayName">Správca</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" th:href="@{/admin/heslo}">
+                                <span class="hc-i hc-i-key" aria-hidden="true"></span>Zmeniť heslo
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form th:action="@{/odhlasenie}" method="post" class="m-0">
+                                <button class="dropdown-item" type="submit">
+                                    <span class="hc-i hc-i-logout" aria-hidden="true"></span>Odhlásiť sa
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </nav>
 
+<!-- The icon is decorative: the alert text already says what happened. -->
 <div th:fragment="alerts" class="hc-alerts">
-    <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" role="alert">
+        <span class="hc-i hc-i-check" aria-hidden="true"></span>
+        <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span class="hc-i hc-i-alert" aria-hidden="true"></span>
+        <span th:text="${error}"></span>
+    </div>
 </div>
+
+<footer th:fragment="footer" class="hc-footer">
+    <span>Mediacentrum — správa servera</span>
+    <span>Prehrávanie na televízore zabezpečuje Android TV klient.</span>
+</footer>
 
 <div th:fragment="scripts">
     <script th:src="@{/webjars/jquery/jquery.min.js}"></script>

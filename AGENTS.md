@@ -21,8 +21,9 @@ art. This applies to the README, `doc/`, and any other `.md` files.
 
 **The backend has a functional skeleton**—media indexing, Samba scanning, TMDb
 movie metadata, a REST API, streaming with Range request support, a Thymeleaf UI,
-and authentication with user management. **`frontend/` is still empty**; work on
-the Android TV client has not started yet.
+and authentication with user management. **The Android TV client in `frontend/`
+builds, passes its unit tests and lints clean, but has never been run**—this
+machine has no Android TV system image.
 
 On first launch, the server creates the **`admin` / `admin`** administrator account
 and forces a password change.
@@ -54,6 +55,27 @@ The project uses **Lombok**. If getters or `log` suddenly "disappear" after a
 change to `pom.xml`, check `annotationProcessorPaths` in the Maven Compiler
 Plugin—since JDK 23, processors are no longer discovered on the classpath
 automatically.
+
+`frontend/` is a **separate Gradle build that must not use JDK 25**—AGP does not
+run on it. Use JDK 21:
+
+```powershell
+$env:JAVA_HOME = "d:\java\openlogic-openjdk-21.0.6+7-windows-x64"
+cd frontend
+```
+
+| Command | What it does |
+|---|---|
+| `.\gradlew.bat assembleDebug` | builds the debug APK |
+| `.\gradlew.bat testDebugUnitTest` | runs the unit tests |
+| `.\gradlew.bat lintDebug` | runs lint |
+
+The client's Retrofit interfaces and models are **generated at build time** from
+`frontend/openapi/homecenter-openapi.json` into `app/build/generated/openapi`.
+Never edit or hand-write them—after a REST API change, re-export the snapshot with
+`frontend/openapi/refresh.ps1` against a running server. Generated models are
+all-nullable and must stop at the repository layer, which maps them to the domain
+types in `tv/domain`.
 
 ## Decisions that are closed
 
@@ -125,6 +147,15 @@ These rules are not apparent from any single source file:
    (springdoc). The server uses Java, the client uses Kotlin, and models are not
    shared. Do not manually duplicate DTOs on both sides.
 
+   The client enforces this rather than describing it: the openapi-generator Gradle
+   plugin builds its Retrofit layer from `frontend/openapi/homecenter-openapi.json`.
+   Two server-side settings exist for the generator and must not be undone—
+   `springdoc.paths-to-match: /api/v1/**` (generating an API for `/admin/**` would
+   suggest the TV may call it, and rule 9 says it may not), and the SPDX licence
+   identifier that OpenAPI 3.1 requires. Tag names stay free of diacritics; the
+   generator turns each tag into a Kotlin interface name and silently drops what it
+   cannot spell.
+
 7. **The schema changes only through Flyway migrations.** `V1__init.sql` contains
    the base structure and data model and **must no longer be edited**—every further
    change is a new `V2__…`, `V3__…` script. Rewriting an existing migration breaks
@@ -157,16 +188,46 @@ These rules are not apparent from any single source file:
     Boot BOM—the `bcprov-jdk18on` version is pinned in `pom.xml`. If it is missing,
     the failure appears only at runtime.
 
+11. **The UI has a design token layer, and colour literals do not belong outside it.**
+    `static/css/tokens.css` defines the palette, maps it to semantic roles per theme,
+    and forwards those into Bootstrap's `--bs-*` variables—so plain Bootstrap markup
+    in a template is already themed and needs no extra classes. `homecenter.css` may
+    use **only** the semantic tokens (`--hc-brand`, `--hc-surface`, …); a raw ramp
+    step or a hex literal there silently breaks the dark theme. Icons are CSS masks
+    in `icons.css`, not an icon font. See [doc/design-system.md](doc/design-system.md)
+    before changing any of it.
+
+    Two traps that fail *silently*: Bootstrap's `--bs-*-rgb` variables are
+    comma-separated, so alpha must be `rgba(var(--bs-primary-rgb), .3)`—the
+    `rgb(... / .3)` form drops the whole declaration. And **Thymeleaf parses HTML
+    comments**, so a comment containing a double-bracket sequence is read as an
+    inline expression and the template fails to parse at render time.
+
+12. **AGP 9 compiles Kotlin itself.** Applying `org.jetbrains.kotlin.android`
+    alongside it in `frontend/` is an error. The Compose and serialization compiler
+    plugins are still applied normally, `jvmTarget` follows
+    `android.compileOptions.targetCompatibility`, and generated sources are added
+    through `android.sourceSets`, not the Kotlin extension. Inside an
+    `openApiGenerate { }` block `library` resolves to something else and does not
+    compile, so the generator is configured through `extensions.getByType(...)`.
+
+13. **The client stores three things and no more**: the server address, the token,
+    and the resume position of each video. The password and PIN are never written
+    down—that is what the token is for—and backups are switched off, because a token
+    restored onto a different television would be a session nobody signed in for.
+    A 401 on anything other than login means the token died; the interceptor clears
+    it and the navigation host returns to the login screen.
+
 ## Structure
 
 ```
 backend/    Spring Boot server—REST API, Thymeleaf UI, SMB, indexing
-frontend/   Android TV application (Kotlin)—currently empty
+frontend/   Android TV application (Kotlin)—Compose for TV, Media3, Hilt, Room
 doc/        assignment and technology decisions
 ```
 
 Thymeleaf templates belong in `backend/src/main/resources/templates`, **not** in
-`frontend/`. The `frontend/` directory is reserved for the Android TV client.
+`frontend/`. The `frontend/` directory holds only the Android TV client.
 
 The base package is `org.javerlabd.homecenter`. Packages are organized by
 responsibility, not by layer:
@@ -191,6 +252,23 @@ and `source`. When logic is added, it belongs in a service, not a controller.
 the token side about something (for example, a password change requiring all TVs
 to be logged out), it uses an event—`UserCredentialsChangedEvent`. A direct call
 would create a circular dependency.
+
+The client's base package is `org.javerlabd.homecenter.tv`, organized the same way:
+
+| Package | Contents |
+|---|---|
+| `api` | **generated** Retrofit interfaces and models—never edited by hand |
+| `data.net` | OkHttp interceptor (server address + bearer token), error mapping |
+| `data.session` | DataStore: server address, token, account |
+| `data.db` | Room: resume positions, the one piece of state the server does not have |
+| `data.repository` | maps the all-nullable generated models to domain types |
+| `domain` | the types the UI works with |
+| `di` | Hilt modules |
+| `ui.<screen>` | one package per screen: a Composable plus its ViewModel |
+
+The interceptor is the single place authentication happens, which is why **Coil and
+ExoPlayer share the same OkHttp client**—posters and streams are not public, and
+their own clients would collect a 401 on every request.
 
 ## UX rule
 

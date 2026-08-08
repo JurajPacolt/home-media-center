@@ -9,16 +9,40 @@
 
     <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <h1 class="h3 mb-4">Prehľad</h1>
+    <div class="hc-page-head">
+        <div>
+            <h1 class="hc-page-title">Prehľad</h1>
+            <p class="hc-page-lead">
+                Stav indexu a posledného skenovania. Televízor číta rovnaké údaje —
+                nepripája sa na úložisko sám.
+            </p>
+        </div>
+        <div class="hc-page-actions">
+            <form th:action="@{/admin/sken}" method="post" class="m-0">
+                <button class="btn btn-primary" type="submit"
+                        th:disabled="${scanRunning or sources.isEmpty()}">
+                    <span class="hc-i hc-i-scan" aria-hidden="true"></span>
+                    <span th:text="${scanRunning} ? 'Sken beží…' : 'Spustiť sken'">Spustiť sken</span>
+                </button>
+            </form>
+        </div>
+    </div>
 
+    <!-- The same three categories the TV shows. Clicking one opens the library already
+         filtered, so the tile is a shortcut and not just a number. -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-4" th:each="tile : ${summary.tiles()}">
             <a class="text-decoration-none"
                th:href="@{/admin/kniznica(category=${tile.category().name()})}">
-                <div class="card hc-tile h-100">
+                <div class="card hc-tile" th:classappend="|hc-cat-${tile.category().name()}|">
                     <div class="card-body">
-                        <div class="hc-tile-count" th:text="${tile.count()}">0</div>
-                        <div class="hc-tile-label" th:text="${tile.label()}">Kategória</div>
+                        <span class="hc-tile-icon">
+                            <span class="hc-i hc-i-cat" aria-hidden="true"></span>
+                        </span>
+                        <div>
+                            <div class="hc-tile-count" th:text="${tile.count()}">0</div>
+                            <div class="hc-tile-label" th:text="${tile.label()}">Kategória</div>
+                        </div>
                     </div>
                 </div>
             </a>
@@ -29,15 +53,22 @@
 
         <div class="col-12 col-lg-6">
             <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <span>Samba zdroje</span>
                     <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/zdroje}">Spravovať</a>
                 </div>
-                <div class="card-body">
-                    <p th:if="${sources.isEmpty()}" class="mb-0 text-secondary">
-                        Zdroj zatiaľ nie je nastavený. Bez neho sa knižnica nenaplní.
-                    </p>
-                    <table th:if="${!sources.isEmpty()}" class="table table-sm mb-0 align-middle">
+
+                <div th:if="${sources.isEmpty()}" class="hc-empty">
+                    <span class="hc-empty-icon"><span class="hc-i hc-i-server" aria-hidden="true"></span></span>
+                    <p class="hc-empty-title">Žiadny zdroj</p>
+                    <p>Zdroj zatiaľ nie je nastavený. Bez neho sa knižnica nenaplní.</p>
+                    <a class="btn btn-primary btn-sm mt-1" th:href="@{/admin/zdroje/novy}">
+                        <span class="hc-i hc-i-plus" aria-hidden="true"></span>Pridať zdroj
+                    </a>
+                </div>
+
+                <div th:if="${!sources.isEmpty()}" class="table-responsive">
+                    <table class="table table-sm align-middle">
                         <tbody>
                         <tr th:each="source : ${sources}" th:with="id=${source.requireId()},
                                                                    use=${usage.get(id)},
@@ -70,44 +101,51 @@
 
         <div class="col-12 col-lg-6">
             <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Skenovanie</span>
-                    <form th:action="@{/admin/sken}" method="post" class="m-0">
-                        <button class="btn btn-primary btn-sm" type="submit"
-                                th:disabled="${scanRunning or sources.isEmpty()}">Spustiť sken</button>
-                    </form>
+                <div class="card-header">
+                    <span>Posledné skenovanie</span>
+                    <span th:if="${scanRunning}" class="badge text-bg-primary">prebieha</span>
                 </div>
                 <div class="card-body" id="hc-scan" th:data-running="${scanRunning}">
-                    <p th:if="${lastScan == null}" class="text-secondary mb-0">Zatiaľ neprebehol žiadny sken.</p>
-                    <dl th:if="${lastScan != null}" class="row mb-0">
-                        <dt class="col-5">Stav</dt>
-                        <dd class="col-7">
+
+                    <div th:if="${lastScan == null}" class="hc-empty py-4">
+                        <span class="hc-empty-icon"><span class="hc-i hc-i-scan" aria-hidden="true"></span></span>
+                        <p class="hc-empty-title">Zatiaľ neprebehol žiadny sken</p>
+                        <p>Index sa naplní až po prvom prehľadaní zdrojov.</p>
+                    </div>
+
+                    <dl th:if="${lastScan != null}" class="hc-facts">
+                        <dt>Stav</dt>
+                        <dd>
                             <span class="badge" id="hc-scan-status"
                                   th:classappend="${lastScan.status().name() == 'FAILED'} ? 'text-bg-danger'
                                                  : (${lastScan.status().name() == 'RUNNING'} ? 'text-bg-primary' : 'text-bg-success')"
                                   th:text="${lastScan.status().label()}">—</span>
                         </dd>
-                        <dt class="col-5">Spustený</dt>
-                        <dd class="col-7" th:text="${@humanFormat.dateTime(lastScan.startedAt())}">—</dd>
-                        <dt class="col-5">Priečinkov</dt>
-                        <dd class="col-7" id="hc-scan-dirs" th:text="${lastScan.directoriesScanned()}">0</dd>
-                        <dt class="col-5">Súborov</dt>
-                        <dd class="col-7" id="hc-scan-files" th:text="${lastScan.filesSeen()}">0</dd>
-                        <dt class="col-5">Pribudlo / zmenilo / ubudlo</dt>
-                        <dd class="col-7" id="hc-scan-delta"
+                        <dt>Spustený</dt>
+                        <dd th:text="${@humanFormat.dateTime(lastScan.startedAt())}">—</dd>
+                        <dt>Priečinkov</dt>
+                        <dd id="hc-scan-dirs" th:text="${lastScan.directoriesScanned()}">0</dd>
+                        <dt>Súborov</dt>
+                        <dd id="hc-scan-files" th:text="${lastScan.filesSeen()}">0</dd>
+                        <dt>Pribudlo / zmenilo / ubudlo</dt>
+                        <dd id="hc-scan-delta"
                             th:text="|${lastScan.itemsAdded()} / ${lastScan.itemsUpdated()} / ${lastScan.itemsRemoved()}|">0 / 0 / 0</dd>
                     </dl>
+
                     <div th:if="${lastScan != null and lastScan.errorMessage() != null}"
-                         class="alert alert-danger mb-0 mt-3 py-2" th:text="${lastScan.errorMessage()}"></div>
+                         class="alert alert-danger mb-0 mt-3">
+                        <span class="hc-i hc-i-alert" aria-hidden="true"></span>
+                        <span th:text="${lastScan.errorMessage()}"></span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="card mt-4" th:if="${!history.isEmpty()}">
-        <div class="card-header">História skenov</div>
+        <div class="card-header"><span>História skenov</span></div>
         <div class="table-responsive">
-            <table class="table table-sm mb-0 align-middle">
+            <table class="table table-sm align-middle">
                 <thead>
                 <tr>
                     <th>Spustený</th>
@@ -121,7 +159,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="run : ${history}">
-                    <td th:text="${@humanFormat.dateTime(run.startedAt())}">—</td>
+                    <td class="text-nowrap" th:text="${@humanFormat.dateTime(run.startedAt())}">—</td>
                     <td th:text="${run.sourceId() == null} ? '—'
                                  : (${sourceNames.getOrDefault(run.sourceId(), '(zmazaný)')})">—</td>
                     <td th:text="${run.trigger().label()}">—</td>
@@ -141,10 +179,13 @@
         </div>
     </div>
 
-    <p class="text-secondary mt-4 mb-5 small">
-        Index má <span th:text="${summary.totalItems()}">0</span> položiek,
-        spolu <span th:text="${@humanFormat.size(summary.totalSizeBytes())}">0 B</span>.
-    </p>
+    <footer class="hc-footer">
+        <span>
+            Index má <strong class="hc-num" th:text="${summary.totalItems()}">0</strong> položiek,
+            spolu <strong class="hc-num" th:text="${@humanFormat.size(summary.totalSizeBytes())}">0 B</strong>.
+        </span>
+        <span>Prehrávanie na televízore zabezpečuje Android TV klient.</span>
+    </footer>
 
 </main>
 

@@ -12,11 +12,19 @@
     <div class="row">
         <div class="col-12 col-md-8 col-lg-6">
 
-            <h1 class="h3 mb-3">Zmena hesla</h1>
+            <div class="hc-page-head">
+                <div>
+                    <h1 class="hc-page-title">Zmena hesla</h1>
+                    <p class="hc-page-lead">Heslo platí pre správu servera aj pre televízor.</p>
+                </div>
+            </div>
 
             <div th:if="${forced}" class="alert alert-warning">
-                Účet má stále predvolené heslo z prvého spustenia. Kým ho nezmeníš,
-                nikam inam sa v správe servera nedostaneš.
+                <span class="hc-i hc-i-alert" aria-hidden="true"></span>
+                <span>
+                    Účet má stále predvolené heslo z prvého spustenia. Kým ho nezmeníš,
+                    nikam inam sa v správe servera nedostaneš.
+                </span>
             </div>
 
             <form th:action="@{/admin/heslo}" th:object="${form}" method="post" class="card">
@@ -48,12 +56,16 @@
                     </p>
                 </div>
                 <div class="card-footer">
-                    <button class="btn btn-primary" type="submit">Zmeniť heslo</button>
+                    <button class="btn btn-primary" type="submit">
+                        <span class="hc-i hc-i-key" aria-hidden="true"></span>Zmeniť heslo
+                    </button>
                 </div>
             </form>
 
         </div>
     </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 
 </main>
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The banner is what the Android TV home row shows. Its size is fixed at 320x180, which
+    is what the launcher asks for rather than an icon that needs to stay small, so the
+    usual 200x200 vector limit does not apply here.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180"
+    tools:ignore="VectorRaster">
+
+    <path
+        android:fillColor="#241B4C"
+        android:pathData="M0,0h320v180h-320z" />
+
+    <path
+        android:fillColor="#8B87EF"
+        android:pathData="M118,58h84a10,10 0 0 1 10,10v44a10,10 0 0 1 -10,10h-84a10,10 0 0 1 -10,-10v-44a10,10 0 0 1 10,-10z" />
+
+    <path
+        android:fillColor="#0E1017"
+        android:pathData="M150,74l26,16l-26,16z" />
+
+    <path
+        android:fillColor="#5CD4D3"
+        android:pathData="M108,132h104v6h-104z" />
+</vector>

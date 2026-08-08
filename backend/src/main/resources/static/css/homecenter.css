@@ -1,32 +1,953 @@
-.hc-tile {
-    transition: border-color .15s ease-in-out, transform .15s ease-in-out;
+/*
+ * Component styling for the management UI, built entirely on the semantic tokens
+ * from tokens.css. No colour literal belongs in this file — if a value is needed
+ * that the semantic layer does not have, the token is missing and belongs there,
+ * otherwise the dark theme silently breaks.
+ *
+ * Loaded after Bootstrap, so these rules refine Bootstrap's components rather than
+ * replacing them; the templates keep using ordinary Bootstrap classes.
+ */
+
+/* ================================================================== *
+ * Base
+ * ================================================================== */
+
+body {
+    background-color: var(--hc-canvas);
+    /* A very wide, very faint brand wash at the top of the page. It is invisible
+       as a colour but stops a full-width canvas from looking like bare paper. */
+    background-image: radial-gradient(120rem 40rem at 50% -22rem, var(--hc-brand-soft), transparent 70%);
+    background-repeat: no-repeat;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.hc-tile:hover {
-    border-color: var(--bs-primary);
-    transform: translateY(-2px);
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: 650;
+    letter-spacing: -.015em;
+}
+
+/* Figures line up in columns and stop jittering while a scan counts up. */
+.hc-num,
+.hc-tile-count,
+td.text-end,
+.table td.text-end {
+    font-variant-numeric: tabular-nums;
+}
+
+a {
+    text-underline-offset: .2em;
+}
+
+main.container {
+    padding-bottom: 3rem;
+}
+
+::selection {
+    background-color: var(--hc-brand-soft-line);
+}
+
+/* ================================================================== *
+ * App shell — top bar
+ *
+ * The bar keeps its dark gradient in both themes. It is the one surface that
+ * deliberately does not follow the theme: it frames the page, and a frame that
+ * changes colour with the content stops reading as a frame.
+ * ================================================================== */
+
+.hc-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    padding-block: .6rem;
+    margin-bottom: 2rem;
+    background: var(--hc-shell);
+    border-bottom: 1px solid var(--hc-shell-line-soft);
+    box-shadow: var(--hc-shell-shadow);
+}
+
+.hc-topbar .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 650;
+    letter-spacing: -.02em;
+    color: var(--hc-shell-text);
+}
+
+/* The brand mark: a small play glyph in a brand-tinted tile. Cheaper than an
+   image, and it renders identically at every zoom level. */
+.hc-brand-mark {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--hc-radius-sm);
+    background: var(--hc-brand-gradient);
+    color: var(--hc-shell-text);
+    font-size: .8rem;
+    box-shadow: 0 2px 10px var(--hc-brand-glow);
+}
+
+.hc-topbar .navbar-nav {
+    gap: .15rem;
+}
+
+.hc-topbar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem .8rem;
+    border-radius: var(--hc-radius-sm);
+    color: var(--hc-shell-text-muted);
+    font-weight: 500;
+    transition: background-color var(--hc-transition), color var(--hc-transition);
+}
+
+.hc-topbar .nav-link:hover,
+.hc-topbar .nav-link:focus-visible {
+    background-color: var(--hc-shell-fill-hover);
+    color: var(--hc-shell-text);
+}
+
+.hc-topbar .nav-link.active {
+    background-color: var(--hc-shell-fill-active);
+    color: var(--hc-shell-text);
+}
+
+/* Menu items carry an icon; a link outside the menu (the API link) does not. */
+.hc-topbar .hc-i {
+    opacity: .85;
+}
+
+.hc-topbar .navbar-toggler {
+    border-color: var(--hc-shell-ring);
+}
+
+.hc-topbar .navbar-toggler:focus {
+    box-shadow: 0 0 0 var(--hc-focus-ring-width) var(--hc-shell-ring);
+}
+
+/* Right-hand controls: theme switch and the account menu. */
+.hc-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.hc-shell-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    padding: .4rem .75rem;
+    border: 1px solid var(--hc-shell-line);
+    border-radius: var(--hc-radius-sm);
+    background-color: var(--hc-shell-fill);
+    color: var(--hc-shell-text-muted);
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: background-color var(--hc-transition), border-color var(--hc-transition), color var(--hc-transition);
+}
+
+.hc-shell-btn:hover,
+.hc-shell-btn:focus-visible {
+    background-color: var(--hc-shell-fill-hover);
+    border-color: var(--hc-shell-ring);
+    color: var(--hc-shell-text);
+}
+
+.hc-shell-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--hc-focus-ring-width) var(--hc-shell-ring);
+}
+
+/* Square variant for the icon-only theme switch. */
+.hc-shell-btn-icon {
+    width: 2.25rem;
+    padding-inline: 0;
+}
+
+/* ================================================================== *
+ * Page header
+ * ================================================================== */
+
+.hc-page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.hc-page-title {
+    margin-bottom: .25rem;
+    font-size: 1.65rem;
+}
+
+.hc-page-lead {
+    max-width: 60ch;
+    margin-bottom: 0;
+    color: var(--hc-text-muted);
+}
+
+.hc-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+/* ================================================================== *
+ * Cards
+ * ================================================================== */
+
+.card {
+    --bs-card-bg: var(--hc-surface);
+    --bs-card-border-color: var(--hc-border);
+    --bs-card-border-radius: var(--hc-radius-lg);
+    --bs-card-inner-border-radius: calc(var(--hc-radius-lg) - 1px);
+    --bs-card-cap-bg: transparent;
+    --bs-card-spacer-x: 1.35rem;
+    --bs-card-spacer-y: 1.25rem;
+    box-shadow: var(--hc-shadow-sm);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: .95rem;
+    border-bottom-color: var(--hc-border);
+    font-weight: 600;
+    color: var(--hc-text-strong);
+}
+
+.card-footer {
+    padding-block: 1rem;
+    background-color: transparent;
+    border-top-color: var(--hc-border);
+}
+
+/* A table sitting directly in a card must not poke through its rounded corner. */
+.card > .table-responsive {
+    border-bottom-left-radius: var(--bs-card-inner-border-radius);
+    border-bottom-right-radius: var(--bs-card-inner-border-radius);
+}
+
+.card > .table-responsive:first-child {
+    border-top-left-radius: var(--bs-card-inner-border-radius);
+    border-top-right-radius: var(--bs-card-inner-border-radius);
+}
+
+/* ================================================================== *
+ * Category tiles
+ *
+ * The three counts on the dashboard. Each category keeps one colour across the
+ * whole UI — Videos are Iris, Photos Aqua, Music Amber — so the tile, its icon
+ * and the badge in the library table all agree.
+ * ================================================================== */
+
+.hc-tile {
+    --hc-tile-color: var(--hc-brand);
+    --hc-tile-soft: var(--hc-brand-soft);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    transition: transform var(--hc-transition), box-shadow var(--hc-transition),
+                border-color var(--hc-transition);
+}
+
+/* The wash is a pseudo-element rather than a background on the card so that it
+   can fade in on hover without animating the card's own background. */
+.hc-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(18rem 12rem at 100% 0%, var(--hc-tile-soft), transparent 70%);
+    opacity: .7;
+    transition: opacity var(--hc-transition);
+    pointer-events: none;
+}
+
+.hc-tile:hover,
+.hc-tile:focus-within {
+    transform: translateY(-3px);
+    border-color: var(--hc-tile-color);
+    box-shadow: var(--hc-shadow);
+}
+
+.hc-tile:hover::after,
+.hc-tile:focus-within::after {
+    opacity: 1;
+}
+
+.hc-tile .card-body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.hc-tile-icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--hc-radius);
+    background-color: var(--hc-tile-soft);
+    color: var(--hc-tile-color);
+    font-size: 1.5rem;
 }
 
 .hc-tile-count {
-    font-size: 2.5rem;
-    font-weight: 600;
-    line-height: 1.1;
-    color: var(--bs-body-color);
+    font-size: 2.1rem;
+    font-weight: 680;
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    color: var(--hc-text-strong);
 }
 
 .hc-tile-label {
-    color: var(--bs-secondary-color);
+    color: var(--hc-text-muted);
     text-transform: uppercase;
-    letter-spacing: .05em;
-    font-size: .85rem;
+    letter-spacing: .08em;
+    font-size: .75rem;
+    font-weight: 600;
 }
+
+/* Category colours, keyed by the enum name so the template can pass it straight
+   through from MediaCategory. */
+.hc-cat-VIDEO {
+    --hc-tile-color: var(--hc-brand);
+    --hc-tile-soft: var(--hc-brand-soft);
+}
+
+.hc-cat-PHOTO {
+    --hc-tile-color: var(--hc-accent);
+    --hc-tile-soft: var(--hc-accent-soft);
+}
+
+.hc-cat-AUDIO {
+    --hc-tile-color: var(--hc-warning);
+    --hc-tile-soft: var(--hc-warning-soft);
+}
+
+/* .hc-i-cat is "whichever icon this category uses". The template passes the enum
+   name once as an .hc-cat-* class and the mapping lives here, instead of being
+   repeated as a chain of Thymeleaf conditionals at every call site.
+   The film icon is the default rather than a bare .hc-i: an element with no mask
+   at all is not an invisible icon, it is a solid 1em square. */
+.hc-i-cat {
+    -webkit-mask-image: var(--hc-icon-film);
+    mask-image: var(--hc-icon-film);
+}
+
+.hc-cat-VIDEO .hc-i-cat {
+    -webkit-mask-image: var(--hc-icon-film);
+    mask-image: var(--hc-icon-film);
+}
+
+.hc-cat-PHOTO .hc-i-cat {
+    -webkit-mask-image: var(--hc-icon-photo);
+    mask-image: var(--hc-icon-photo);
+}
+
+.hc-cat-AUDIO .hc-i-cat {
+    -webkit-mask-image: var(--hc-icon-music);
+    mask-image: var(--hc-icon-music);
+}
+
+/* ================================================================== *
+ * Buttons
+ * ================================================================== */
+
+.btn {
+    --bs-btn-border-radius: var(--hc-radius-sm);
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-padding-y: .5rem;
+    --bs-btn-font-weight: 550;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    transition: background-color var(--hc-transition), border-color var(--hc-transition),
+                color var(--hc-transition), box-shadow var(--hc-transition), transform var(--hc-transition);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-sm {
+    --bs-btn-padding-x: .7rem;
+    --bs-btn-padding-y: .3rem;
+    --bs-btn-font-size: .8125rem;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--hc-brand);
+    --bs-btn-border-color: var(--hc-brand);
+    --bs-btn-color: var(--hc-text-on-brand);
+    --bs-btn-hover-bg: var(--hc-brand-hover);
+    --bs-btn-hover-border-color: var(--hc-brand-hover);
+    --bs-btn-hover-color: var(--hc-text-on-brand);
+    --bs-btn-active-bg: var(--hc-brand-hover);
+    --bs-btn-active-border-color: var(--hc-brand-hover);
+    --bs-btn-disabled-bg: var(--hc-brand);
+    --bs-btn-disabled-border-color: var(--hc-brand);
+    box-shadow: var(--hc-shadow-sm);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--hc-brand-text);
+    --bs-btn-border-color: var(--hc-brand-soft-line);
+    --bs-btn-bg: transparent;
+    --bs-btn-hover-bg: var(--hc-brand-soft);
+    --bs-btn-hover-border-color: var(--hc-brand);
+    --bs-btn-hover-color: var(--hc-brand-text);
+    --bs-btn-active-bg: var(--hc-brand-soft);
+    --bs-btn-active-border-color: var(--hc-brand);
+    --bs-btn-active-color: var(--hc-brand-text);
+    --bs-btn-disabled-color: var(--hc-text-faint);
+    --bs-btn-disabled-border-color: var(--hc-border);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--hc-text);
+    --bs-btn-border-color: var(--hc-border-strong);
+    --bs-btn-bg: var(--hc-surface);
+    --bs-btn-hover-bg: var(--hc-surface-hover);
+    --bs-btn-hover-border-color: var(--hc-text-faint);
+    --bs-btn-hover-color: var(--hc-text-strong);
+    --bs-btn-active-bg: var(--hc-surface-sunken);
+    --bs-btn-active-border-color: var(--hc-text-faint);
+    --bs-btn-active-color: var(--hc-text-strong);
+    --bs-btn-disabled-color: var(--hc-text-faint);
+    --bs-btn-disabled-border-color: var(--hc-border);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--hc-danger-text);
+    --bs-btn-border-color: var(--hc-border-strong);
+    --bs-btn-bg: var(--hc-surface);
+    --bs-btn-hover-bg: var(--hc-danger-soft);
+    --bs-btn-hover-border-color: var(--hc-danger);
+    --bs-btn-hover-color: var(--hc-danger-text);
+    --bs-btn-active-bg: var(--hc-danger-soft);
+    --bs-btn-active-border-color: var(--hc-danger);
+    --bs-btn-active-color: var(--hc-danger-text);
+}
+
+.btn-secondary {
+    --bs-btn-bg: var(--hc-surface-sunken);
+    --bs-btn-border-color: var(--hc-border);
+    --bs-btn-color: var(--hc-text);
+    --bs-btn-hover-bg: var(--hc-border);
+    --bs-btn-hover-border-color: var(--hc-border-strong);
+    --bs-btn-hover-color: var(--hc-text-strong);
+    --bs-btn-active-bg: var(--hc-border);
+    --bs-btn-active-color: var(--hc-text-strong);
+}
+
+.btn-link {
+    --bs-btn-color: var(--hc-brand-text);
+    --bs-btn-hover-color: var(--hc-brand-hover);
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--hc-focus-ring-width) var(--bs-focus-ring-color);
+}
+
+/* Row actions in a table read as one control group rather than three loose
+   buttons, which is what a row of separately floating buttons looks like. */
+.hc-row-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    justify-content: flex-end;
+}
+
+.hc-row-actions form {
+    margin: 0;
+}
+
+/* ================================================================== *
+ * Forms
+ * ================================================================== */
+
+.form-label {
+    margin-bottom: .35rem;
+    font-size: .875rem;
+    font-weight: 550;
+    color: var(--hc-text-strong);
+}
+
+.form-control,
+.form-select {
+    padding: .55rem .8rem;
+    background-color: var(--hc-surface);
+    border-color: var(--hc-border-strong);
+    border-radius: var(--hc-radius-sm);
+    color: var(--hc-text);
+    transition: border-color var(--hc-transition), box-shadow var(--hc-transition);
+}
+
+.form-control::placeholder {
+    color: var(--hc-text-faint);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--hc-brand);
+    box-shadow: 0 0 0 var(--hc-focus-ring-width) var(--bs-focus-ring-color);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background-color: var(--hc-surface-sunken);
+}
+
+.form-text {
+    color: var(--hc-text-muted);
+    font-size: .8125rem;
+}
+
+.form-check-input {
+    border-color: var(--hc-border-strong);
+}
+
+.form-check-input:checked {
+    background-color: var(--hc-brand);
+    border-color: var(--hc-brand);
+}
+
+.form-check-input:focus {
+    border-color: var(--hc-brand);
+    box-shadow: 0 0 0 var(--hc-focus-ring-width) var(--bs-focus-ring-color);
+}
+
+.form-check-label {
+    color: var(--hc-text);
+}
+
+.invalid-feedback {
+    color: var(--hc-danger-text);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--hc-danger);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    box-shadow: 0 0 0 var(--hc-focus-ring-width) rgba(var(--bs-danger-rgb), .25);
+}
+
+/* The library filter bar: one raised strip rather than controls floating on the
+   canvas, so it reads as a single tool and not as part of the results. */
+.hc-filters {
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--hc-surface);
+    border: 1px solid var(--hc-border);
+    border-radius: var(--hc-radius-lg);
+    box-shadow: var(--hc-shadow-sm);
+}
+
+/* Search field with the magnifier inside it. */
+.hc-search {
+    position: relative;
+}
+
+.hc-search .hc-i {
+    position: absolute;
+    top: 50%;
+    left: .8rem;
+    translate: 0 -50%;
+    color: var(--hc-text-faint);
+    pointer-events: none;
+}
+
+.hc-search .form-control {
+    padding-left: 2.35rem;
+}
+
+/* ================================================================== *
+ * Tables
+ * ================================================================== */
+
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--hc-text);
+    --bs-table-border-color: var(--hc-border);
+    --bs-table-hover-bg: var(--hc-surface-hover);
+    --bs-table-hover-color: var(--hc-text-strong);
+    /* Striping stays, but far below the strength of Bootstrap's default: enough
+       to follow a wide row, not enough to compete with the content. */
+    --bs-table-striped-bg: rgba(var(--bs-body-color-rgb), .022);
+    --bs-table-striped-color: var(--hc-text);
+    margin-bottom: 0;
+}
+
+.table > thead {
+    /* Bootstrap draws a heavy double rule under thead by default. */
+    --bs-table-border-color: var(--hc-border);
+}
+
+.table > thead th {
+    padding-block: .8rem;
+    background-color: var(--hc-surface-sunken);
+    border-bottom: 1px solid var(--hc-border);
+    color: var(--hc-text-muted);
+    font-size: .75rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+
+.table > tbody > tr {
+    transition: background-color var(--hc-transition);
+}
+
+.table > :not(caption) > * > * {
+    padding: .8rem .9rem;
+}
+
+.table > :not(caption) > * > *:first-child {
+    padding-left: 1.35rem;
+}
+
+.table > :not(caption) > * > *:last-child {
+    padding-right: 1.35rem;
+}
+
+.table > tbody > tr:last-child > * {
+    border-bottom-width: 0;
+}
+
+/* A compact table inside a card panel (the dashboard sidebars). */
+.table-sm > :not(caption) > * > * {
+    padding: .55rem .75rem;
+}
+
+/* An underline under every name turns a long table into a striped mess, so links in
+   a table are plain until pointed at. Buttons that happen to be anchors keep their
+   own styling. */
+.table a:not(.btn) {
+    color: var(--hc-text-strong);
+    font-weight: 550;
+    text-decoration: none;
+}
+
+.table a:not(.btn):hover,
+.table a:not(.btn):focus-visible {
+    color: var(--hc-brand-text);
+    text-decoration: underline;
+}
+
+/* ================================================================== *
+ * Status badges
+ *
+ * Bootstrap's .text-bg-* are solid blocks of colour. Half a dozen of them in one
+ * table turn the page into a set of traffic lights, so they are redrawn here as
+ * soft pills: tinted background, readable text in the same hue, and a dot that
+ * carries the state at a glance. The templates keep their existing classes.
+ * ================================================================== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .3rem .6rem;
+    border-radius: var(--hc-radius-pill);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+}
+
+.badge::before {
+    content: "";
+    width: .4rem;
+    height: .4rem;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex: none;
+}
+
+/* Badges used purely as labels rather than as state carry no dot. */
+.hc-badge-plain::before {
+    display: none;
+}
+
+.badge.text-bg-success {
+    background-color: var(--hc-success-soft) !important;
+    color: var(--hc-success-text) !important;
+}
+
+.badge.text-bg-danger {
+    background-color: var(--hc-danger-soft) !important;
+    color: var(--hc-danger-text) !important;
+}
+
+.badge.text-bg-warning {
+    background-color: var(--hc-warning-soft) !important;
+    color: var(--hc-warning-text) !important;
+}
+
+.badge.text-bg-primary {
+    background-color: var(--hc-brand-soft) !important;
+    color: var(--hc-brand-text) !important;
+}
+
+.badge.text-bg-secondary,
+.badge.text-bg-light {
+    background-color: var(--hc-surface-sunken) !important;
+    color: var(--hc-text-muted) !important;
+}
+
+/* A running scan pulses, so a page left open shows at a glance that something is
+   still happening without the reader having to compare numbers. */
+.badge.text-bg-primary::before {
+    animation: hc-pulse 1.6s var(--hc-ease) infinite;
+}
+
+@keyframes hc-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .35; transform: scale(.8); }
+}
+
+/* The category badge in the library uses the same colour as the matching dashboard
+   tile, so "Videá" means Iris everywhere it appears. It relies on an .hc-cat-* class
+   for the two custom properties. */
+.badge.hc-badge-cat {
+    background-color: var(--hc-tile-soft) !important;
+    color: var(--hc-tile-color) !important;
+}
+
+/* Genre chips in the library are labels, not states. */
+.hc-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: .15rem .5rem;
+    border: 1px solid var(--hc-border);
+    border-radius: var(--hc-radius-pill);
+    background-color: var(--hc-surface-sunken);
+    color: var(--hc-text-muted);
+    font-size: .7rem;
+    font-weight: 550;
+    white-space: nowrap;
+}
+
+/* ================================================================== *
+ * Alerts
+ * ================================================================== */
 
 .hc-alerts:empty {
     display: none;
 }
 
-/* Media preview: video and photos fit within the dialog without overflowing, regardless
-   of file size. The background appears only behind the player, not behind messages. */
+.alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .9rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: var(--hc-radius);
+    box-shadow: var(--hc-shadow-sm);
+}
+
+.alert > .hc-i {
+    margin-top: .12em;
+    font-size: 1.15em;
+}
+
+.alert-success {
+    --bs-alert-bg: var(--hc-success-soft);
+    --bs-alert-color: var(--hc-success-text);
+    --bs-alert-border-color: var(--hc-success);
+    border-color: color-mix(in srgb, var(--hc-success) 35%, transparent);
+}
+
+.alert-danger {
+    --bs-alert-bg: var(--hc-danger-soft);
+    --bs-alert-color: var(--hc-danger-text);
+    border-color: color-mix(in srgb, var(--hc-danger) 35%, transparent);
+}
+
+.alert-warning {
+    --bs-alert-bg: var(--hc-warning-soft);
+    --bs-alert-color: var(--hc-warning-text);
+    border-color: color-mix(in srgb, var(--hc-warning) 35%, transparent);
+}
+
+.alert-info {
+    --bs-alert-bg: var(--hc-accent-soft);
+    --bs-alert-color: var(--hc-accent-text);
+    border-color: color-mix(in srgb, var(--hc-accent) 35%, transparent);
+}
+
+/* ================================================================== *
+ * Empty states
+ *
+ * "Nothing here" is the first screen a new installation shows. It gets a real
+ * layout instead of a grey sentence, because it is also where the user has to be
+ * told what to do next.
+ * ================================================================== */
+
+.hc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .65rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--hc-text-muted);
+}
+
+.hc-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background-color: var(--hc-surface-sunken);
+    color: var(--hc-text-faint);
+    font-size: 1.6rem;
+}
+
+.hc-empty-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--hc-text-strong);
+}
+
+.hc-empty p {
+    max-width: 44ch;
+    margin: 0;
+    font-size: .9rem;
+}
+
+/* ================================================================== *
+ * Definition lists (the scan panel)
+ * ================================================================== */
+
+.hc-facts {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: .55rem 1rem;
+    margin: 0;
+}
+
+.hc-facts dt {
+    color: var(--hc-text-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+}
+
+.hc-facts dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    font-weight: 550;
+    color: var(--hc-text-strong);
+}
+
+/* ================================================================== *
+ * Library table specifics
+ * ================================================================== */
+
+.hc-poster-column,
+.hc-poster-cell {
+    width: 3.5rem;
+}
+
+.hc-library-poster {
+    display: block;
+    width: 3rem;
+    height: 4.5rem;
+    object-fit: cover;
+    border-radius: var(--hc-radius-sm);
+    background-color: var(--hc-surface-sunken);
+    box-shadow: var(--hc-shadow-sm);
+}
+
+/* Placeholder in the same shape, so video rows keep a steady grid whether or not
+   TMDb found a poster. */
+.hc-poster-empty {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 4.5rem;
+    border: 1px dashed var(--hc-border-strong);
+    border-radius: var(--hc-radius-sm);
+    color: var(--hc-text-faint);
+    font-size: 1rem;
+}
+
+/* Photos and music never get a poster, so holding poster height for them only
+   makes every one of those rows needlessly tall. */
+.hc-poster-empty.hc-cat-PHOTO,
+.hc-poster-empty.hc-cat-AUDIO {
+    height: 2.75rem;
+}
+
+.hc-item-title {
+    font-weight: 550;
+    color: var(--hc-text-strong);
+}
+
+.hc-path {
+    font-family: var(--bs-font-monospace);
+    font-size: .78rem;
+    color: var(--hc-text-muted);
+    word-break: break-word;
+}
+
+/* ================================================================== *
+ * Media preview
+ *
+ * Video and photos fit inside the dialog regardless of file size. The black
+ * backdrop appears only behind the player, never behind a message.
+ * ================================================================== */
+
+.modal-content {
+    border: 1px solid var(--hc-border);
+    border-radius: var(--hc-radius-xl);
+    background-color: var(--hc-surface);
+    box-shadow: var(--hc-shadow-lg);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--hc-border);
+}
+
+.modal-header {
+    padding: 1.15rem 1.35rem;
+}
+
+.modal-body {
+    padding: 1.35rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.35rem;
+}
+
 .hc-preview-body {
     min-height: 6rem;
     display: flex;
@@ -39,14 +960,18 @@
 .hc-preview-media {
     max-width: 100%;
     max-height: 70vh;
-    background-color: #000;
+    border-radius: var(--hc-radius);
+    background-color: var(--hc-media-backdrop);
 }
 
-/* Video.js has its own inner wrapper, so its container controls dimensions rather than
-   the original <video> element, which is no longer the player root after initialization. */
+/* Video.js has its own inner wrapper, so its container controls the dimensions
+   rather than the original <video>, which is no longer the player root after
+   initialization. */
 .hc-preview-video {
     width: 100%;
     max-height: 70vh;
+    overflow: hidden;
+    border-radius: var(--hc-radius);
 }
 
 .hc-preview-video .video-js {
@@ -59,24 +984,26 @@
     object-fit: contain;
 }
 
-.hc-poster-column,
-.hc-poster-cell {
-    width: 3.5rem;
+/* The player's own accents follow the brand instead of Video.js blue. */
+.hc-preview-video .vjs-big-play-button {
+    border: none;
+    border-radius: var(--hc-radius);
+    background-color: rgba(var(--bs-primary-rgb), .85);
 }
 
-.hc-library-poster {
-    display: block;
-    width: 3rem;
-    height: 4.5rem;
-    object-fit: cover;
-    border-radius: var(--bs-border-radius-sm);
-    background: var(--bs-secondary-bg);
+.hc-preview-video .video-js:hover .vjs-big-play-button {
+    background-color: rgb(var(--bs-primary-rgb));
+}
+
+.hc-preview-video .vjs-play-progress,
+.hc-preview-video .vjs-volume-level {
+    background-color: var(--hc-player-accent);
 }
 
 .hc-preview-metadata {
     display: flex;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.15rem;
     width: 100%;
 }
 
@@ -88,24 +1015,191 @@
     width: 7rem;
     max-height: 10.5rem;
     object-fit: cover;
-    border-radius: var(--bs-border-radius);
+    border-radius: var(--hc-radius);
+    box-shadow: var(--hc-shadow-sm);
+}
+
+/* ================================================================== *
+ * Pagination
+ * ================================================================== */
+
+.pagination {
+    --bs-pagination-border-radius: var(--hc-radius-sm);
+    --bs-pagination-bg: var(--hc-surface);
+    --bs-pagination-color: var(--hc-text);
+    --bs-pagination-border-color: var(--hc-border);
+    --bs-pagination-hover-bg: var(--hc-brand-soft);
+    --bs-pagination-hover-color: var(--hc-brand-text);
+    --bs-pagination-hover-border-color: var(--hc-brand-soft-line);
+    --bs-pagination-focus-bg: var(--hc-brand-soft);
+    --bs-pagination-focus-color: var(--hc-brand-text);
+    --bs-pagination-disabled-bg: var(--hc-surface);
+    --bs-pagination-disabled-color: var(--hc-text-faint);
+    --bs-pagination-disabled-border-color: var(--hc-border);
+    --bs-pagination-padding-x: .85rem;
+    --bs-pagination-padding-y: .45rem;
+    gap: .35rem;
+}
+
+.page-link {
+    border-radius: var(--hc-radius-sm);
+    font-weight: 550;
+}
+
+/* ================================================================== *
+ * Dropdown
+ * ================================================================== */
+
+.dropdown-menu {
+    --bs-dropdown-bg: var(--hc-surface);
+    --bs-dropdown-border-color: var(--hc-border);
+    --bs-dropdown-border-radius: var(--hc-radius);
+    --bs-dropdown-link-color: var(--hc-text);
+    --bs-dropdown-link-hover-bg: var(--hc-surface-hover);
+    --bs-dropdown-link-hover-color: var(--hc-text-strong);
+    --bs-dropdown-link-active-bg: var(--hc-brand-soft);
+    --bs-dropdown-link-active-color: var(--hc-brand-text);
+    --bs-dropdown-padding-y: .35rem;
+    --bs-dropdown-item-padding-x: .8rem;
+    --bs-dropdown-item-padding-y: .45rem;
+    box-shadow: var(--hc-shadow);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    border-radius: var(--hc-radius-sm);
+    width: calc(100% - .7rem);
+    margin-inline: .35rem;
+}
+
+.dropdown-header {
+    padding-inline: .8rem;
+    color: var(--hc-text-muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 650;
+}
+
+/* The theme menu marks the stored choice, which may be "auto" and therefore does
+   not necessarily match the theme currently on screen. */
+.hc-theme-option[aria-checked="true"] {
+    background-color: var(--hc-brand-soft);
+    color: var(--hc-brand-text);
+}
+
+/* ================================================================== *
+ * Login page
+ * ================================================================== */
+
+.hc-login {
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--hc-shell);
+    background-attachment: fixed;
+}
+
+/* Two soft brand lights over the gradient. Without them the shell is a flat
+   diagonal band, which is exactly what a CSS gradient looks like. */
+.hc-login::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(38rem 28rem at 12% 8%, var(--hc-shell-glow-brand), transparent 65%),
+        radial-gradient(32rem 26rem at 88% 92%, var(--hc-shell-glow-accent), transparent 65%);
+    pointer-events: none;
+}
+
+.hc-login main {
+    position: relative;
+    z-index: 1;
+}
+
+.hc-login-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    margin-bottom: .5rem;
+    color: var(--hc-shell-text);
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -.02em;
+}
+
+.hc-login-lead {
+    margin-bottom: 1.75rem;
+    color: var(--hc-shell-text-faint);
+    text-align: center;
+}
+
+.hc-login-note {
+    margin-top: 1.25rem;
+    margin-bottom: 0;
+    color: var(--hc-shell-text-faint);
+    font-size: .8125rem;
+    text-align: center;
+}
+
+.hc-login .card {
+    border-color: var(--hc-shell-line-soft);
+    box-shadow: var(--hc-shadow-lg);
+}
+
+/* ================================================================== *
+ * Footer
+ * ================================================================== */
+
+.hc-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    margin-top: 3rem;
+    border-top: 1px solid var(--hc-border);
+    color: var(--hc-text-muted);
+    font-size: .8125rem;
 }
 
 .hc-tmdb-attribution {
     display: flex;
     align-items: center;
     gap: .75rem;
+    max-width: 46ch;
 }
 
 .hc-tmdb-attribution img {
-    width: 5rem;
+    width: 4.5rem;
     height: auto;
+    flex: none;
 }
 
-/* The login page has no navigation, so the form is centered in the viewport. */
-.hc-login {
-    display: flex;
-    align-items: center;
-    min-height: 100vh;
-    background-color: var(--bs-tertiary-bg);
+/* ================================================================== *
+ * Motion
+ * ================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .hc-tile,
+    .btn,
+    .nav-link,
+    .form-control,
+    .form-select,
+    .table > tbody > tr {
+        transition: none;
+    }
+
+    .hc-tile:hover,
+    .hc-tile:focus-within {
+        transform: none;
+    }
+
+    .badge.text-bg-primary::before {
+        animation: none;
+    }
 }

@@ -6,7 +6,9 @@ features in the future.
 
 **Status:** the server has a functional foundation—it indexes Samba, enriches
 movies with metadata, supports seekable streaming, and provides a web-based
-management UI. Work on the Android TV client has not started yet.
+management UI. The Android TV client exists and builds: server setup, login,
+the three tiles, browsing with posters, a detail screen with episodes, and
+playback of video, photos and music. It has not yet been run on a real device.
 
 ## How it works
 
@@ -97,9 +99,13 @@ metadata.
 
 **Management UI**—Thymeleaf + Bootstrap 5 + jQuery, Video.js for browser video,
 and Chart.js for charts (to be added only when needed). Everything is served
-locally through WebJars, not from a CDN.
+locally through WebJars, not from a CDN. On top of Bootstrap sits the project's
+own design token layer—one colour scale, a light and a dark theme, and an icon
+set built from CSS masks; see [doc/design-system.md](doc/design-system.md).
 
-**Client**—Kotlin, Jetpack Compose for TV, Media3/ExoPlayer, and Retrofit.
+**Client**—Kotlin, Jetpack Compose for TV, Media3/ExoPlayer, Retrofit, Hilt, Room
+and Coil. Its REST layer is **generated from the OpenAPI specification**, not
+written by hand.
 
 The complete library list and rationale are in
 [doc/implementation-plan.md](doc/implementation-plan.md).
@@ -175,11 +181,43 @@ TOKEN=$(curl -s -X POST http://localhost:8085/api/v1/auth/login \
 curl http://localhost:8085/api/v1/library -H "Authorization: Bearer $TOKEN"
 ```
 
+### The Android TV client
+
+The client lives in `frontend/` and is a separate Gradle build. **AGP does not run
+on JDK 25**, so it needs **JDK 21**—the server's JDK cannot be reused:
+
+```powershell
+$env:JAVA_HOME = "d:\java\openlogic-openjdk-21.0.6+7-windows-x64"
+cd frontend
+.\gradlew.bat assembleDebug        # builds app/build/outputs/apk/debug/app-debug.apk
+.\gradlew.bat testDebugUnitTest    # unit tests
+.\gradlew.bat lintDebug            # lint
+```
+
+`frontend/local.properties` points Gradle at the Android SDK (`sdk.dir`) and is not
+committed. Install the result with `adb install -r app-debug.apk`.
+
+The REST layer is **generated during the build** from
+`frontend/openapi/homecenter-openapi.json`—a committed export of `/api/openapi`.
+No DTO is written twice. After changing the REST API, re-export the snapshot
+against a running server:
+
+```powershell
+cd frontend\openapi
+.\refresh.ps1 -BaseUrl http://localhost:8085 -Username admin
+```
+
+On first launch the TV asks for the server address (for example
+`http://192.168.1.10:8085`), then for a username and a password or PIN. The client
+stores only three things: that address, the returned token, and the position where
+each video was left off. Everything else—sources, users, scans—stays in the browser
+UI, by design.
+
 ## Repository structure
 
 ```
 backend/    Spring Boot server—REST API, Thymeleaf UI, SMB, and indexing
-frontend/   Android TV application (Kotlin)—currently empty
+frontend/   Android TV application (Kotlin)—Compose for TV, Media3, generated REST layer
 doc/        assignment and technology decisions
 ```
 
@@ -204,7 +242,10 @@ reserved for the Android TV client.
 
 ## What is not finished yet
 
-- **Android TV client**—the `frontend/` directory is still empty.
+- **The Android TV client has never been run.** It builds, its unit tests pass and
+  it lints clean, but no Android TV system image is available on the development
+  machine, so the login round trip, poster loading, seeking and D-pad focus order
+  are unproven.
 - **Technical file metadata and photo thumbnails**—duration, codecs, and dimensions
   through ffprobe, as well as separate photo thumbnails, have not been implemented.
   The server already indexes movie descriptions, genres, and posters from TMDb.
@@ -220,3 +261,5 @@ reserved for the Android TV client.
 - [doc/assignment.md](doc/assignment.md)—original assignment and requirements
 - [doc/implementation-plan.md](doc/implementation-plan.md)—technology decisions,
   their rationale, and rejected alternatives
+- [doc/design-system.md](doc/design-system.md)—colour scale, themes, and the UI
+  conventions built on them

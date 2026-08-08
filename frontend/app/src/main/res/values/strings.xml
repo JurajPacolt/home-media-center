@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Domáce mediacentrum</string>
+
+    <!-- Server address -->
+    <string name="server_title">Adresa servera</string>
+    <string name="server_hint">Zadaj adresu, na ktorej beží mediacentrum. Nájdeš ju v prehliadači, kde spravuješ zdroje.</string>
+    <string name="server_label">Adresa servera</string>
+    <string name="server_placeholder">http://192.168.1.10:8085</string>
+    <string name="server_continue">Pokračovať</string>
+    <string name="server_checking">Overujem spojenie…</string>
+    <string name="server_invalid">Adresa musí začínať http:// alebo https://</string>
+    <string name="server_unreachable">Na tejto adrese sa server neozval</string>
+
+    <!-- Login -->
+    <string name="login_title">Prihlásenie</string>
+    <string name="login_hint">Prihlás sa menom a heslom alebo menom a PINom.</string>
+    <string name="login_username">Používateľské meno</string>
+    <string name="login_secret">Heslo alebo PIN</string>
+    <string name="login_submit">Prihlásiť sa</string>
+    <string name="login_working">Prihlasujem…</string>
+    <string name="login_failed">Meno alebo heslo nesedí</string>
+    <string name="login_empty">Vyplň meno aj heslo</string>
+    <string name="login_change_server">Zmeniť server</string>
+
+    <!-- Home -->
+    <string name="home_greeting">Ahoj, %1$s</string>
+    <string name="home_videos">Videá</string>
+    <string name="home_photos">Fotky</string>
+    <string name="home_music">Hudba</string>
+    <plurals name="home_items">
+        <item quantity="one">%1$d položka</item>
+        <item quantity="few">%1$d položky</item>
+        <item quantity="other">%1$d položiek</item>
+    </plurals>
+    <string name="home_empty_library">Knižnica je prázdna. Spusti sken v správe servera.</string>
+    <string name="home_continue">Pokračovať v sledovaní</string>
+    <string name="home_settings">Nastavenia</string>
+    <string name="home_last_scan">Posledný sken: %1$s</string>
+
+    <!-- Browse -->
+    <string name="browse_search">Hľadať</string>
+    <string name="browse_search_hint">Názov súboru alebo filmu</string>
+    <string name="browse_all_genres">Všetky žánre</string>
+    <string name="browse_empty">Nič sa nenašlo</string>
+    <string name="browse_count">%1$d z %2$d</string>
+
+    <!-- Detail -->
+    <string name="detail_play">Prehrať</string>
+    <string name="detail_resume">Pokračovať od %1$s</string>
+    <string name="detail_from_start">Od začiatku</string>
+    <string name="detail_episodes">Epizódy</string>
+    <string name="detail_parts">Časti</string>
+    <string name="detail_rating">Hodnotenie %1$s</string>
+
+    <!-- Playback -->
+    <string name="player_error">Súbor sa nepodarilo prehrať</string>
+    <string name="photo_position">%1$d / %2$d</string>
+    <string name="music_now_playing">Prehráva sa</string>
+    <string name="music_next">Ďalšia</string>
+    <string name="music_previous">Predchádzajúca</string>
+    <string name="music_play_pause">Prehrať alebo pozastaviť</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Nastavenia</string>
+    <string name="settings_account">Účet</string>
+    <string name="settings_server">Server</string>
+    <string name="settings_role">Rola</string>
+    <string name="settings_role_admin">Správca</string>
+    <string name="settings_role_user">Používateľ</string>
+    <string name="settings_change_server">Zmeniť adresu servera</string>
+    <string name="settings_logout">Odhlásiť sa</string>
+    <string name="settings_logout_hint">Token zostane na serveri zneplatnený, na TV nezostane heslo ani PIN.</string>
+    <string name="settings_version">Verzia aplikácie %1$s</string>
+    <string name="settings_admin_note">Zdroje, používateľov a skenovanie nastavíš v prehliadači na %1$s</string>
+
+    <!-- Shared -->
+    <string name="common_loading">Načítavam…</string>
+    <string name="common_retry">Skúsiť znova</string>
+    <string name="common_back">Späť</string>
+    <string name="common_error_network">Server neodpovedá. Skontroluj, či je zapnutý a či je TV v tej istej sieti.</string>
+    <string name="common_error_unauthorized">Prihlásenie vypršalo, prihlás sa znova.</string>
+    <string name="common_error_generic">Niečo sa pokazilo</string>
+</resources>

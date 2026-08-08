@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Prihlásenie", description = "Vydávanie a rušenie tokenov pre TV klienta")
+@Tag(name = "Prihlasenie", description = "Vydávanie a rušenie tokenov pre TV klienta")
 @RequiredArgsConstructor
 public class AuthApiController {
 

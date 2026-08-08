@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Only what the system theme needs before Compose takes over; the palette itself
+        lives in ui/theme/Colours.kt. Both come from the server's design system
+        (doc/design-system.md), Slate 950 being the darkest surface.
+    -->
+    <color name="hc_background">#0E1017</color>
+</resources>

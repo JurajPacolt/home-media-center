@@ -1,0 +1,362 @@
+/*
+ * Design tokens for the management UI — the single source of truth for colour,
+ * radius, elevation and motion. Documented in doc/design-system.md.
+ *
+ * Three layers, in this order:
+ *
+ *   1. Palette      raw colour ramps (--hc-iris-600). Never used directly in
+ *                   component CSS; a ramp step carries no meaning on its own.
+ *   2. Semantics    role names (--hc-surface, --hc-text-muted). Component CSS
+ *                   uses only these, which is what makes one theme switch work.
+ *   3. Bootstrap    the semantic layer mapped onto --bs-* variables, so that
+ *                   plain Bootstrap markup in the templates inherits the theme
+ *                   without every page having to opt in.
+ *
+ * The file is loaded before homecenter.css and before any component styling.
+ */
+
+/* ------------------------------------------------------------------ *
+ * 1. Palette
+ *
+ * Four ramps. Iris carries the brand, Aqua marks activity (a running scan,
+ * a live stream), Slate builds every surface, and the three semantic ramps
+ * report outcomes. The neutrals are deliberately blue-tinted rather than pure
+ * grey — next to the Iris brand a neutral grey reads as dirty yellow.
+ * ------------------------------------------------------------------ */
+:root {
+    /* Iris — brand, primary actions, links, active navigation */
+    --hc-iris-50:  #f1f2fe;
+    --hc-iris-100: #e4e6fd;
+    --hc-iris-200: #cdd0fa;
+    --hc-iris-300: #adaef6;
+    --hc-iris-400: #8b87ef;
+    --hc-iris-500: #7264e6;
+    --hc-iris-600: #6149d9;
+    --hc-iris-700: #5239bd;
+    --hc-iris-800: #442f99;
+    --hc-iris-900: #3a2c79;
+    --hc-iris-950: #241b4c;
+
+    /* Aqua — activity and streaming: running scans, playback, highlights */
+    --hc-aqua-50:  #e8fbfa;
+    --hc-aqua-100: #c9f4f2;
+    --hc-aqua-200: #97e8e6;
+    --hc-aqua-300: #5cd4d3;
+    --hc-aqua-400: #2bb8b9;
+    --hc-aqua-500: #159a9c;
+    --hc-aqua-600: #0f7b7f;
+    --hc-aqua-700: #116266;
+    --hc-aqua-800: #134f53;
+    --hc-aqua-900: #144246;
+
+    /* Slate — every surface, border and piece of text */
+    --hc-slate-0:   #ffffff;
+    --hc-slate-50:  #f7f8fc;
+    --hc-slate-100: #eff1f7;
+    --hc-slate-200: #e2e5ef;
+    --hc-slate-300: #cbd0e0;
+    --hc-slate-400: #9aa1b8;
+    --hc-slate-500: #6e7691;
+    --hc-slate-600: #515974;
+    --hc-slate-700: #3c4359;
+    --hc-slate-800: #2a2f41;
+    --hc-slate-850: #1e2331;
+    --hc-slate-900: #161a24;
+    --hc-slate-950: #0e1017;
+
+    /* Green — completed scan, enabled source, PIN set */
+    --hc-green-50:  #e9f9ef;
+    --hc-green-100: #d0f2de;
+    --hc-green-300: #79d6a1;
+    --hc-green-400: #45bd7c;
+    --hc-green-500: #22a45d;
+    --hc-green-600: #1a8b4e;
+    --hc-green-700: #15703f;
+    --hc-green-900: #0e4a2b;
+
+    /* Amber — needs attention but nothing is broken yet */
+    --hc-amber-50:  #fdf7e8;
+    --hc-amber-100: #fbedcd;
+    --hc-amber-300: #f6cd6b;
+    --hc-amber-400: #ecb43a;
+    --hc-amber-500: #e0a422;
+    --hc-amber-600: #b98118;
+    --hc-amber-700: #8f6312;
+    --hc-amber-900: #5c3f0b;
+
+    /* Rose — failed scan, unreachable source, destructive actions */
+    --hc-rose-50:  #fdeff0;
+    --hc-rose-100: #fbdcde;
+    --hc-rose-300: #f2a1a6;
+    --hc-rose-400: #e8747c;
+    --hc-rose-500: #dc4d58;
+    --hc-rose-600: #c4353f;
+    --hc-rose-700: #a02a33;
+    --hc-rose-900: #611a20;
+
+    /* --------------------------------------------------------------
+     * Deliberately theme-independent colours.
+     *
+     * The shell — the top bar and the login backdrop — keeps its dark gradient in
+     * both themes: it frames the page, and a frame that changes colour with the
+     * content stops reading as a frame. Everything drawn on it therefore needs its
+     * own small scale that does not flip with the theme. The alpha steps are named
+     * once here because the top bar would otherwise repeat a dozen slightly
+     * different whites and drift out of alignment.
+     * -------------------------------------------------------------- */
+    --hc-shell-text: #ffffff;
+    --hc-shell-text-muted: rgb(255 255 255 / .72);
+    --hc-shell-text-faint: rgb(255 255 255 / .58);
+    --hc-shell-line: rgb(255 255 255 / .18);
+    --hc-shell-line-soft: rgb(255 255 255 / .07);
+    --hc-shell-fill: rgb(255 255 255 / .06);
+    --hc-shell-fill-hover: rgb(255 255 255 / .13);
+    --hc-shell-fill-active: rgb(255 255 255 / .15);
+    --hc-shell-ring: rgb(255 255 255 / .24);
+    --hc-shell-shadow: 0 1px 24px rgb(15 17 28 / .28);
+
+    /* The brand mark, identical in both themes. */
+    --hc-brand-gradient: linear-gradient(140deg, var(--hc-iris-400), var(--hc-iris-600) 60%, var(--hc-aqua-500));
+    --hc-brand-glow: rgb(97 73 217 / .5);
+
+    /* The two soft lights over the login backdrop. Without them the shell is a flat
+       diagonal band, which is exactly what a CSS gradient looks like. */
+    --hc-shell-glow-brand: rgb(114 100 230 / .38);
+    --hc-shell-glow-accent: rgb(21 154 156 / .28);
+
+    /* Letterboxing behind video and photos. Black in both themes—anything else
+       tints the picture. */
+    --hc-media-backdrop: #000000;
+
+    /* Video.js accent. It sits over arbitrary video, so it stays a fixed light
+       brand tone instead of following the theme. */
+    --hc-player-accent: var(--hc-iris-400);
+
+    /* --------------------------------------------------------------
+     * Shape, elevation and motion — theme-independent.
+     * -------------------------------------------------------------- */
+    --hc-radius-sm: .5rem;
+    --hc-radius:    .75rem;
+    --hc-radius-lg: 1rem;
+    --hc-radius-xl: 1.25rem;
+    --hc-radius-pill: 999rem;
+
+    /* One quick transition for everything, so the UI feels like one object. */
+    --hc-ease: cubic-bezier(.2, .7, .3, 1);
+    --hc-transition: .18s var(--hc-ease);
+
+    --hc-focus-ring-width: 3px;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. Semantics — light theme
+ *
+ * Bootstrap 5.3 switches themes through data-bs-theme on <html>. The selector
+ * therefore matches both the explicit attribute and the bare :root, so a page
+ * still renders correctly if the theme script has not run yet.
+ * ------------------------------------------------------------------ */
+:root,
+[data-bs-theme="light"] {
+    color-scheme: light;
+
+    /* Canvas is a shade darker than the cards, so a card reads as a card
+       without needing a heavy border. */
+    --hc-canvas:          var(--hc-slate-50);
+    --hc-canvas-accent:   var(--hc-iris-50);
+    --hc-surface:         var(--hc-slate-0);
+    --hc-surface-sunken:  var(--hc-slate-100);
+    --hc-surface-hover:   var(--hc-slate-50);
+
+    --hc-border:          var(--hc-slate-200);
+    --hc-border-strong:   var(--hc-slate-300);
+
+    --hc-text:            var(--hc-slate-800);
+    --hc-text-strong:     var(--hc-slate-900);
+    --hc-text-muted:      var(--hc-slate-500);
+    --hc-text-faint:      var(--hc-slate-400);
+    --hc-text-on-brand:   #ffffff;
+
+    --hc-brand:           var(--hc-iris-600);
+    --hc-brand-hover:     var(--hc-iris-700);
+    --hc-brand-text:      var(--hc-iris-700);
+    --hc-brand-soft:      var(--hc-iris-50);
+    --hc-brand-soft-line: var(--hc-iris-200);
+
+    --hc-accent:          var(--hc-aqua-600);
+    --hc-accent-text:     var(--hc-aqua-700);
+    --hc-accent-soft:     var(--hc-aqua-50);
+
+    --hc-success:         var(--hc-green-600);
+    --hc-success-text:    var(--hc-green-700);
+    --hc-success-soft:    var(--hc-green-50);
+
+    --hc-warning:         var(--hc-amber-500);
+    --hc-warning-text:    var(--hc-amber-700);
+    --hc-warning-soft:    var(--hc-amber-50);
+
+    --hc-danger:          var(--hc-rose-600);
+    --hc-danger-text:     var(--hc-rose-700);
+    --hc-danger-soft:     var(--hc-rose-50);
+
+    /* The shell behind the top bar and the login page. */
+    --hc-shell:           linear-gradient(135deg, var(--hc-iris-800) 0%, var(--hc-iris-950) 55%, var(--hc-slate-950) 100%);
+
+    /* Two shadows per level: a tight one for the edge, a wide soft one for
+       depth. A single shadow always looks either flat or like a drop shadow. */
+    --hc-shadow-sm: 0 1px 2px rgb(23 27 43 / .06), 0 1px 3px rgb(23 27 43 / .05);
+    --hc-shadow:    0 1px 2px rgb(23 27 43 / .05), 0 6px 18px -6px rgb(23 27 43 / .12);
+    --hc-shadow-lg: 0 2px 4px rgb(23 27 43 / .05), 0 18px 40px -12px rgb(23 27 43 / .22);
+}
+
+/* ------------------------------------------------------------------ *
+ * 2b. Semantics — dark theme
+ *
+ * Not the light theme inverted. Surfaces get lighter as they rise (there is no
+ * such thing as a darker shadow on a dark canvas), and every brand or status
+ * colour moves two to three steps up the ramp: a mid-ramp colour that reads
+ * well on white disappears against a dark surface.
+ * ------------------------------------------------------------------ */
+[data-bs-theme="dark"] {
+    color-scheme: dark;
+
+    --hc-canvas:          var(--hc-slate-950);
+    --hc-canvas-accent:   var(--hc-slate-900);
+    --hc-surface:         var(--hc-slate-900);
+    --hc-surface-sunken:  var(--hc-slate-850);
+    --hc-surface-hover:   var(--hc-slate-850);
+
+    --hc-border:          #272d3d;
+    --hc-border-strong:   #364058;
+
+    --hc-text:            #d9dde9;
+    --hc-text-strong:     #f2f4f9;
+    --hc-text-muted:      #949cb3;
+    --hc-text-faint:      #6b7391;
+    --hc-text-on-brand:   #ffffff;
+
+    --hc-brand:           #6d5ae2;
+    --hc-brand-hover:     var(--hc-iris-500);
+    --hc-brand-text:      var(--hc-iris-300);
+    --hc-brand-soft:      rgb(109 90 226 / .16);
+    --hc-brand-soft-line: rgb(109 90 226 / .38);
+
+    --hc-accent:          var(--hc-aqua-400);
+    --hc-accent-text:     var(--hc-aqua-300);
+    --hc-accent-soft:     rgb(43 184 185 / .14);
+
+    --hc-success:         var(--hc-green-500);
+    --hc-success-text:    var(--hc-green-300);
+    --hc-success-soft:    rgb(69 189 124 / .15);
+
+    --hc-warning:         var(--hc-amber-400);
+    --hc-warning-text:    var(--hc-amber-300);
+    --hc-warning-soft:    rgb(236 180 58 / .15);
+
+    --hc-danger:          var(--hc-rose-500);
+    --hc-danger-text:     var(--hc-rose-300);
+    --hc-danger-soft:     rgb(232 116 124 / .15);
+
+    --hc-shell:           linear-gradient(135deg, #241b4c 0%, #16182a 55%, var(--hc-slate-950) 100%);
+
+    --hc-shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+    --hc-shadow:    0 1px 2px rgb(0 0 0 / .4), 0 8px 24px -8px rgb(0 0 0 / .6);
+    --hc-shadow-lg: 0 2px 6px rgb(0 0 0 / .45), 0 22px 48px -14px rgb(0 0 0 / .75);
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Bootstrap mapping
+ *
+ * Everything below only forwards the semantic layer into --bs-*. Bootstrap
+ * composes most component colours from these at runtime, so a plain
+ * <div class="card"> or <table class="table"> follows the theme with no extra
+ * classes in the templates. The -rgb variants are required because Bootstrap
+ * builds translucent colours as rgba(var(--bs-*-rgb), opacity).
+ * ------------------------------------------------------------------ */
+:root,
+[data-bs-theme="light"] {
+    --bs-body-bg: var(--hc-canvas);
+    --bs-body-color: var(--hc-text);
+    --bs-body-color-rgb: 42, 47, 65;
+    --bs-emphasis-color: var(--hc-text-strong);
+    --bs-heading-color: var(--hc-text-strong);
+    --bs-secondary-color: var(--hc-text-muted);
+    --bs-secondary-bg: var(--hc-surface-sunken);
+    --bs-tertiary-bg: var(--hc-canvas);
+    --bs-tertiary-color: var(--hc-text-faint);
+    --bs-border-color: var(--hc-border);
+    --bs-border-color-translucent: var(--hc-border);
+
+    --bs-primary: var(--hc-iris-600);
+    --bs-primary-rgb: 97, 73, 217;
+    --bs-primary-text-emphasis: var(--hc-iris-700);
+    --bs-primary-bg-subtle: var(--hc-iris-50);
+    --bs-primary-border-subtle: var(--hc-iris-200);
+
+    --bs-link-color: var(--hc-brand-text);
+    --bs-link-color-rgb: 82, 57, 189;
+    --bs-link-hover-color: var(--hc-iris-800);
+
+    --bs-success: var(--hc-green-600);
+    --bs-success-rgb: 26, 139, 78;
+    --bs-danger: var(--hc-rose-600);
+    --bs-danger-rgb: 196, 53, 63;
+    --bs-warning: var(--hc-amber-500);
+    --bs-warning-rgb: 224, 164, 34;
+    --bs-info: var(--hc-aqua-600);
+    --bs-info-rgb: 15, 123, 127;
+
+    --bs-code-color: var(--hc-iris-700);
+    --bs-highlight-bg: var(--hc-amber-100);
+}
+
+[data-bs-theme="dark"] {
+    --bs-body-bg: var(--hc-canvas);
+    --bs-body-color: var(--hc-text);
+    --bs-body-color-rgb: 217, 221, 233;
+    --bs-emphasis-color: var(--hc-text-strong);
+    --bs-heading-color: var(--hc-text-strong);
+    --bs-secondary-color: var(--hc-text-muted);
+    --bs-secondary-bg: var(--hc-surface-sunken);
+    --bs-tertiary-bg: var(--hc-canvas-accent);
+    --bs-tertiary-color: var(--hc-text-faint);
+    --bs-border-color: var(--hc-border);
+    --bs-border-color-translucent: var(--hc-border);
+
+    --bs-primary: #6d5ae2;
+    --bs-primary-rgb: 109, 90, 226;
+    --bs-primary-text-emphasis: var(--hc-iris-300);
+    --bs-primary-bg-subtle: rgb(109 90 226 / .16);
+    --bs-primary-border-subtle: rgb(109 90 226 / .38);
+
+    --bs-link-color: var(--hc-iris-300);
+    --bs-link-color-rgb: 173, 174, 246;
+    --bs-link-hover-color: var(--hc-iris-200);
+
+    --bs-success: var(--hc-green-500);
+    --bs-success-rgb: 34, 164, 93;
+    --bs-danger: var(--hc-rose-500);
+    --bs-danger-rgb: 220, 77, 88;
+    --bs-warning: var(--hc-amber-400);
+    --bs-warning-rgb: 236, 180, 58;
+    --bs-info: var(--hc-aqua-400);
+    --bs-info-rgb: 43, 184, 185;
+
+    --bs-code-color: var(--hc-iris-300);
+    --bs-highlight-bg: var(--hc-amber-900);
+}
+
+/* Radii and the focus ring are shared by both themes. */
+:root {
+    --bs-border-radius-sm: var(--hc-radius-sm);
+    --bs-border-radius: var(--hc-radius);
+    --bs-border-radius-lg: var(--hc-radius-lg);
+    --bs-border-radius-xl: var(--hc-radius-xl);
+    --bs-border-radius-pill: var(--hc-radius-pill);
+
+    --bs-focus-ring-width: var(--hc-focus-ring-width);
+    --bs-focus-ring-opacity: .3;
+    /* The -rgb variables hold a comma-separated triplet, so alpha has to be applied
+       with rgba(...) — the space-and-slash form cannot mix with commas and the whole
+       declaration would be dropped. */
+    --bs-focus-ring-color: rgba(var(--bs-primary-rgb), .3);
+}

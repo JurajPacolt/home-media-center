@@ -44,6 +44,7 @@
 | JavaScript | jQuery |
 | Browser video | Video.js through a WebJar |
 | Charts | Chart.js—to be added only when needed |
+| Colour, shape, icons | own token layer over Bootstrap—[design-system.md](design-system.md) |
 
 Libraries are served **locally through WebJars**, not from a CDN. The server runs
 on a home network, and the management UI must work without internet access.
@@ -560,3 +561,188 @@ Filename structure is stored **even without a TMDb token**, so basic grouping of
 series and multipart videos does not depend on internet access. Automatic matching
 is not infallible, however: ambiguous or custom names may match the wrong title.
 Manually confirming or correcting a match in the UI remains a separate future task.
+
+---
+
+## 2026-08-08—Management UI design system
+
+The UI was plain Bootstrap with about a hundred lines of patch CSS. It worked,
+but it looked like an unstyled admin scaffold and there was no answer to "what
+colour is this supposed to be." A design foundation was introduced, documented
+in full in **[design-system.md](design-system.md)**; only the decisions are
+recorded here.
+
+### Three token layers, not Bootstrap overrides
+
+The obvious approach—override `--bs-primary` and stop—breaks as soon as a second
+theme exists. `--bs-primary` records what Bootstrap paints with, never what a
+colour *means*, so there is nowhere to say that a running scan and a live stream
+are the same idea.
+
+Instead: `tokens.css` defines raw ramps (`--hc-iris-600`), maps them to roles per
+theme (`--hc-brand`, `--hc-surface`), and only then forwards the roles into
+`--bs-*`. Because the last step exists, **plain Bootstrap markup in the templates
+follows the theme with no extra classes**—a bare `<div class="card">` or
+`<table class="table">` is already themed. Component CSS is forbidden from naming
+a palette step; that rule is what makes one theme switch work.
+
+Palette: **Iris** (indigo-violet) for the brand, **Aqua** for activity and
+streaming, a blue-tinted **Slate** for every surface, and green/amber/rose for
+outcomes. The three TV categories keep one colour each—Videos Iris, Photos Aqua,
+Music Amber—across the tile, its icon, the library badge and the poster
+placeholder.
+
+### Light and dark, with dark as a first-class theme
+
+Bootstrap 5.3's `data-bs-theme` drives it. The stored choice has three states,
+because "auto" has to stay reachable—a user who once clicked the toggle must be
+able to hand control back to the operating system.
+
+**The theme is applied by an inline script in `<head>`, not by `homecenter.js`.**
+Waiting for the external file means every page load flashes the light theme
+first. `homecenter.js` owns only the menu. The consequence is that the "is it
+dark?" decision exists twice and the two copies must be changed together.
+
+The dark theme is not the light theme inverted: surfaces get lighter as they
+rise (a shadow cannot darken an already dark surface), brand and status colours
+move two to three steps up the ramp, and solid pale tints become 14–16 % alpha.
+
+### Icons as CSS masks
+
+26 icons live in `icons.css` as inline SVG data URIs used as `mask-image`. No
+icon-font WebJar to add, nothing to download on a network that may be offline,
+and—because a mask is painted with `background-color`—every icon inherits
+`currentColor` and tints itself correctly in both themes.
+
+Watch out: an `.hc-i` with no variant class renders as a **solid square**, since
+`mask-image: none` means unmasked rather than empty.
+
+### Two things that cost time
+
+- Bootstrap's `--bs-*-rgb` variables hold a **comma-separated** triplet. Alpha
+  must be `rgba(var(--bs-primary-rgb), .3)`; the modern `rgb(... / .3)` slash
+  form cannot be mixed with commas and the browser silently drops the entire
+  declaration. Five rules were written this way and failed invisibly.
+- **Thymeleaf parses HTML comments.** A comment containing a double-bracket
+  sequence is treated as an inline expression and the template fails to parse at
+  render time—not at build time. Prose in comments must avoid it.
+
+`/img/**` was added to the anonymous allowlist in `SecurityConfig`; the favicon
+is referenced from the login page, which is reached before authentication.
+
+---
+
+## 2026-08-08—Android TV client
+
+`frontend/` is no longer empty. The client covers the whole path a household
+actually walks: enter the server address, sign in, browse the three categories,
+open a video and watch it, look through photos, listen to music, sign out.
+
+### The client API is generated, never written
+
+The OpenAPI specification was already declared the contract between the Java
+server and the Kotlin client. It is now enforced rather than described:
+`frontend/openapi/homecenter-openapi.json` is a committed export of
+`GET /api/openapi`, and the **openapi-generator** Gradle plugin turns it into
+Kotlin models and Retrofit interfaces during the build. No DTO is written twice.
+
+Refreshing the snapshot needs a running server and an administrator account,
+because `/api/openapi` belongs to the management UI's filter chain—
+`frontend/openapi/refresh.ps1` does the form login and the export.
+
+Three things had to change on the server for this to work:
+
+- **`springdoc.paths-to-match: /api/v1/**`.** The specification described the
+  `/admin/**` endpoints too, and generating a Kotlin API for them would suggest
+  the TV may call them. It may not; that is architectural rule 9.
+- **The licence needed an SPDX identifier.** OpenAPI 3.1 rejects a licence
+  carrying only a name, and the generator validates before it reads anything.
+  `Domáce použitie` became `Apache-2.0`, which is the repository's actual licence.
+- **Tag names lost their diacritics.** The generator turns each tag into a Kotlin
+  interface name and silently drops what it cannot spell, so `Knižnica` arrived as
+  `KninicaApi`. The tags are now `Kniznica`, `Prihlasenie`, `Prehravanie`—the same
+  convention the URLs already follow. Descriptions are prose and kept theirs.
+
+Generated models are all-nullable, because springdoc marks almost nothing
+required. They therefore stop at the repository layer, which maps them to domain
+types that state what is actually there. `dateLibrary=string` keeps instants as
+strings: kotlinx.serialization has no serializer for `java.time`, and the client
+only ever formats them for display.
+
+### Build: AGP 9 and JDK 21
+
+The client cannot be built with the JDK the server needs. **AGP does not run on
+JDK 25**, so `frontend/` is built with **JDK 21** while `backend/` stays on 25.
+
+The version choice was forced from below rather than picked. AndroidX releases
+from mid-2026 (`core-ktx` 1.19, `lifecycle` 2.11) refuse to be consumed by
+anything under AGP 9.1 and `compileSdk` 37, and Hilt 2.59+ refuses to apply on
+anything under AGP 9. The result is AGP 9.3.1 on Gradle 9.7, `compileSdk` and
+`targetSdk` 37, `minSdk` 23.
+
+**AGP 9 compiles Kotlin itself.** Applying `org.jetbrains.kotlin.android`
+alongside it is an error; the Compose and serialization compiler plugins are
+still applied normally, `jvmTarget` follows
+`android.compileOptions.targetCompatibility`, and generated sources are added
+through `android.sourceSets` rather than the Kotlin extension.
+
+One trap: inside an `openApiGenerate { }` block, `library` resolves to something
+else in this build and the assignment does not compile. The extension is
+configured through `extensions.getByType(...)` instead.
+
+### How the client reaches the server
+
+The server address is typed on the television, so Retrofit cannot be given a base
+URL when it is built. Every call is issued against a placeholder host and pointed
+at the real one by an interceptor, which also attaches the bearer token—to
+everything except login, the one endpoint that does not have one yet.
+
+That interceptor is the single place authentication happens, which is why
+**Coil and ExoPlayer both use the same OkHttp client**. Posters and streams are
+not public; Coil's own client would collect a 401 on every poster, and
+ExoPlayer's default data source on every film.
+
+A 401 on anything else means the token died—the server invalidates all of them
+when a password or PIN changes. The interceptor clears it and the navigation host
+returns to login.
+
+### What the client stores
+
+Only three things: the server address, the token, and where each video was left
+off. The password and PIN are never written down; that is the whole point of the
+token. Backups are switched off, because a token restored onto a different
+television would be a session nobody signed in for.
+
+Resume positions are the one piece of state the server does not have—it indexes
+files and has no idea who watched what. They are written every ten seconds rather
+than only on exit, since switching a television off mid-film is an ordinary way to
+stop watching. A position under 30 seconds or within a minute of the end is
+discarded: "continue" should not land on the opening titles or the closing credits.
+
+### Screens, and what is deliberately missing
+
+Videos get a detail screen; photos and music do not, because making somebody press
+OK twice to look at a picture is one press too many. Episodes of a series are
+grouped on the detail screen using the server's season and episode numbers, which
+is what stops `S01E10` from sorting before `S01E02`.
+
+**There is no way to configure anything from the TV.** No sources, no users, no
+scan trigger—the 2026-08-05 decision holds. Settings shows the account, the server
+and the way out, and points at the browser for the rest.
+
+Compose for TV supplies no text field, so the two screens that need typing borrow
+the ordinary Material 3 one, wrapped in the project's colours. The player is
+Media3's own `PlayerView` inside an `AndroidView`: it already handles a D-pad and
+a seek bar the way a remote expects, and rebuilding that in Compose would mean
+rebuilding its focus rules too.
+
+The palette is the design system's, dark only. A television in a living room is
+looked at from three metres away in the evening, and the design system already
+treats dark as a first-class theme rather than an inversion.
+
+### What has not been verified
+
+The app **builds, passes its unit tests and lints clean, but has never been run**.
+This machine has no Android TV system image and no `cmdline-tools` to install one,
+so nothing here has been exercised against a real server: the login round trip,
+poster loading, seeking, and D-pad focus order are all unproven.

@@ -28,7 +28,7 @@ class TmdbMetadataResolverTest {
                 .thenReturn(Optional.of(new TmdbEpisode("Tajomstvá", "Prvá epizóda", "/e1.jpg", 8.1)));
         when(client.episode(70523L, 1, 2))
                 .thenReturn(Optional.of(new TmdbEpisode("Klamstvá", "Druhá epizóda", null, 8.2)));
-        TmdbMetadataResolver.Session session = resolver.newSession();
+        MetadataSession session = new MetadataSession(resolver);
 
         ResolvedVideoMetadata first = resolver.resolve(
                 new ParsedVideoName("Dark", null, 1, 1, null), session).orElseThrow();
@@ -55,7 +55,7 @@ class TmdbMetadataResolverTest {
         when(client.movie(603L)).thenReturn(movie);
 
         ResolvedVideoMetadata result = resolver.resolve(
-                new ParsedVideoName("Matrix", 1999, null, null, 2), resolver.newSession())
+                new ParsedVideoName("Matrix", 1999, null, null, 2), new MetadataSession(resolver))
                 .orElseThrow();
 
         assertThat(result.kind()).isEqualTo(VideoKind.MOVIE);

@@ -16,7 +16,7 @@ import org.javerland.homecenter.media.MediaClassifier;
 import org.javerland.homecenter.media.MediaItem;
 import org.javerland.homecenter.media.MediaRepository;
 import org.javerland.homecenter.metadata.MetadataEnrichmentService;
-import org.javerland.homecenter.metadata.TmdbMetadataResolver;
+import org.javerland.homecenter.metadata.MetadataSession;
 import org.javerland.homecenter.source.SmbAccessException;
 import org.javerland.homecenter.source.SmbEntry;
 import org.javerland.homecenter.source.SmbGateway;
@@ -104,7 +104,7 @@ public class ScanService implements DisposableBean {
         try {
             executor.execute(() -> {
                 try {
-                    TmdbMetadataResolver.Session metadataSession = metadataService.newSession();
+                    MetadataSession metadataSession = metadataService.newSession();
                     sources.forEach(source -> scanQuietly(source, trigger, metadataSession));
                 } finally {
                     metadataService.cleanupPosters();
@@ -146,7 +146,7 @@ public class ScanService implements DisposableBean {
      * sources continue; an offline NAS must not prevent another one from being reindexed.
      */
     private void scanQuietly(SmbSource source, ScanTrigger trigger,
-                             TmdbMetadataResolver.Session metadataSession) {
+                             MetadataSession metadataSession) {
         long scanId;
         try {
             scanId = runRepository.start(source.requireId(), trigger).requireId();
@@ -158,7 +158,7 @@ public class ScanService implements DisposableBean {
     }
 
     private void execute(SmbSource source, long scanId,
-                         TmdbMetadataResolver.Session metadataSession) {
+                         MetadataSession metadataSession) {
         long sourceId = source.requireId();
         ScanCounters counters = new ScanCounters();
         int lastReported = 0;
@@ -204,7 +204,7 @@ public class ScanService implements DisposableBean {
     }
 
     private void index(long sourceId, long scanId, SmbEntry entry, ScanCounters counters,
-                       TmdbMetadataResolver.Session metadataSession) {
+                       MetadataSession metadataSession) {
         Optional<MediaCategory> category = classifier.categoryOf(entry.name());
         if (category.isEmpty()) {
             return;

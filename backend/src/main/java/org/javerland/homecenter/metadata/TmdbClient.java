@@ -1,7 +1,6 @@
 package org.javerland.homecenter.metadata;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,11 +22,11 @@ public class TmdbClient {
     private final HomeCenterProperties.Metadata properties;
     private final @Nullable RestClient api;
     private final @Nullable RestClient images;
-    private final Object throttleMonitor = new Object();
-    private long nextRequestNanos;
+    private final RequestThrottle throttle;
 
     public TmdbClient(HomeCenterProperties properties) {
         this.properties = properties.metadata();
+        this.throttle = new RequestThrottle("TMDb", this.properties.requestDelay());
         if (this.properties.enabled()) {
             this.api = RestClient.builder()
                     .baseUrl(this.properties.apiBaseUrl())
@@ -118,7 +117,7 @@ public class TmdbClient {
 
     public byte[] downloadPoster(String remotePath) {
         RestClient client = require(images);
-        throttle();
+        throttle.await();
         byte[] body = client.get()
                 // Build the URI explicitly: during normal URI resolution, a path starting
                 // with a slash would discard /t/p/w342 from imageBaseUrl.
@@ -185,32 +184,12 @@ public class TmdbClient {
     }
 
     private <T> T callApi(java.util.function.Function<RestClient, @Nullable T> request) {
-        throttle();
+        throttle.await();
         T body = request.apply(require(api));
         if (body == null) {
             throw new RestClientException("TMDb vrátil prázdnu odpoveď");
         }
         return body;
-    }
-
-    private void throttle() {
-        Duration delay = properties.requestDelay();
-        if (delay.isZero() || delay.isNegative()) {
-            return;
-        }
-        synchronized (throttleMonitor) {
-            long now = System.nanoTime();
-            long remaining = nextRequestNanos - now;
-            if (remaining > 0) {
-                try {
-                    Thread.sleep(Duration.ofNanos(remaining));
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    throw new RestClientException("Čakanie na TMDb bolo prerušené", ex);
-                }
-            }
-            nextRequestNanos = System.nanoTime() + delay.toNanos();
-        }
     }
 
     private static Optional<Long> firstId(@Nullable SearchResponse response) {

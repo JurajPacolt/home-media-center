@@ -1,5 +1,9 @@
 homecenter:
   data-dir: ./target
+  metadata:
+    # Tests must never reach the internet; without this the token-free Cinemeta fallback
+    # would become the active provider.
+    cinemeta-fallback: false
   scan:
     # '-' disables the scheduled task; tests start scans themselves.
     cron: "-"

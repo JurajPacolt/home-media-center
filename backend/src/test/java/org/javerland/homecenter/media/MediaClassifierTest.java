@@ -20,7 +20,8 @@ class MediaClassifierTest {
                     Set.of("mp3", "flac")),
             new HomeCenterProperties.Metadata("", "sk-SK", "en-US",
                     Duration.ofDays(30), Duration.ofDays(1), Duration.ZERO,
-                    "https://api.themoviedb.org/3", "https://image.tmdb.org/t/p/w342"),
+                    "https://api.themoviedb.org/3", "https://image.tmdb.org/t/p/w342",
+                    false, "https://v3-cinemeta.strem.io"),
             new HomeCenterProperties.Scan("-", false, 32),
             new HomeCenterProperties.Streaming(DataSize.ofKilobytes(256)),
             new HomeCenterProperties.Security(Duration.ofDays(90))));

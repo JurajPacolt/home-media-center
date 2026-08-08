@@ -224,6 +224,21 @@ These rules are not apparent from any single source file:
     A 401 on anything other than login means the token died; the interceptor clears
     it and the navigation host returns to the login screen.
 
+14. **Metadata has two providers and a scan picks exactly one.** `MetadataProvider`
+    implementations are ordered beans—TMDb when a Read Access Token is configured,
+    otherwise the token-free Cinemeta. `MetadataEnrichmentService.newSession()`
+    chooses once and the choice holds for the whole scan, because
+    `media_item.metadata_provider` is stored next to an identifier that means
+    nothing to the other provider (TMDb numeric ids versus IMDb `tt…`).
+
+    Two consequences that are easy to get wrong: Cinemeta has **no genre ids**, so
+    a stable hash of the name stands in for `media_genre.provider_id`, and its
+    poster field is an **absolute URL without an extension**, so
+    `TmdbClient.posterUri()` does not apply—`CinemetaClient.posterUri()` allows only
+    `https` on `metahub.space`. Attribution follows the active provider: TMDB's
+    terms mandate their exact sentence and logo, Cinemeta requires nothing, and
+    showing the TMDB notice over other data is precisely what is not allowed.
+
 ## Structure
 
 ```
@@ -243,7 +258,7 @@ responsibility, not by layer:
 | `config` | `@ConfigurationProperties`, OpenAPI, MVC, and Spring Security configuration |
 | `source` | Samba: connection (`SmbGateway`), source configuration, paths |
 | `media` | media index—domain, repository, read service, extension classification |
-| `metadata` | filename parser, TMDb client, index enrichment, and local poster cache |
+| `metadata` | filename parser, TMDb and Cinemeta clients, index enrichment, and local poster cache |
 | `scan` | Samba traversal and index maintenance, scan history |
 | `stream` | Range logic, reading files from Samba into HTTP responses |
 | `user` | accounts: domain, repository, roles, password and PIN hashing |

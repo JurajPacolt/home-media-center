@@ -92,7 +92,7 @@
                              th:src="@{|/admin/kniznica/${item.requireId()}/poster|}"
                              th:alt="|Plagát: ${item.title()}|" loading="lazy">
                         <!-- Without a placeholder the rows would jump between heights
-                             depending on whether TMDb found a poster. -->
+                             depending on whether the provider found a poster. -->
                         <span th:unless="${item.metadata() != null && item.metadata().hasPoster()}"
                               class="hc-poster-empty" th:classappend="|hc-cat-${item.category().name()}|"
                               aria-hidden="true">
@@ -247,11 +247,18 @@
     </div>
 
     <footer class="hc-footer">
-        <aside class="hc-tmdb-attribution" aria-label="Zdroj filmových metadát">
+        <!-- TMDB terms require this exact sentence and the logo whenever their API is used.
+             Cinemeta demands nothing, but the source is still worth naming. -->
+        <aside class="hc-metadata-attribution" th:if="${metadataProvider == 'TMDB'}"
+               aria-label="Zdroj filmových metadát">
             <a href="https://www.themoviedb.org" target="_blank" rel="noopener">
                 <img th:src="@{/img/tmdb.svg}" alt="TMDB">
             </a>
             <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
+        </aside>
+        <aside class="hc-metadata-attribution" th:if="${metadataProvider == 'CINEMETA'}"
+               aria-label="Zdroj filmových metadát">
+            <span>Filmové metadáta pochádzajú z katalógu Cinemeta, ktorý stavia na údajoch IMDb.</span>
         </aside>
         <span>Náhľad prehráva iba to, čo zvládne prehliadač. Televízor zvládne viac.</span>
     </footer>

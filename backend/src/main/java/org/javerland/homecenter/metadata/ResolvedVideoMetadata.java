@@ -23,8 +23,8 @@ record ResolvedVideoMetadata(
         @Nullable Integer partNumber,
         List<ProviderGenre> genres) {
 
-    MediaMetadataUpdate toUpdate(@Nullable String posterFile) {
-        return new MediaMetadataUpdate(title, kind, "TMDB", providerId, description,
+    MediaMetadataUpdate toUpdate(String provider, @Nullable String posterFile) {
+        return new MediaMetadataUpdate(title, kind, provider, providerId, description,
                 posterFile, releaseYear, rating, groupKey, groupTitle,
                 seasonNumber, episodeNumber, partNumber, genres);
     }

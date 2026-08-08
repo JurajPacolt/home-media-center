@@ -1,15 +1,17 @@
 package org.javerland.homecenter.metadata;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.javerland.homecenter.media.VideoKind;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /** Combines title search, series/movie details, and a specific episode. */
 @Component
-public class TmdbMetadataResolver {
+@Order(10)
+public class TmdbMetadataResolver implements MetadataProvider {
+
+    static final String PROVIDER = "TMDB";
 
     private final TmdbClient client;
 
@@ -17,20 +19,29 @@ public class TmdbMetadataResolver {
         this.client = client;
     }
 
-    public Session newSession() {
-        return new Session();
+    @Override
+    public String name() {
+        return PROVIDER;
     }
 
-    public Optional<ResolvedVideoMetadata> resolve(ParsedVideoName parsed, Session session) {
-        if (!session.available) {
-            return Optional.empty();
-        }
+    @Override
+    public boolean enabled() {
+        return client.enabled();
+    }
+
+    @Override
+    public byte[] downloadPoster(String remotePosterPath) {
+        return client.downloadPoster(remotePosterPath);
+    }
+
+    @Override
+    public Optional<ResolvedVideoMetadata> resolve(ParsedVideoName parsed, MetadataSession session) {
         return parsed.episode() ? resolveEpisode(parsed, session) : resolveMovie(parsed, session);
     }
 
-    private Optional<ResolvedVideoMetadata> resolveMovie(ParsedVideoName parsed, Session session) {
+    private Optional<ResolvedVideoMetadata> resolveMovie(ParsedVideoName parsed, MetadataSession session) {
         SearchKey key = new SearchKey(parsed.queryTitle(), parsed.year());
-        Optional<TmdbTitle> result = session.movies.computeIfAbsent(key, ignored ->
+        Optional<TmdbTitle> result = session.cached(key, ignored ->
                 client.searchMovie(parsed.queryTitle(), parsed.year()).map(client::movie));
         return result.map(movie -> {
             String groupKey = null;
@@ -55,9 +66,9 @@ public class TmdbMetadataResolver {
         });
     }
 
-    private Optional<ResolvedVideoMetadata> resolveEpisode(ParsedVideoName parsed, Session session) {
-        SearchKey key = new SearchKey(parsed.queryTitle(), parsed.year());
-        Optional<TmdbTitle> seriesResult = session.series.computeIfAbsent(key, ignored ->
+    private Optional<ResolvedVideoMetadata> resolveEpisode(ParsedVideoName parsed, MetadataSession session) {
+        SeriesKey key = new SeriesKey(parsed.queryTitle(), parsed.year());
+        Optional<TmdbTitle> seriesResult = session.cached(key, ignored ->
                 client.searchSeries(parsed.queryTitle(), parsed.year()).map(client::series));
         if (seriesResult.isEmpty()) {
             return Optional.empty();
@@ -66,7 +77,7 @@ public class TmdbMetadataResolver {
         int season = parsed.seasonNumber();
         int episodeNumber = parsed.episodeNumber();
         EpisodeKey episodeKey = new EpisodeKey(series.id(), season, episodeNumber);
-        Optional<TmdbEpisode> episode = session.episodes.computeIfAbsent(episodeKey, ignored ->
+        Optional<TmdbEpisode> episode = session.cached(episodeKey, ignored ->
                 client.episode(series.id(), season, episodeNumber));
 
         String code = "S%02dE%02d".formatted(season, episodeNumber);
@@ -89,19 +100,10 @@ public class TmdbMetadataResolver {
                 season, episodeNumber, parsed.partNumber(), series.genres()));
     }
 
-    /** Cache valid only for one scan, avoiding a repeated series search for every episode. */
-    public static final class Session {
-        private final Map<SearchKey, Optional<TmdbTitle>> movies = new HashMap<>();
-        private final Map<SearchKey, Optional<TmdbTitle>> series = new HashMap<>();
-        private final Map<EpisodeKey, Optional<TmdbEpisode>> episodes = new HashMap<>();
-        private boolean available = true;
-
-        public void disable() {
-            available = false;
-        }
+    private record SearchKey(String title, Integer year) {
     }
 
-    private record SearchKey(String title, Integer year) {
+    private record SeriesKey(String title, Integer year) {
     }
 
     private record EpisodeKey(long seriesId, int season, int episode) {

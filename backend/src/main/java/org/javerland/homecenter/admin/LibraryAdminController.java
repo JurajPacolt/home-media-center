@@ -6,6 +6,7 @@ import org.javerland.homecenter.media.MediaCategory;
 import org.javerland.homecenter.media.MediaQuery;
 import org.javerland.homecenter.media.MediaService;
 import org.javerland.homecenter.source.SmbSourceService;
+import org.javerland.homecenter.metadata.MetadataEnrichmentService;
 import org.javerland.homecenter.metadata.PosterResponse;
 import org.javerland.homecenter.metadata.PosterStorage;
 import org.javerland.homecenter.stream.MediaStreamResponse;
@@ -36,6 +37,7 @@ public class LibraryAdminController {
     private final MediaStreamService streamService;
     private final SmbSourceService sourceService;
     private final PosterStorage posterStorage;
+    private final MetadataEnrichmentService metadataService;
 
     @GetMapping
     public String library(@RequestParam(required = false) @Nullable MediaCategory category,
@@ -64,6 +66,7 @@ public class LibraryAdminController {
         model.addAttribute("total", total);
         model.addAttribute("page", currentPage);
         model.addAttribute("lastPage", lastPage);
+        model.addAttribute("metadataProvider", metadataService.activeProviderName());
         return "kniznica";
     }
 

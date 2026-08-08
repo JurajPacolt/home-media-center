@@ -30,8 +30,9 @@ public record HomeCenterProperties(
     }
 
     /**
-     * Optional movie metadata from TMDb. An empty token disables the integration entirely,
-     * so SMB scanning and playback also work without internet access or a TMDb account.
+     * Optional movie metadata. TMDb is used when a Read Access Token is configured; otherwise the
+     * scan falls back to Cinemeta, which needs no account but only provides English texts. With
+     * both switched off, SMB scanning and playback still work without internet access.
      */
     public record Metadata(
             @DefaultValue("") String tmdbReadAccessToken,
@@ -41,8 +42,11 @@ public record HomeCenterProperties(
             @DefaultValue("1d") Duration retryAfter,
             @DefaultValue("250ms") Duration requestDelay,
             @DefaultValue("https://api.themoviedb.org/3") String apiBaseUrl,
-            @DefaultValue("https://image.tmdb.org/t/p/w342") String imageBaseUrl) {
+            @DefaultValue("https://image.tmdb.org/t/p/w342") String imageBaseUrl,
+            @DefaultValue("true") boolean cinemetaFallback,
+            @DefaultValue("https://v3-cinemeta.strem.io") String cinemetaBaseUrl) {
 
+        /** True when a TMDb token is configured. */
         public boolean enabled() {
             return tmdbReadAccessToken != null && !tmdbReadAccessToken.isBlank();
         }

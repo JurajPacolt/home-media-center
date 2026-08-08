@@ -94,8 +94,8 @@ the file produces 416.
 ## Technology stack
 
 **Server**—Java 25 (LTS), Spring Boot 4.1, smbj for SMB access, H2 as the index
-(schema managed by Flyway), Lombok, and an optional TMDb API integration for movie
-metadata.
+(schema managed by Flyway), Lombok, and movie metadata from TMDb or, without a
+token, from Cinemeta.
 
 **Management UI**—Thymeleaf + Bootstrap 5 + jQuery, Video.js for browser video,
 and Chart.js for charts (to be added only when needed). Everything is served
@@ -117,6 +117,7 @@ The complete library list and rationale are in
 ```powershell
 $env:JAVA_HOME = "d:\java\jdk-25"
 # Optional: TMDb API Read Access Token for descriptions, genres, and posters.
+# Without it, the token-free Cinemeta catalogue is used instead.
 $env:TMDB_READ_ACCESS_TOKEN = "insert-token-here"
 cd backend
 mvn spring-boot:run
@@ -129,18 +130,21 @@ sources**, add storage (address, share, and credentials), and start a scan. You 
 add multiple sources. The index is stored in `backend/data/homecenter.mv.db`.
 
 Obtain `TMDB_READ_ACCESS_TOKEN` after registering for API access in the
-[TMDb settings](https://www.themoviedb.org/settings/api). It is optional: without
-it, scanning still recognizes and sorts TV episodes by filename, but does not
-download descriptions, ratings, genres, or posters. The token is not stored in the
-database.
+[TMDb settings](https://www.themoviedb.org/settings/api). It is optional: **without
+a token, the server falls back to the public Cinemeta catalogue**, which needs no
+account. Cinemeta only provides English texts and does not know movie collections,
+which is why TMDb takes precedence whenever a token is present. Setting
+`homecenter.metadata.cinemeta-fallback: false` switches enrichment off entirely; a
+scan then still recognizes and sorts TV episodes by filename, but downloads no
+descriptions, ratings, genres, or posters. The token is not stored in the database.
 
 ### Movie metadata and sorting
 
-During a scan, videos are enriched through TMDb, and the result is stored in the
-local H2 index. Posters are saved in `backend/data/posters`, so opening the library
-does not call the public API. Genres (such as Comedy or Horror) are a separate
-filter in the video library; they do not change the three main categories of
-Videos / Photos / Music.
+During a scan, videos are enriched through the active provider, and the result is
+stored in the local H2 index. Posters are saved in `backend/data/posters`, so
+opening the library does not call the public API. Genres (such as Comedy or Horror)
+are a separate filter in the video library; they do not change the three main
+categories of Videos / Photos / Music.
 
 Automatic recognition is most reliable with conventional filenames:
 
@@ -150,8 +154,8 @@ Automatic recognition is most reliable with conventional filenames:
 
 Episodes of the same series share a group and are sorted by season and episode
 number rather than alphabetically (`S01E02` before `S01E10`). The same applies to
-numbered parts. TMDb enrichment is best-effort: an internet outage or a missing
-title never stops the SMB scan itself.
+numbered parts. Enrichment is best-effort: an internet outage or a missing title
+never stops the SMB scan itself.
 
 ### Interfaces
 
@@ -248,7 +252,7 @@ reserved for the Android TV client.
   are unproven.
 - **Technical file metadata and photo thumbnails**—duration, codecs, and dimensions
   through ffprobe, as well as separate photo thumbnails, have not been implemented.
-  The server already indexes movie descriptions, genres, and posters from TMDb.
+  The server already indexes movie descriptions, genres, and posters.
 - **The server runs over HTTP.** Tokens and passwords travel unencrypted on the home
   network; HTTPS is required before exposing the server outside the LAN.
 - **The Samba password is stored in plaintext in the database.** Account passwords

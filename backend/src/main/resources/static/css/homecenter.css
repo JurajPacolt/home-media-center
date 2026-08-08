@@ -1167,14 +1167,14 @@ main.container {
     font-size: .8125rem;
 }
 
-.hc-tmdb-attribution {
+.hc-metadata-attribution {
     display: flex;
     align-items: center;
     gap: .75rem;
     max-width: 46ch;
 }
 
-.hc-tmdb-attribution img {
+.hc-metadata-attribution img {
     width: 4.5rem;
     height: auto;
     flex: none;

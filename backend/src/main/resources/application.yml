@@ -57,6 +57,10 @@ homecenter:
     request-delay: 250ms
     api-base-url: https://api.themoviedb.org/3
     image-base-url: https://image.tmdb.org/t/p/w342
+    # Fallback without an account: the public Cinemeta catalogue. It is used only when no TMDb
+    # token is configured and, unlike TMDb, provides English texts only.
+    cinemeta-fallback: true
+    cinemeta-base-url: https://v3-cinemeta.strem.io
 
   scan:
     # Nightly background scan. Manual scans start from the management UI or REST API.

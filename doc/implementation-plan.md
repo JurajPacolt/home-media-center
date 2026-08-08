@@ -32,7 +32,7 @@
 | SMB access | smbj (SMB2/3), positional reads through `share.File` |
 | Media index | H2 + Flyway (originally SQLite, changed on 2026-08-06) |
 | File metadata | ffprobe (FFmpeg) |
-| Movie metadata | TMDb API |
+| Movie metadata | TMDb API, or Cinemeta without a token |
 | Photo thumbnails | thumbnailator |
 | Deployment | Docker + docker-compose |
 
@@ -792,3 +792,77 @@ cd frontend\openapi; .\refresh.ps1 -BaseUrl http://localhost:8099 -Username admi
 A fresh database creates `admin`/`admin` with a forced password change, and that
 is enough: the interceptor guards `/admin/**` only, and `/api/openapi` is outside
 it.
+
+---
+
+## 2026-08-08—Cinemeta as a metadata provider without a token
+
+TMDb needs an account and a Read Access Token. That is a barrier for anyone who
+just wants to point the server at a Samba share and see posters, so metadata now
+has a **second provider that needs neither**: the public **Cinemeta** catalogue
+(the Stremio add-on built on IMDb identifiers).
+
+### Which provider a scan uses
+
+`MetadataProvider` is the seam: `name()`, `enabled()`, `resolve()` and
+`downloadPoster()`. The implementations are ordered Spring beans—`TmdbMetadataResolver`
+is `@Order(10)`, `CinemetaMetadataResolver` is `@Order(20)`—and
+`MetadataEnrichmentService.newSession()` picks the first enabled one.
+
+**The choice is made once, when the session is created, and holds for the whole
+scan.** A provider name goes into `media_item.metadata_provider` and
+`media_genre.provider` together with an identifier that means nothing to the other
+provider; switching mid-scan would produce an index where half the rows point at
+TMDb ids and half at IMDb ids.
+
+| Configuration | Active provider |
+|---|---|
+| `tmdb-read-access-token` set | `TMDB` |
+| no token, `cinemeta-fallback: true` (default) | `CINEMETA` |
+| no token, `cinemeta-fallback: false` | none—only filename parsing |
+
+Changing providers on an existing library is not a migration; the next scan
+rewrites each item as its refresh falls due.
+
+### What Cinemeta costs
+
+- **English only.** TMDb serves `sk-SK` descriptions and falls back to `en-US`;
+  Cinemeta has one language. This is the reason TMDb stays the preferred provider
+  rather than being replaced.
+- **No collections.** TMDb knows that three Matrix films belong together;
+  Cinemeta does not. Sequels are grouped only when the filename numbers the part.
+- **No terms and no SLA.** It is Stremio's own infrastructure, published for their
+  add-on. Nothing forbids this use, but nothing guarantees it either.
+
+In exchange, one request returns a whole series *including its episode list*, so
+episodes need no further calls—the opposite of TMDb, which needs a request per
+episode.
+
+### Two mappings the index forced
+
+`provider_id` is a `BIGINT`, but Cinemeta identifies titles as `tt0133093`. The
+`tt` prefix carries no information, so the numeric part is stored and the prefix is
+re-attached for group keys (`cinemeta:tv:tt4574334`).
+
+Genres are worse: Cinemeta returns bare strings with no identifiers, while
+`media_genre` is keyed by `(provider, provider_id)`. A stable FNV-1a hash of the
+lowercased name stands in for the id, so `Sci-Fi` always lands on the same row. The
+`provider` column keeps these synthetic ids from ever colliding with TMDb's.
+
+### Posters come as absolute URLs
+
+TMDb returns `/matrix.jpg` and the server prepends a configured image base URL.
+Cinemeta returns `https://images.metahub.space/poster/small/tt0133093/img`—a full
+URL, no file extension. So `TmdbClient.posterUri()` could not be reused:
+`CinemetaClient.posterUri()` **allows only `https` on `metahub.space`**. A poster
+address arriving in an API response must never be able to point the server at an
+arbitrary machine on the home network. The cached file falls back to `.jpg`, which
+is what the CDN serves.
+
+### Attribution follows the provider
+
+TMDB's terms require their logo and an exact sentence; Cinemeta requires nothing.
+The library footer therefore renders whichever credit matches
+`MetadataEnrichmentService.activeProviderName()`, and neither one when enrichment
+is switched off. Showing the TMDB notice while the data came from somewhere else
+would be the one thing their terms clearly do not allow.

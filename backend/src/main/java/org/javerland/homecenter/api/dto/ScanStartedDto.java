@@ -11,10 +11,10 @@ import org.javerland.homecenter.scan.ScanStart;
  */
 public record ScanStartedDto(
 
-        @Schema(description = "Počet zdrojov, ktoré sa budú prechádzať")
+        @Schema(description = "How many sources will be walked")
         int queuedSources,
 
-        @Schema(description = "Názvy zdrojov v poradí, v akom sa prejdú")
+        @Schema(description = "Source names in the order they will be walked")
         List<String> sources) {
 
     public static ScanStartedDto from(ScanStart start) {

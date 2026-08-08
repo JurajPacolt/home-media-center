@@ -152,9 +152,15 @@ These rules are not apparent from any single source file:
    Two server-side settings exist for the generator and must not be undone—
    `springdoc.paths-to-match: /api/v1/**` (generating an API for `/admin/**` would
    suggest the TV may call it, and rule 9 says it may not), and the SPDX licence
-   identifier that OpenAPI 3.1 requires. Tag names stay free of diacritics; the
-   generator turns each tag into a Kotlin interface name and silently drops what it
-   cannot spell.
+   identifier that OpenAPI 3.1 requires.
+
+   **The specification is written in English**—title, tags, summaries and schema
+   descriptions. A tag name becomes a Kotlin interface name (`Library` →
+   `LibraryApi`), so renaming a tag renames a class the client imports and requires
+   re-exporting the snapshot. Diacritics are impossible there for the same reason:
+   the generator silently drops what it cannot spell. This stops at the
+   specification—`ProblemDetail` titles, validation messages and log output stay
+   Slovak, like the rest of the running application.
 
 7. **The schema changes only through Flyway migrations.** `V1__init.sql` contains
    the base structure and data model and **must no longer be edited**—every further

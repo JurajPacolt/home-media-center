@@ -24,14 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Prehravanie", description = "Prenos súborov zo Samby s podporou Range requestov")
+@Tag(name = "Playback", description = "Transfers files from Samba with Range request support")
 @RequiredArgsConstructor
 public class StreamApiController {
 
     private final MediaStreamService streamService;
 
     @GetMapping("/media/{id}/stream")
-    @Operation(summary = "Prehrá súbor; s hlavičkou Range vráti 206 a žiadanú časť")
+    @Operation(summary = "Plays a file; with a Range header it returns 206 and the requested part")
     @SecurityRequirement(name = "bearer")
     public ResponseEntity<Resource> stream(
             @PathVariable long id,

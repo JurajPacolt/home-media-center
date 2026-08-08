@@ -13,10 +13,16 @@ import org.springframework.context.annotation.Configuration;
  * This specification is the contract between the server and Android TV client. Models
  * are not shared between Java and Kotlin; OpenAPI is the only link between them.
  *
- * <p><b>Tag names must stay free of diacritics.</b> The client generator turns each tag
- * into a Kotlin interface name and strips whatever it cannot spell, so {@code Knižnica}
- * would arrive as {@code KninicaApi}. Descriptions are prose and keep their diacritics;
- * only the names are identifiers.
+ * <p>The specification is written in <b>English</b>: it is read by whoever writes a
+ * client, and tag names become Kotlin identifiers in the generated code. Renaming a tag
+ * therefore renames a class the client imports—{@code Library} produces
+ * {@code LibraryApi}—so it is never a cosmetic change. Diacritics are impossible for the
+ * same reason: the generator strips what it cannot spell, and {@code Knižnica} used to
+ * arrive as {@code KninicaApi}.
+ *
+ * <p>This applies to the specification only. {@code ProblemDetail} titles, validation
+ * messages and log output stay Slovak—they belong to a running application, not to the
+ * contract between two codebases.
  */
 @Configuration(proxyBeanMethods = false)
 public class OpenApiConfig {
@@ -28,16 +34,17 @@ public class OpenApiConfig {
     OpenAPI homeCenterOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Domáce mediacentrum — API")
+                        .title("Home Media Center — API")
                         .version("v1")
                         .description("""
-                                REST rozhranie pre Android TV klienta. Médiá sú rozdelené na tri kategórie
-                                (VIDEO, PHOTO, AUDIO). Server číta z lokálneho indexu a súbory zo Samby
-                                preposiela cez /api/v1/media/{id}/stream s podporou Range requestov.
+                                REST interface for the Android TV client. Media is split into three
+                                categories (VIDEO, PHOTO, AUDIO). The server reads from its local index
+                                and forwards files from Samba through /api/v1/media/{id}/stream with
+                                Range request support.
 
-                                Všetko okrem /api/v1/auth/login vyžaduje hlavičku
-                                `Authorization: Bearer <token>`. Token vydá prihlásenie menom a heslom
-                                alebo menom a PINom.
+                                Everything except /api/v1/auth/login requires the
+                                `Authorization: Bearer <token>`. A token is issued by logging in
+                                with a username and password, or a username and PIN.
                                 """)
                         // OpenAPI 3.1 rejects a license that carries only a name; the client's
                         // code generator validates the specification and refuses to run without
@@ -46,7 +53,7 @@ public class OpenApiConfig {
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME, new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
-                        .description("Token z POST /api/v1/auth/login")))
+                        .description("Token from POST /api/v1/auth/login")))
                 // Applies to all operations by default; /auth/login overrides it.
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
     }

@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 /** Reads the library for the Android TV client. Everything comes from the index; Samba is not accessed here. */
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Kniznica", description = "Prehľad a výpis indexovaných médií")
+@Tag(name = "Library", description = "Overview and listing of indexed media")
 @RequiredArgsConstructor
 public class MediaApiController {
 
@@ -36,13 +36,13 @@ public class MediaApiController {
     private final PosterStorage posterStorage;
 
     @GetMapping("/library")
-    @Operation(summary = "Prehľad knižnice — počty pre dlaždice Videá / Fotky / Hudba")
+    @Operation(summary = "Library overview—the counts behind the Videos / Photos / Music tiles")
     public LibrarySummaryDto library() {
         return LibrarySummaryDto.from(mediaService.summary(), scanService.latest().orElse(null));
     }
 
     @GetMapping("/media")
-    @Operation(summary = "Výpis médií, voliteľne filtrovaný podľa kategórie, zdroja a hľadaného textu")
+    @Operation(summary = "Lists media, optionally filtered by category, source, genre and search text")
     public MediaPageDto list(@RequestParam(required = false) @Nullable MediaCategory category,
                              @RequestParam(required = false) @Nullable Long sourceId,
                              @RequestParam(required = false) @Nullable Long genreId,
@@ -55,19 +55,19 @@ public class MediaApiController {
     }
 
     @GetMapping("/media/{id}")
-    @Operation(summary = "Detail jednej položky")
+    @Operation(summary = "Details of a single item")
     public MediaItemDto detail(@PathVariable long id) {
         return MediaItemDto.from(mediaService.require(id));
     }
 
     @GetMapping("/genres")
-    @Operation(summary = "Filmové žánre, ktoré sa v knižnici aktuálne používajú")
+    @Operation(summary = "Movie genres currently in use in the library")
     public List<MediaGenreDto> genres() {
         return mediaService.genres().stream().map(MediaGenreDto::from).toList();
     }
 
     @GetMapping("/media/{id}/poster")
-    @Operation(summary = "Lokálne cachovaný plagát alebo náhľad epizódy")
+    @Operation(summary = "Locally cached poster or episode still")
     public ResponseEntity<Resource> poster(@PathVariable long id) {
         return PosterResponse.of(posterStorage.open(mediaService.require(id)));
     }

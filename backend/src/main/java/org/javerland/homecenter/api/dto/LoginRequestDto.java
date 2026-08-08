@@ -16,7 +16,7 @@ public record LoginRequestDto(
         String username,
 
         @NotBlank(message = "Zadaj heslo alebo PIN")
-        @Schema(description = "Heslo alebo PIN, ak ho používateľ má nastavený")
+        @Schema(description = "Password, or PIN if the user has one set")
         String secret,
 
         @Nullable String deviceName) {

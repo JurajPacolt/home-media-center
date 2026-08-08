@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Prihlasenie", description = "Vydávanie a rušenie tokenov pre TV klienta")
+@Tag(name = "Authentication", description = "Issuing and revoking tokens for the TV client")
 @RequiredArgsConstructor
 public class AuthApiController {
 
@@ -40,7 +40,7 @@ public class AuthApiController {
     private final AuthTokenService tokenService;
 
     @PostMapping("/login")
-    @Operation(summary = "Prihlási menom a heslom alebo menom a PINom, vráti token")
+    @Operation(summary = "Logs in with a username and password, or a username and PIN, and returns a token")
     public LoginResponseDto login(@Valid @RequestBody LoginRequestDto request) {
         AppUser user = userService.authenticate(request.username(), request.secret(), true)
                 .orElseThrow(InvalidLoginException::new);
@@ -49,7 +49,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Zneplatní token, ktorým je request podpísaný")
+    @Operation(summary = "Revokes the token this request is signed with")
     @SecurityRequirement(name = "bearer")
     public ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         if (authorization.regionMatches(true, 0, BEARER, 0, BEARER.length())) {
@@ -59,7 +59,7 @@ public class AuthApiController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Kto je prihlásený týmto tokenom")
+    @Operation(summary = "Who is logged in with this token")
     @SecurityRequirement(name = "bearer")
     public AuthUserDto me(@AuthenticationPrincipal AuthenticatedUser principal) {
         return AuthUserDto.from(principal.user());

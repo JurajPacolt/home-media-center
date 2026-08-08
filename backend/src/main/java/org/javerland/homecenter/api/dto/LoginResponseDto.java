@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 public record LoginResponseDto(
 
-        @Schema(description = "Server ho ukazuje jediný raz, znovu sa zobraziť nedá")
+        @Schema(description = "Shown by the server exactly once; it cannot be displayed again")
         String token,
 
         Instant expiresAt,

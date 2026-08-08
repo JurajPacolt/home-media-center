@@ -660,8 +660,9 @@ Three things had to change on the server for this to work:
   `Domáce použitie` became `Apache-2.0`, which is the repository's actual licence.
 - **Tag names lost their diacritics.** The generator turns each tag into a Kotlin
   interface name and silently drops what it cannot spell, so `Knižnica` arrived as
-  `KninicaApi`. The tags are now `Kniznica`, `Prihlasenie`, `Prehravanie`—the same
-  convention the URLs already follow. Descriptions are prose and kept theirs.
+  `KninicaApi`. The tags were first stripped to `Kniznica`, `Prihlasenie`,
+  `Prehravanie`, and later translated outright—see the 2026-08-08 entry on the
+  English specification.
 
 Generated models are all-nullable, because springdoc marks almost nothing
 required. They therefore stop at the repository layer, which maps them to domain
@@ -746,3 +747,48 @@ The app **builds, passes its unit tests and lints clean, but has never been run*
 This machine has no Android TV system image and no `cmdline-tools` to install one,
 so nothing here has been exercised against a real server: the login round trip,
 poster loading, seeking, and D-pad focus order are all unproven.
+
+---
+
+## 2026-08-08—`org.javerlabd` renamed to `org.javerland`
+
+The base package and Maven `groupId` were misspelled from the first commit. Both
+modules were renamed: `org.javerland` is now the Java base package, the Maven
+`groupId`, the Android `namespace` and the `applicationId`. The Android
+`applicationId` change means an already-installed build is a different app to the
+system and will not upgrade in place—it has to be uninstalled first. Nothing was
+published anywhere, so no coordinates had to be kept for compatibility.
+
+---
+
+## 2026-08-08—The OpenAPI specification is written in English
+
+The specification is read by whoever writes the client, and its tag names become
+Kotlin identifiers in the generated code. Both are engineering artefacts, so the
+whole of it—title, description, tags, operation summaries and schema
+descriptions—is now English, matching the rest of the documentation.
+
+The tags carry the weight: `Kniznica`, `Prihlasenie`, `Prehravanie` and
+`Skenovanie` became `Library`, `Authentication`, `Playback` and `Scanning`, so the
+generated interfaces are `LibraryApi`, `AuthenticationApi`, `PlaybackApi` and
+`ScanningApi`. Renaming a tag is therefore never a cosmetic change—it renames a
+class the client imports, and the enums nested in it (`LibraryApi.CategoryList`)
+along with it. Three files needed editing and the snapshot needed re-exporting.
+
+**This stops at the specification.** `ProblemDetail` titles, Bean Validation
+messages and log output stay Slovak: they belong to a running application whose
+management UI and television are Slovak, not to the contract between two
+codebases.
+
+Re-exporting the snapshot needs a server whose administrator password is known.
+The development database has one that was already changed, so the export ran
+against a throwaway data directory instead:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.arguments=--homecenter.data-dir=$env:TEMP\hc --server.port=8099"
+cd frontend\openapi; .\refresh.ps1 -BaseUrl http://localhost:8099 -Username admin -Password admin
+```
+
+A fresh database creates `admin`/`admin` with a forced password change, and that
+is enough: the interceptor guards `/admin/**` only, and `/api/openapi` is outside
+it.

@@ -9,9 +9,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.javerland.homecenter.tv.BuildConfig
-import org.javerland.homecenter.tv.api.KniznicaApi
-import org.javerland.homecenter.tv.api.PrihlasenieApi
-import org.javerland.homecenter.tv.api.SkenovanieApi
+import org.javerland.homecenter.tv.api.LibraryApi
+import org.javerland.homecenter.tv.api.AuthenticationApi
+import org.javerland.homecenter.tv.api.ScanningApi
 import org.javerland.homecenter.tv.data.net.HomeCenterInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -60,13 +60,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideLibraryApi(retrofit: Retrofit): KniznicaApi = retrofit.create(KniznicaApi::class.java)
+    fun provideLibraryApi(retrofit: Retrofit): LibraryApi = retrofit.create(LibraryApi::class.java)
 
     @Provides
     @Singleton
-    fun provideAuthApi(retrofit: Retrofit): PrihlasenieApi = retrofit.create(PrihlasenieApi::class.java)
+    fun provideAuthApi(retrofit: Retrofit): AuthenticationApi = retrofit.create(AuthenticationApi::class.java)
 
     @Provides
     @Singleton
-    fun provideScanApi(retrofit: Retrofit): SkenovanieApi = retrofit.create(SkenovanieApi::class.java)
+    fun provideScanApi(retrofit: Retrofit): ScanningApi = retrofit.create(ScanningApi::class.java)
 }

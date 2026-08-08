@@ -1,7 +1,7 @@
 package org.javerland.homecenter.tv.data.repository
 
 import android.os.Build
-import org.javerland.homecenter.tv.api.PrihlasenieApi
+import org.javerland.homecenter.tv.api.AuthenticationApi
 import org.javerland.homecenter.tv.api.model.AuthUserDto
 import org.javerland.homecenter.tv.api.model.LoginRequestDto
 import org.javerland.homecenter.tv.data.net.ApiException
@@ -18,7 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class AuthRepository @Inject constructor(
-    private val api: PrihlasenieApi,
+    private val api: AuthenticationApi,
     private val sessionStore: SessionStore,
 ) {
 

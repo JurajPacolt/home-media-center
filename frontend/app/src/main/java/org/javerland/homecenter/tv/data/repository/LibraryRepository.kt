@@ -1,6 +1,6 @@
 package org.javerland.homecenter.tv.data.repository
 
-import org.javerland.homecenter.tv.api.KniznicaApi
+import org.javerland.homecenter.tv.api.LibraryApi
 import org.javerland.homecenter.tv.api.model.CategoryTileDto
 import org.javerland.homecenter.tv.api.model.LibrarySummaryDto
 import org.javerland.homecenter.tv.api.model.MediaGenreDto
@@ -28,7 +28,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class LibraryRepository @Inject constructor(
-    private val api: KniznicaApi,
+    private val api: LibraryApi,
     private val sessionStore: SessionStore,
 ) {
 
@@ -44,7 +44,7 @@ class LibraryRepository @Inject constructor(
         offset: Int = 0,
     ): MediaPage = apiCall {
         val response = api.list(
-            category = category?.let { KniznicaApi.CategoryList.valueOf(it.name) },
+            category = category?.let { LibraryApi.CategoryList.valueOf(it.name) },
             sourceId = null,
             genreId = genreId,
             search = search?.takeIf { it.isNotBlank() },

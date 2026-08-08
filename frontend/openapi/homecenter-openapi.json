@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Domáce mediacentrum — API",
-    "description": "REST rozhranie pre Android TV klienta. Médiá sú rozdelené na tri kategórie\n(VIDEO, PHOTO, AUDIO). Server číta z lokálneho indexu a súbory zo Samby\npreposiela cez /api/v1/media/{id}/stream s podporou Range requestov.\n\nVšetko okrem /api/v1/auth/login vyžaduje hlavičku\n`Authorization: Bearer <token>`. Token vydá prihlásenie menom a heslom\nalebo menom a PINom.\n",
+    "title": "Home Media Center — API",
+    "description": "REST interface for the Android TV client. Media is split into three\ncategories (VIDEO, PHOTO, AUDIO). The server reads from its local index\nand forwards files from Samba through /api/v1/media/{id}/stream with\nRange request support.\n\nEverything except /api/v1/auth/login requires the\n`Authorization: Bearer <token>`. A token is issued by logging in\nwith a username and password, or a username and PIN.\n",
     "license": {
       "name": "Apache-2.0",
       "identifier": "Apache-2.0"
@@ -16,29 +16,29 @@
   ],
   "tags": [
     {
-      "name": "Skenovanie",
-      "description": "Spustenie skenu Samby a jeho história"
+      "name": "Scanning",
+      "description": "Starting a Samba scan and its history"
     },
     {
-      "name": "Kniznica",
-      "description": "Prehľad a výpis indexovaných médií"
+      "name": "Library",
+      "description": "Overview and listing of indexed media"
     },
     {
-      "name": "Prehravanie",
-      "description": "Prenos súborov zo Samby s podporou Range requestov"
+      "name": "Playback",
+      "description": "Transfers files from Samba with Range request support"
     },
     {
-      "name": "Prihlasenie",
-      "description": "Vydávanie a rušenie tokenov pre TV klienta"
+      "name": "Authentication",
+      "description": "Issuing and revoking tokens for the TV client"
     }
   ],
   "paths": {
     "/api/v1/scan": {
       "get": {
         "tags": [
-          "Skenovanie"
+          "Scanning"
         ],
-        "summary": "História skenov naprieč všetkými zdrojmi",
+        "summary": "Scan history across all sources",
         "operationId": "history",
         "parameters": [
           {
@@ -75,9 +75,9 @@
       },
       "post": {
         "tags": [
-          "Skenovanie"
+          "Scanning"
         ],
-        "summary": "Spustí sken na pozadí a hneď sa vráti; bez sourceId prejde všetky zapnuté zdroje",
+        "summary": "Starts a scan in the background and returns at once; without sourceId it walks every enabled source",
         "operationId": "start",
         "parameters": [
           {
@@ -112,9 +112,9 @@
     "/api/v1/auth/logout": {
       "post": {
         "tags": [
-          "Prihlasenie"
+          "Authentication"
         ],
-        "summary": "Zneplatní token, ktorým je request podpísaný",
+        "summary": "Revokes the token this request is signed with",
         "operationId": "logout",
         "parameters": [
           {
@@ -141,9 +141,9 @@
     "/api/v1/auth/login": {
       "post": {
         "tags": [
-          "Prihlasenie"
+          "Authentication"
         ],
-        "summary": "Prihlási menom a heslom alebo menom a PINom, vráti token",
+        "summary": "Logs in with a username and password, or a username and PIN, and returns a token",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -172,9 +172,9 @@
     "/api/v1/scan/latest": {
       "get": {
         "tags": [
-          "Skenovanie"
+          "Scanning"
         ],
-        "summary": "Posledný sken vrátane priebehu toho, ktorý práve beží",
+        "summary": "The latest scan, including the progress of one still running",
         "operationId": "latest",
         "responses": {
           "200": {
@@ -198,9 +198,9 @@
     "/api/v1/media": {
       "get": {
         "tags": [
-          "Kniznica"
+          "Library"
         ],
-        "summary": "Výpis médií, voliteľne filtrovaný podľa kategórie, zdroja a hľadaného textu",
+        "summary": "Lists media, optionally filtered by category, source, genre and search text",
         "operationId": "list",
         "parameters": [
           {
@@ -280,9 +280,9 @@
     "/api/v1/media/{id}": {
       "get": {
         "tags": [
-          "Kniznica"
+          "Library"
         ],
-        "summary": "Detail jednej položky",
+        "summary": "Details of a single item",
         "operationId": "detail",
         "parameters": [
           {
@@ -312,9 +312,9 @@
     "/api/v1/media/{id}/stream": {
       "get": {
         "tags": [
-          "Prehravanie"
+          "Playback"
         ],
-        "summary": "Prehrá súbor; s hlavičkou Range vráti 206 a žiadanú časť",
+        "summary": "Plays a file; with a Range header it returns 206 and the requested part",
         "operationId": "stream",
         "parameters": [
           {
@@ -358,9 +358,9 @@
     "/api/v1/media/{id}/poster": {
       "get": {
         "tags": [
-          "Kniznica"
+          "Library"
         ],
-        "summary": "Lokálne cachovaný plagát alebo náhľad epizódy",
+        "summary": "Locally cached poster or episode still",
         "operationId": "poster",
         "parameters": [
           {
@@ -391,9 +391,9 @@
     "/api/v1/library": {
       "get": {
         "tags": [
-          "Kniznica"
+          "Library"
         ],
-        "summary": "Prehľad knižnice — počty pre dlaždice Videá / Fotky / Hudba",
+        "summary": "Library overview—the counts behind the Videos / Photos / Music tiles",
         "operationId": "library",
         "responses": {
           "200": {
@@ -412,9 +412,9 @@
     "/api/v1/genres": {
       "get": {
         "tags": [
-          "Kniznica"
+          "Library"
         ],
-        "summary": "Filmové žánre, ktoré sa v knižnici aktuálne používajú",
+        "summary": "Movie genres currently in use in the library",
         "operationId": "genres",
         "responses": {
           "200": {
@@ -436,9 +436,9 @@
     "/api/v1/auth/me": {
       "get": {
         "tags": [
-          "Prihlasenie"
+          "Authentication"
         ],
-        "summary": "Kto je prihlásený týmto tokenom",
+        "summary": "Who is logged in with this token",
         "operationId": "me",
         "responses": {
           "200": {
@@ -468,11 +468,11 @@
           "queuedSources": {
             "type": "integer",
             "format": "int32",
-            "description": "Počet zdrojov, ktoré sa budú prechádzať"
+            "description": "How many sources will be walked"
           },
           "sources": {
             "type": "array",
-            "description": "Názvy zdrojov v poradí, v akom sa prejdú",
+            "description": "Source names in the order they will be walked",
             "items": {
               "type": "string"
             }
@@ -488,7 +488,7 @@
           },
           "secret": {
             "type": "string",
-            "description": "Heslo alebo PIN, ak ho používateľ má nastavený",
+            "description": "Password, or PIN if the user has one set",
             "minLength": 1
           },
           "deviceName": {
@@ -530,7 +530,7 @@
         "properties": {
           "token": {
             "type": "string",
-            "description": "Server ho ukazuje jediný raz, znovu sa zobraziť nedá"
+            "description": "Shown by the server exactly once; it cannot be displayed again"
           },
           "expiresAt": {
             "type": "string",
@@ -789,7 +789,7 @@
     "securitySchemes": {
       "bearer": {
         "type": "http",
-        "description": "Token z POST /api/v1/auth/login",
+        "description": "Token from POST /api/v1/auth/login",
         "scheme": "bearer"
       }
     }

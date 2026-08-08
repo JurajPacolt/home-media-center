@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/scan")
-@Tag(name = "Skenovanie", description = "Spustenie skenu Samby a jeho história")
+@Tag(name = "Scanning", description = "Starting a Samba scan and its history")
 @RequiredArgsConstructor
 public class ScanApiController {
 
     private final ScanService scanService;
 
     @PostMapping
-    @Operation(summary = "Spustí sken na pozadí a hneď sa vráti; bez sourceId prejde všetky zapnuté zdroje")
+    @Operation(summary = "Starts a scan in the background and returns at once; without sourceId it walks every enabled source")
     @SecurityRequirement(name = "bearer")
     public ResponseEntity<ScanStartedDto> start(@RequestParam(required = false) @Nullable Long sourceId) {
         ScanStart started = sourceId == null
@@ -39,7 +39,7 @@ public class ScanApiController {
     }
 
     @GetMapping("/latest")
-    @Operation(summary = "Posledný sken vrátane priebehu toho, ktorý práve beží")
+    @Operation(summary = "The latest scan, including the progress of one still running")
     @SecurityRequirement(name = "bearer")
     public ResponseEntity<ScanRunDto> latest() {
         return scanService.latest()
@@ -48,7 +48,7 @@ public class ScanApiController {
     }
 
     @GetMapping
-    @Operation(summary = "História skenov naprieč všetkými zdrojmi")
+    @Operation(summary = "Scan history across all sources")
     @SecurityRequirement(name = "bearer")
     public List<ScanRunDto> history(@RequestParam(defaultValue = "20") int limit) {
         return scanService.history(limit).stream().map(ScanRunDto::from).toList();
